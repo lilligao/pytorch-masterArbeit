@@ -1,0 +1,9 @@
+[submodule "lib/bop_toolkit"]
+	path = lib/bop_toolkit
+	url = git@github.com:thodan/bop_toolkit.git
+[submodule "lib/t-less_toolkit"]
+	path = lib/t-less_toolkit
+	url = git@github.com:thodan/t-less_toolkit.git
+[submodule "lib/pytorch-image-models"]
+	path = lib/pytorch-image-models
+	url = git@github.com:huggingface/pytorch-image-models.git
