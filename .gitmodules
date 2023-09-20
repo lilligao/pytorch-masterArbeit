@@ -7,3 +7,9 @@
 [submodule "lib/pytorch-image-models"]
 	path = lib/pytorch-image-models
 	url = git@github.com:huggingface/pytorch-image-models.git
+[submodule "tutorial/pytorch-tutorial"]
+	path = tutorial/pytorch-tutorial
+	url = git@github.com:xiaotudui/pytorch-tutorial.git
+[submodule "thesis"]
+	path = thesis
+	url = https://git.overleaf.com/650b053d87dd756737c34d1a
