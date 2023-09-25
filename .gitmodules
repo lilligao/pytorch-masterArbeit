@@ -13,3 +13,6 @@
 [submodule "thesis"]
 	path = thesis
 	url = https://git.overleaf.com/650b053d87dd756737c34d1a
+[submodule "lib/SegFormer"]
+	path = lib/SegFormer
+	url = git@github.com:NVlabs/SegFormer.git
