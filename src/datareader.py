@@ -15,7 +15,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         self.root = root
         self.transforms = transforms
         self.split = split
-        self.imgs = list(sorted(glob.glob(os.path.join(root, split, "*", "rgb", "*.jpg"))))
+        self.imgs = list(sorted(glob.glob(os.path.join(root, split, "*", "rgb",  "*.jpg" if split == 'train_pbr' else "*.png"))))
         # self.masks = list(sorted(glob.glob(os.path.join(root, split, "*", "mask_visib", "*.png"))))
         self.scene_gt_infos = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt_info.json"))))
         self.scene_gts = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt.json"))))
@@ -57,7 +57,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         with open(self.scene_gt_infos[int(scene_id)]) as f:
             scene_gt_info = json.load(f)[str(int(im_id))]
         boxes = [gt['bbox_visib'] for gt in scene_gt_info]
-        print(boxes)
+        #print(boxes)
  
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
@@ -70,7 +70,7 @@ class TLESSDataset(torch.utils.data.Dataset):
  
         # Data Augmentations
         if self.transforms is not None:
-            img, target = self.transforms(img, target)
+            img = self.transforms(img)
  
         return img, target
     
