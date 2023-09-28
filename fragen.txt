@@ -1,0 +1,43 @@
+bwcluster:
+- pip not found & cant add path -> muss jedes mal /usr/bin/pip
+- keine venv gefunden, /usr/bin/pip3 install virtualenv -> permission denied 
+
+SegFormer:
+- viele Funktionen veraltet: z.B. get_root_logger, etc. : https://mmsegmentation.readthedocs.io/en/latest/migration/interface.html
+- versucht, alte Versionen zu installieren, gescheitert beim 
+     - pip install mmcv-full==1.2.7
+     -  ERROR: Failed building wheel for mmcv-full
+	  Running setup.py clean for mmcv-full
+	Failed to build mmcv-full
+	Installing collected packages: addict, opencv-python, pyyaml, platformdirs, tomli, zipp, importlib-metadata, yapf, mmcv-full
+	    Running setup.py install for mmcv-full ... error
+	    ERROR: Command errored out with exit status 1....
+     - KeyError: 'mit_b1 is not in the mmseg::model registry
+     
+-newer version: CUDA not available...
+	    
+MixVisionTransformer: The backbone of Segformer.
+- only encoder, no decoder?!
+- input size 512x512 like in papers?? how to resize back
+- how to convert target to 30*128*128
+- batch size always be 1??
+
+
+
+
+
+
+
+Given groups=1, weight of size [64, 64, 7, 7], expected input[1, 3, 512, 682] to have 64 channels, but got 3 channels instead
+
+
+torch                         1.9.0+cu102
+torchaudio                    0.9.0
+torchvision                   0.10.0+cu102
+
+mmcv                          2.0.1
+mmdet                         3.1.0
+mmengine                      0.8.5
+mmsegmentation                1.1.2
+
+

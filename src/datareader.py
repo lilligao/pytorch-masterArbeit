@@ -94,6 +94,7 @@ if __name__ == '__main__':
     print('test: ', torch.unique(target["label"]).tolist())
     label_array = target["label"].numpy()
     img_array = np.array(img)
+    print(label_array)
  
     fig,ax = plt.subplots(1,2)
     ax[0].imshow(img_array)
@@ -101,4 +102,9 @@ if __name__ == '__main__':
     plt.savefig('data/tless/label_img.png')
     plt.close()
 
-    print(target['label'].shape)
+    # Define a transform to convert PIL 
+    # image to a Torch tensor
+    transform = transforms.Compose([
+        transforms.PILToTensor()
+    ])
+    

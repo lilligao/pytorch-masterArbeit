@@ -4,10 +4,13 @@ from torch import nn
 from  torch.optim import lr_scheduler
 from datareader import *
 from torch.utils.tensorboard import SummaryWriter
-from mmseg.models import MixVisionTransformer, SegformerHead
-from  model_segFormer import *
+from mmseg.models import MixVisionTransformer
+from mmseg.models.losses import CrossEntropyLoss
+
 from torch.utils.data import DataLoader
 import time
+from segformer_pytorch import Segformer
+
 # define the device for training
 device = torch.device("cpu")
 
@@ -25,32 +28,32 @@ print("Length of testing dataset is:{}".format(test_data_size))
 # use DataLoader to load data
 train_dataloader = DataLoader(train_data, batch_size=1)
 test_dataloader = DataLoader(test_data, batch_size=1)
-# ??batch size can't be bigger
-#out_indices=[3]
-model_endocder = MixVisionTransformer(in_channels=3,strides=[4, 2, 2, 2],drop_rate=0.1)
-#model_endocder = model_endocder.to(device)
-model_decoder = SegformerHead(in_channels=[64, 128, 256, 512],
-        in_index=[0, 1, 2, 3],
-        channels=512,
-        dropout_ratio=0.1,
-        num_classes=31,
-        norm_cfg=dict(type='SyncBN', requires_grad=True),
-        align_corners=False,
-        loss_decode=dict(
-        type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0))
-#model_dedocder = model_endocder.to(device)
-model = SegFormerModel(model_endocder, model_decoder)
+
+model = Segformer(
+    dims = (64, 128, 256, 512),      # dimensions of each stage
+    heads = (1, 2, 4, 8),           # heads of each stage
+    ff_expansion = (8, 8, 4, 4),    # feedforward expansion factor of each stage
+    reduction_ratio = (8, 4, 2, 1), # reduction ratio of each stage for efficient attention
+    num_layers = 2,                 # num layers of each stage
+    decoder_dim = 512,              # decoder dimension
+    num_classes = 31                 # number of segmentation classes
+)
+
+# x = torch.randn(1, 3, 512, 512)
+# pred = model(x) # (1, 4, 128, 128)  # output is (H/4, W/4) map of the number of segmentation classes
+# print(pred.shape)
+
 
 # loss function
-loss_fn = nn.CrossEntropyLoss()
-#loss_fn = loss_fn.to(device)
+loss_fn = CrossEntropyLoss()
+loss_fn = loss_fn.to(device)
 # optimizer
 learning_rate = 0.01
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 #learning_rate = 6e-5
-# optimizer = torch.optim.AdamW(model.parameters(),lr=0.00006,betas=(0.9, 0.999),weight_decay=0.01)
-# scheduler1 = lr_scheduler.LinearLR(optimizer, start_factor=1e-6,total_iters=15)  #total_iters = 1500
-# scheduler2 = lr_scheduler.PolynomialLR(optimizer, power=1.0, total_iters=150)  #total_iters = 150000
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00006,betas=(0.9, 0.999),weight_decay=0.01)
+scheduler1 = lr_scheduler.LinearLR(optimizer, start_factor=1e-6,total_iters=15)  #total_iters = 1500
+scheduler2 = lr_scheduler.PolynomialLR(optimizer, power=1.0, total_iters=150)  #total_iters = 150000
+#optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 
 # set parameters for training and testing
@@ -105,6 +108,7 @@ for i in range(epoch):
             print("Training steps: {}, Loss: {}".format(total_train_step, loss.item()))
             writer.add_scalar("train_loss", loss.item(), total_train_step)
         print('---------')
+
 
     # # start testing
     # model.eval()
