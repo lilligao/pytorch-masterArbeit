@@ -13,7 +13,9 @@ device = torch.device("cpu")
 
 transform_compose = transforms.Compose([transforms.Resize((512,512)), transforms.ToTensor()])
 #transform_compose =transforms.ToTensor()
+# random cropping
 train_data = TLESSDataset(root='./data/tless', transforms=transform_compose, split='train_pbr')
+# for test no resizing
 test_data = TLESSDataset(root='./data/tless', transforms=transform_compose, split='test_primesense')
 
 # length
@@ -23,8 +25,8 @@ print("Length of training dataset is:{}".format(train_data_size))
 print("Length of testing dataset is:{}".format(test_data_size))
 
 # use DataLoader to load data
-train_dataloader = DataLoader(train_data, batch_size=1)
-test_dataloader = DataLoader(test_data, batch_size=1)
+train_dataloader = DataLoader(train_data, batch_size=2, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=2, shuffle=False)  #batchsize k learning rate wurzel k
 # ??batch size can't be bigger
 #out_indices=[3]
 model_endocder = MixVisionTransformer(in_channels=3,strides=[4, 2, 2, 2],drop_rate=0.1)
@@ -33,7 +35,7 @@ model_decoder = SegformerHead(in_channels=[64, 128, 256, 512],
         in_index=[0, 1, 2, 3],
         channels=512,
         dropout_ratio=0.1,
-        num_classes=31,
+        num_classes=31, # !!! 30
         norm_cfg=dict(type='SyncBN', requires_grad=True),
         align_corners=False,
         loss_decode=dict(
@@ -43,14 +45,16 @@ model = SegFormerModel(model_endocder, model_decoder)
 
 # loss function
 loss_fn = nn.CrossEntropyLoss()
+# !!! Ignore index
 #loss_fn = loss_fn.to(device)
 # optimizer
-learning_rate = 0.01
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
+# learning_rate = 0.01
+# optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 #learning_rate = 6e-5
-# optimizer = torch.optim.AdamW(model.parameters(),lr=0.00006,betas=(0.9, 0.999),weight_decay=0.01)
-# scheduler1 = lr_scheduler.LinearLR(optimizer, start_factor=1e-6,total_iters=15)  #total_iters = 1500
-# scheduler2 = lr_scheduler.PolynomialLR(optimizer, power=1.0, total_iters=150)  #total_iters = 150000
+optimizer = torch.optim.AdamW(model.parameters(),lr=0.00002,betas=(0.9, 0.999),weight_decay=0.01)
+scheduler1 = lr_scheduler.LinearLR(optimizer, start_factor=1e-6,total_iters=15)  #total_iters = 1500
+scheduler2 = lr_scheduler.PolynomialLR(optimizer, power=1.0, total_iters=150)  #total_iters = 150000
+#nur poly LR
 
 
 # set parameters for training and testing
@@ -74,18 +78,18 @@ for i in range(epoch):
 
         # resize target image
         transform_resize = transforms.Resize((512,512))
-        target_seg = transform_resize(target["label"])
+        target_seg = transform_resize(target)
         #print("target size: {}", targets["label"].shape)
-        #print("target size after transform:",target_seg.shape)
+        print("target size after transform:",target_seg.shape)
 
         #targets["label"] = targets["label"].to(device)
         prediction = model(img)
-        #print("predicted size:",prediction.shape)
+        print("predicted size:",prediction.shape)
 
         #writer.add_image("output", output,step, dataformats='CHW')
         # double size the prediction
-        prediction = nn.functional.interpolate(prediction, size=[512, 512], mode="nearest")
-        #print("predicted size after interpolate:",prediction.shape)
+        prediction = nn.functional.interpolate(prediction, size=[512, 512], mode="nearest") ##bilinear, align_corner
+        print("predicted size after interpolate:",prediction.shape)
 
         # # extracting maximum values for the pixel
         # prediction = torch.argmax(prediction, 1)

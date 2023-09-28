@@ -1,6 +1,6 @@
 bwcluster:
 - pip not found & cant add path -> muss jedes mal /usr/bin/pip
-- keine venv gefunden, /usr/bin/pip3 install virtualenv -> permission denied 
+- nvdia cuda toolkit??
 
 SegFormer:
 - viele Funktionen veraltet: z.B. get_root_logger, etc. : https://mmsegmentation.readthedocs.io/en/latest/migration/interface.html
@@ -24,7 +24,8 @@ MixVisionTransformer: The backbone of Segformer.
 
 
 
-
+torch metrics: JaccardIndex, task multiclass, ignore index, iou,
+ Lightning
 
 
 

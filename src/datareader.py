@@ -72,7 +72,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         if self.transforms is not None:
             img = self.transforms(img)
  
-        return img, target
+        return img, target["label"]
     
  
     def __len__(self):
