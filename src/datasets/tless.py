@@ -58,7 +58,7 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         self.ignore_index = config.IGNORE_INDEX
         self.void_classes = [0]
-        self.valid_classes = range(1,30)     # classes: 30
+        self.valid_classes = range(1,31)     # classes: 30
         self.class_map = dict(zip(self.valid_classes, range(30)))
  
 
