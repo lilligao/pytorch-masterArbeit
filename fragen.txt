@@ -42,3 +42,11 @@ mmengine                      0.8.5
 mmsegmentation                1.1.2
 
 
+
+
+
+02.11
+cross_entropy_loss IndexError: Target 30 is out of bounds.
+Number of classes
+-------------------------------------
+ignore index: die Klassennummer, die ignoriert sollte? z.B. hier 0?

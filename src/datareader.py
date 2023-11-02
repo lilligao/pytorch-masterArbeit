@@ -3,12 +3,11 @@ import numpy as np
 import torch
 from PIL import Image
 import glob
-from PIL import Image
 import torchvision.transforms as transforms
 import json
 import matplotlib.pyplot as plt
- 
- 
+import torchvision.transforms.functional as TF
+
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms, split):
@@ -88,14 +87,21 @@ if __name__ == '__main__':
     for mask in target['masks']:
         unique_values.update(torch.unique(mask).tolist())
     
+    image = TF.to_tensor(img)
+    print("iimage:", type(image))
+    print("label:", type(target["label"]))
+    print("mask:", type(target["masks"]))
+    print("mask_visib:", type(target["masks_visib"]))
     print('num_imgs:',num_imgs)
     print('labels: ', unique_values)
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
     print('test: ', torch.unique(target["label"]).tolist())
+    print('image:', image.shape)
+    
     label_array = target["label"].numpy()
     img_array = np.array(img)
     print(label_array)
- 
+    print('label array:', label_array.shape)
     fig,ax = plt.subplots(1,2)
     ax[0].imshow(img_array)
     ax[1].imshow(label_array)

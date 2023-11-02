@@ -1,3 +1,7 @@
 data/*
 src/__pycache__
 logs_train/*
+lightning_logs
+src/datasets/__pycache__
+src/models/__pycache__
+src/utils/__pycache__

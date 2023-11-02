@@ -35,7 +35,7 @@ model_decoder = SegformerHead(in_channels=[64, 128, 256, 512],
         in_index=[0, 1, 2, 3],
         channels=512,
         dropout_ratio=0.1,
-        num_classes=31, # !!! 30
+        num_classes=30, # !!! 30
         norm_cfg=dict(type='SyncBN', requires_grad=True),
         align_corners=False,
         loss_decode=dict(
@@ -85,6 +85,7 @@ for i in range(epoch):
         #targets["label"] = targets["label"].to(device)
         prediction = model(img)
         print("predicted size:",prediction.shape)
+        print("predicted size:",prediction.shape[-2:])
 
         #writer.add_image("output", output,step, dataformats='CHW')
         # double size the prediction
