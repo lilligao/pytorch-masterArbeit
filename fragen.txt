@@ -22,7 +22,7 @@ MixVisionTransformer: The backbone of Segformer.
 - how to convert target to 30*128*128
 - batch size always be 1??
 
-
+python ./src/train.py --run=Test5
 
 torch metrics: JaccardIndex, task multiclass, ignore index, iou,
  Lightning

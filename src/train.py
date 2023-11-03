@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='cpu',    # gpu
+        accelerator='gpu',    # cpu
         strategy='auto',
         devices=config.DEVICES,
         precision=config.PRECISION,
