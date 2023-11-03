@@ -65,8 +65,8 @@ class SegFormer(L.LightningModule):
         # ??? Quelle und warum nochmal???
         iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
         # iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
-        # total_iterations = iterations_per_epoch * self.trainer.max_epochs
-        total_iterations = 150
+        total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
+        # total_iterations = 150  # for local
         print("iterations per epoche", iterations_per_epoch)
         print("total iterations", total_iterations)
         scheduler = PolyLR(self.optimizer, max_iterations=total_iterations, power=0.9)
