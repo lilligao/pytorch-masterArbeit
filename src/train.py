@@ -1,4 +1,6 @@
 import lightning as L
+from lightning.pytorch.loggers import WandbLogger
+from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 import config
 from models.segformer import SegFormer
@@ -24,13 +26,15 @@ if __name__ == '__main__':
         strategy='auto',
         devices=config.DEVICES,
         precision=config.PRECISION,
-        check_val_every_n_epoch=2,
-        # logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
-        # logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
-        # callbacks=[
-        #     ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'),
-        #     LearningRateMonitor(logging_interval='epoch'),
-        # ],
+        check_val_every_n_epoch=1,
+        #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
+        logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
+        callbacks=[
+            ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'),
+            LearningRateMonitor(logging_interval='epoch'),
+        ],
     )
 
     trainer.fit(model, data_module)
+
+# lighting logs: tensorboard --logdir=lightning_logs/ --load_fast=false

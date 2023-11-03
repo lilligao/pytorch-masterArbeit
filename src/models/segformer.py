@@ -38,8 +38,8 @@ class SegFormer(L.LightningModule):
 
         self.train_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
-        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_iou', self.train_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
     
@@ -57,15 +57,16 @@ class SegFormer(L.LightningModule):
 
         self.val_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
     
     def configure_optimizers(self):
         # ??? Quelle und warum nochmal???
         # iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
         iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
-        total_iterations = iterations_per_epoch * self.trainer.max_epochs
+        # total_iterations = iterations_per_epoch * self.trainer.max_epochs
+        total_iterations = 150
         print("iterations per epoche", iterations_per_epoch)
         print("total iterations", total_iterations)
         scheduler = PolyLR(self.optimizer, max_iterations=total_iterations, power=0.9)

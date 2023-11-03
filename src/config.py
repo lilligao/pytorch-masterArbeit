@@ -5,11 +5,11 @@ import argparse
 ## Parser Arguments
 parser = argparse.ArgumentParser(description='Masterarbeit Segformer Parser')
 
-parser.add_argument('--project', type=str, default='Masterarbeit Segformer (Default)')
-parser.add_argument('--run', type=str, default='Segformer (Default)')
+parser.add_argument('--project', type=str, default='Masterarbeit Segformer')
+parser.add_argument('--run', type=str, default='Segformer_train')
 parser.add_argument('--backbone', type=str, default='b2')
-parser.add_argument('--epochs', type=int, default=250)
-parser.add_argument('--lr', type=float, default=6e-5) # default=6e-5
+parser.add_argument('--epochs', type=int, default=1)  # 250
+parser.add_argument('--lr', type=float, default=2e-1) # default=6e-5
 parser.add_argument('--dataset', type=str, default='TLESS')
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr')
@@ -22,7 +22,7 @@ parser.add_argument('--use_flipping', type=bool, default=True)
 args = parser.parse_args()
 
 ## W&B Logging (optional)
-ENTITY = 'liligao'   # change this to your W&B username
+ENTITY = 'gaolilli'   # change this to your W&B username
 PROJECT = args.project
 RUN_NAME = args.run
 
@@ -48,9 +48,9 @@ TRAIN_SPLIT = args.train_split
 VAL_SPLIT = args.val_split
 
 if DATASET == 'TLESS':
-    NUMBER_TRAIN_IMAGES = 2975 # 50000 total
-    NUMBER_VAL_IMAGES = 500  # 10080 total
-    BATCH_SIZE = 4  # 8 for train on server
+    NUMBER_TRAIN_IMAGES = 10 # 50000 total ???
+    NUMBER_VAL_IMAGES = 5  # 10080 total ???
+    BATCH_SIZE = 2  # 8 for train on server
     NUM_CLASSES = 30
     IGNORE_INDEX = 255
     NUM_WORKERS = 8   
