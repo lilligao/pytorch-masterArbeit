@@ -32,8 +32,8 @@ class TLESSDataModule(L.LightningDataModule):
         pass
 
     def setup(self, stage):
-        self.train_dataset = TLESSDataset(root=self.root, split=self.train_split)
-        self.val_dataset = TLESSDataset(root=self.root, split=self.val_split)
+        self.train_dataset = TLESSDataset(root=self.root, split=self.train_split) #[0:10]
+        self.val_dataset = TLESSDataset(root=self.root, split=self.val_split)  #[0:10]
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)

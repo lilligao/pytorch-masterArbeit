@@ -21,7 +21,7 @@ class SegFormer(L.LightningModule):
             {'params': self.model.segformer.parameters(), 'lr': config.LEARNING_RATE},
             {'params': self.model.decode_head.parameters(), 'lr': 10 * config.LEARNING_RATE},
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
-
+        # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
 
@@ -30,16 +30,16 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch # if masks / masks visible are also in outpus
         images, labels = batch
 
-        print("train image shape",images.shape)
-        print("train label shape",labels.shape)
+        # print("train image shape",images.shape)
+        # print("train label shape",labels.shape)
         loss, logits = self.model(images, labels.squeeze(dim=1))
         
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
         self.train_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('train_iou', self.train_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_iou', self.train_iou, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
     
@@ -57,14 +57,14 @@ class SegFormer(L.LightningModule):
 
         self.val_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
 
     
     def configure_optimizers(self):
-        # ??? Quelle und warum nochmal???
+        # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
         iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
-        # iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
+        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
         # total_iterations = 150  # for local
         print("iterations per epoche", iterations_per_epoch)

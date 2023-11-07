@@ -8,7 +8,7 @@ from datasets.tless import TLESSDataModule
 
 
 if __name__ == '__main__':
-    L.seed_everything(42)   # for reproducibility ???
+    L.seed_everything(42)   # for reproducibility for training, aus welchen Seed, Zufaelligkeit raus, wichtig fuer data augmentation (random gewichte)
 
     model = SegFormer()
 
@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='gpu',    # cpu
+        accelerator='cpu',    # gpu
         strategy='auto',
         devices=config.DEVICES,
         precision=config.PRECISION,
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
         callbacks=[
-            ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'),
+            ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
             LearningRateMonitor(logging_interval='epoch'),
         ],
     )
