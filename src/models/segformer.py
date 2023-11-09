@@ -39,16 +39,16 @@ class SegFormer(L.LightningModule):
         self.train_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
-        self.log('train_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-        self.log('train_iou', self.train_iou, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         # wandb.log({'batch': batch_index, 'loss': 0.3}) for log on step
         # gpu
-        # epoch = self.current_epoch
+        epoch = self.current_epoch
         # wandb.log({'epoch': epoch, 'val_acc': 0.94}) for log on epoche
 
-        wandb.log({'batch': batch_index, "train_loss": loss}) 
-        wandb.log({'batch': batch_index,"train_iou": self.train_iou})
+        wandb.log({'epoch': epoch, "train_loss": loss}) 
+        wandb.log({'epoch': epoch,"train_iou": self.train_iou})
         
         return loss
     
@@ -66,17 +66,19 @@ class SegFormer(L.LightningModule):
 
         self.val_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
-        self.log('val_loss', loss, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_iou', self.val_iou, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        wandb.log({'batch': batch_index, "val_loss": loss}) 
-        wandb.log({'batch': batch_index,"val_iou": self.val_iou})
+        epoch = self.current_epoch
+
+        wandb.log({'epoch': epoch, "val_loss": loss}) 
+        wandb.log({'epoch': epoch,"val_iou": self.val_iou})
 
     
     def configure_optimizers(self):
         # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
-        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
-        iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
+        iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
+        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
         print("iterations per epoche", iterations_per_epoch)
         print("total iterations", total_iterations)
