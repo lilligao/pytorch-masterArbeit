@@ -26,3 +26,10 @@ Datasets are downloaded from: https://bop.felk.cvut.cz/datasets/
 ```shell
 python ./src/train.py --run=Test_Name
 ```
+
+## wandb Logger problem: numpy has no Attribute bool
+Solution --> downgrade numpy
+```shell
+python -m pip uninstall numpy
+python -m pip install numpy==1.23.1
+```

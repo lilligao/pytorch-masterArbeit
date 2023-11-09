@@ -27,12 +27,16 @@ if __name__ == '__main__':
         devices=config.DEVICES,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
+        limit_train_batches=10, # or 0.25 for 25% # cpu
+        limit_val_batches=10, # cpu
+        max_steps=10, # cpu
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
         callbacks=[
             ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
             LearningRateMonitor(logging_interval='epoch'),
         ],
+        log_every_n_steps=1
     )
 
     trainer.fit(model, data_module)
