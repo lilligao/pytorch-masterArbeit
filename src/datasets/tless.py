@@ -69,6 +69,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         img_path = self.imgs[idx]
         im_id = img_path.split('/')[-1].split('.')[0]
         scene_id = img_path.split('/')[-3]
+
+        print("img id:",im_id)
+        print("scene_id",scene_id)
  
         # Load mmage
         img = Image.open(img_path).convert("RGB")
@@ -93,9 +96,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         # create a single label image
         label = torch.zeros((img.size[1], img.size[0]), dtype=torch.int64)
         for i,id in enumerate(obj_ids):
-            print(scene_id)
-            print(id)
-            print(id, np.sum(masks_visib[i].numpy()==255))
+            #print(id, np.sum(masks_visib[i].numpy()==255))
             label[masks_visib[i]==255] = id
         
 

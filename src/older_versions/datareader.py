@@ -42,15 +42,16 @@ class TLESSDataset(torch.utils.data.Dataset):
         #mask_visib
         masks_visib_path = list(sorted(glob.glob(os.path.join(self.root, self.split, scene_id, "mask_visib", f"{im_id}_*.png"))))
         masks_visib = torch.zeros((len(masks_path), img.size[1], img.size[0]), dtype=torch.uint8)
+        print(masks_visib.shape)
         for i, mp in enumerate(masks_visib_path):
             masks_visib[i] = torch.from_numpy(np.array(Image.open(mp).convert("L")))
- 
+        print(masks_visib.shape)
         # create a single label image
         label = torch.zeros((img.size[1], img.size[0]), dtype=torch.int64)
         for i,id in enumerate(obj_ids):
             #print(id, np.sum(masks_visib[i].numpy()==255))
             label[masks_visib[i]==255] = id
- 
+        print(masks_visib.shape)
  
         # Bounding boxes for each mask
         with open(self.scene_gt_infos[int(scene_id)]) as f:
@@ -71,7 +72,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         if self.transforms is not None:
             img = self.transforms(img)
  
-        return img, target["label"]
+        return img, target
     
  
     def __len__(self):
@@ -82,7 +83,7 @@ class TLESSDataset(torch.utils.data.Dataset):
 if __name__ == '__main__':
     dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
     num_imgs = len(dataset)
-    img, target = dataset[12]
+    img, target = dataset[20]
     unique_values = set()
     for mask in target['masks']:
         unique_values.update(torch.unique(mask).tolist())
