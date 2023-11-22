@@ -47,8 +47,9 @@ class SegFormer(L.LightningModule):
         epoch = self.current_epoch
         # wandb.log({'epoch': epoch, 'val_acc': 0.94}) for log on epoche
 
-        wandb.log({'epoch': epoch, "train_loss": loss}) 
-        wandb.log({'epoch': epoch,"train_iou": self.train_iou})
+        if wandb.run is not None:
+            wandb.log({'epoch': epoch, "train_loss": loss}) 
+            wandb.log({'epoch': epoch,"train_iou": self.train_iou})
         
         return loss
     
@@ -70,9 +71,9 @@ class SegFormer(L.LightningModule):
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         epoch = self.current_epoch
-
-        wandb.log({'epoch': epoch, "val_loss": loss}) 
-        wandb.log({'epoch': epoch,"val_iou": self.val_iou})
+        if wandb.run is not None:
+            wandb.log({'epoch': epoch, "val_loss": loss}) 
+            wandb.log({'epoch': epoch,"val_iou": self.val_iou})
 
     
     def configure_optimizers(self):
