@@ -93,7 +93,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         # create a single label image
         label = torch.zeros((img.size[1], img.size[0]), dtype=torch.int64)
         for i,id in enumerate(obj_ids):
-            #print(id, np.sum(masks_visib[i].numpy()==255))
+            print(scene_id)
+            print(id)
+            print(id, np.sum(masks_visib[i].numpy()==255))
             label[masks_visib[i]==255] = id
         
 
