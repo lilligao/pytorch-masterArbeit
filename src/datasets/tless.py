@@ -77,7 +77,8 @@ class TLESSDataset(torch.utils.data.Dataset):
         img = Image.open(img_path).convert("RGB")
  
         # Object ids
-        with open(self.scene_gts[int(scene_id)]) as f:
+        scene_gt_item = self.scene_gts[int(scene_id)] if self.split == 'train_pbr' else self.scene_gts[int(scene_id)-1]
+        with open(scene_gt_item) as f:
             scene_gt = json.load(f)[str(int(im_id))]
         obj_ids = [gt['obj_id'] for gt in scene_gt]               
         
@@ -110,7 +111,8 @@ class TLESSDataset(torch.utils.data.Dataset):
  
  
         # Bounding boxes for each mask
-        with open(self.scene_gt_infos[int(scene_id)]) as f:
+        scene_gt_infos_item = self.scene_gt_infos[int(scene_id)] if self.split == 'train_pbr' else self.scene_gt_infos[int(scene_id)-1]
+        with open(scene_gt_infos_item) as f:
             scene_gt_info = json.load(f)[str(int(im_id))]
         boxes = [gt['bbox_visib'] for gt in scene_gt_info]
         #print(boxes)

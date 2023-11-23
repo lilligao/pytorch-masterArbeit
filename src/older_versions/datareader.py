@@ -24,14 +24,21 @@ class TLESSDataset(torch.utils.data.Dataset):
         img_path = self.imgs[idx]
         im_id = img_path.split('/')[-1].split('.')[0]
         scene_id = img_path.split('/')[-3]
- 
+
+        print("img path:",img_path)
+        print("img id:",im_id)
+        print("scene_id",scene_id)
+
         # Load mmage
         img = Image.open(img_path).convert("RGB")
  
         # Object ids
-        with open(self.scene_gts[int(scene_id)]) as f:
+        scene_gt_item = self.scene_gts[int(scene_id)] if self.split == 'train_pbr' else self.scene_gts[int(scene_id)-1]
+        with open(scene_gt_item) as f:
+            print("f:",f)
             scene_gt = json.load(f)[str(int(im_id))]
-        obj_ids = [gt['obj_id'] for gt in scene_gt]               
+        obj_ids = [gt['obj_id'] for gt in scene_gt]    
+        print("obj_ids", obj_ids)           
         
         # Load masks from mask
         masks_path = list(sorted(glob.glob(os.path.join(self.root, self.split, scene_id, "mask", f"{im_id}_*.png"))))
@@ -54,7 +61,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         print(masks_visib.shape)
  
         # Bounding boxes for each mask
-        with open(self.scene_gt_infos[int(scene_id)]) as f:
+        scene_gt_infos_item = self.scene_gt_infos[int(scene_id)] if self.split == 'train_pbr' else self.scene_gt_infos[int(scene_id)-1]
+        with open(scene_gt_infos_item) as f:
+            print("f_bbx:",f)
             scene_gt_info = json.load(f)[str(int(im_id))]
         boxes = [gt['bbox_visib'] for gt in scene_gt_info]
         #print(boxes)
@@ -81,9 +90,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         
  
 if __name__ == '__main__':
-    dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
+    dataset = TLESSDataset(root='./data/tless', transforms=None, split='test_primesense')
     num_imgs = len(dataset)
-    img, target = dataset[20]
+    img, target = dataset[10000]
     unique_values = set()
     for mask in target['masks']:
         unique_values.update(torch.unique(mask).tolist())
