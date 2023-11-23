@@ -45,11 +45,12 @@ class SegFormer(L.LightningModule):
         # wandb.log({'batch': batch_index, 'loss': 0.3}) for log on step
         # gpu
         epoch = self.current_epoch
+        step = self.global_step
         # wandb.log({'epoch': epoch, 'val_acc': 0.94}) for log on epoche
 
         if wandb.run is not None:
-            wandb.log({'batch': batch_index, "train_loss_step": loss}) 
-            wandb.log({'batch': batch_index,"train_iou_step": self.train_iou})
+            wandb.log({'step': step, "train_loss_step": loss}) 
+            wandb.log({'step': step,"train_iou_step": self.train_iou})
             wandb.log({'epoch': epoch, "train_loss_epoch": loss}) 
             wandb.log({'epoch': epoch,"train_iou_epoch": self.train_iou})
         
@@ -73,9 +74,10 @@ class SegFormer(L.LightningModule):
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         epoch = self.current_epoch
+        step = self.global_step
         if wandb.run is not None:
-            wandb.log({'batch': batch_index, "val_loss_step": loss}) 
-            wandb.log({'batch': batch_index,"val_iou_step": self.val_iou})
+            wandb.log({'step': step, "val_loss_step": loss}) 
+            wandb.log({'step': step,"val_iou_step": self.val_iou})
             wandb.log({'epoch': epoch, "val_loss_epoch": loss}) 
             wandb.log({'epoch': epoch,"val_iou_epoch": self.val_iou})
 
