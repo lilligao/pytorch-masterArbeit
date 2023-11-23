@@ -70,8 +70,8 @@ class TLESSDataset(torch.utils.data.Dataset):
         im_id = img_path.split('/')[-1].split('.')[0]
         scene_id = img_path.split('/')[-3]
 
-        print("img id:",im_id)
-        print("scene_id",scene_id)
+        #print("img id:",im_id)
+        #print("scene_id",scene_id)
  
         # Load mmage
         img = Image.open(img_path).convert("RGB")
