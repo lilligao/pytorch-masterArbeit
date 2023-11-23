@@ -84,8 +84,8 @@ class SegFormer(L.LightningModule):
     
     def configure_optimizers(self):
         # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
-        iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
-        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
+        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
+        iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
         print("iterations per epoche", iterations_per_epoch)
         print("total iterations", total_iterations)

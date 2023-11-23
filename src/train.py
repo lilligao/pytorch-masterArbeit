@@ -33,7 +33,8 @@ if __name__ == '__main__':
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
         callbacks=[
-            ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
+            ModelCheckpoint(dirpath='./checkpoints',filename='{config.RUN_NAME}-{epoch}-{val_loss:.2f}-{val_iou:.2f}'),
+            #ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1
