@@ -31,3 +31,13 @@ scancel <job_id>
 
 # 3. check available nodes:
 sinfo_t_idle
+
+# job.sh
+
+#!/bin/sh
+# Extract compressed input dataset on local SSD
+tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
+# start job
+enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=150 --root=$
+# Before job completes save results on a workspace
+rsync -av $TMPDIR/results $(ws_find data-ssd)/results-${SLURM_JOB_ID}/
