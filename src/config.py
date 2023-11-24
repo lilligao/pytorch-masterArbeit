@@ -14,6 +14,7 @@ parser.add_argument('--dataset', type=str, default='TLESS')
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr')
 parser.add_argument('--val_split', type=str, default='test_primesense')
+parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 
 parser.add_argument('--use_scaling', type=bool, default=True)
 parser.add_argument('--use_cropping', type=bool, default=True)
@@ -46,6 +47,7 @@ DATASET = args.dataset
 ROOT = args.root
 TRAIN_SPLIT = args.train_split
 VAL_SPLIT = args.val_split
+CHECKPOINTS_DIR = args.checkpoints
 
 if DATASET == 'TLESS':
     NUMBER_TRAIN_IMAGES = 50000 # 50000 total ???
