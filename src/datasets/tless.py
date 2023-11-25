@@ -45,8 +45,7 @@ class TLESSDataModule(L.LightningDataModule):
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
     def __init__(self, root, split):
-        self.root = root
-        print("root dir", self.root)
+        self.root = os.path.expandvars(root)
         self.split = split
 
         if self.split not in ['train_pbr','test_primesense', 'train_primesense','train_render_reconst']:
