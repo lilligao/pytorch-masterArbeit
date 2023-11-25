@@ -24,7 +24,7 @@ class TLESSDataModule(L.LightningDataModule):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
-        self.root = root
+        self.root = os.path.expandvars(root)
         self.train_split = train_split
         self.val_split = val_split
 
@@ -45,16 +45,16 @@ class TLESSDataModule(L.LightningDataModule):
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
     def __init__(self, root, split):
-        self.root = os.path.expandvars(root)
+        self.root = root
         self.split = split
 
         if self.split not in ['train_pbr','test_primesense', 'train_primesense','train_render_reconst']:
             raise ValueError(f'Invalid split: {self.split}')
         
-        self.imgs = list(sorted(glob.glob(os.path.join(root, split, "*", "rgb",  "*.jpg" if split == 'train_pbr' else "*.png"))))
-        self.depths = list(sorted(glob.glob(os.path.join(root, split, "*", "rgb",  "*.png"))))
-        self.scene_gt_infos = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt_info.json"))))
-        self.scene_gts = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt.json"))))
+        self.imgs = list(sorted(glob.glob(os.path.join(self.root, split, "*", "rgb",  "*.jpg" if split == 'train_pbr' else "*.png"))))
+        self.depths = list(sorted(glob.glob(os.path.join(self.root, split, "*", "rgb",  "*.png"))))
+        self.scene_gt_infos = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt_info.json"))))
+        self.scene_gts = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt.json"))))
 
         self.ignore_index = config.IGNORE_INDEX
         self.void_classes = [0]
