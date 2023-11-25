@@ -38,6 +38,6 @@ sinfo_t_idle
 # Extract compressed input dataset on local SSD
 tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
 # start job
-enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=150 --root=$TMPDIR/dataset/tless --checkpoints=$TMPDIR/results
+enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=120 --root=$TMPDIR/pytorch-masterArbeit/data/tless --checkpoints=$TMPDIR/results
 # Before job completes save results on a workspace
 rsync -av $TMPDIR/results $(ws_find data-ssd)/results-${SLURM_JOB_ID}/
