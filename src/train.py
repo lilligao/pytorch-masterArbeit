@@ -10,8 +10,10 @@ import os
 
 if __name__ == '__main__':
     L.seed_everything(42)   # for reproducibility for training, aus welchen Seed, Zufaelligkeit raus, wichtig fuer data augmentation (random gewichte)
-
-    model = SegFormer()
+    if config.LOAD_CHECKPOINTS:
+        model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+    else:
+        model = SegFormer()
 
     data_module = TLESSDataModule(
         batch_size=config.BATCH_SIZE,
@@ -34,13 +36,15 @@ if __name__ == '__main__':
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
         callbacks=[
-            ModelCheckpoint(dirpath=os.path.expandvars(config.CHECKPOINTS_DIR),filename='{config.RUN_NAME}-{epoch}-{val_loss:.2f}-{val_iou:.2f}'),
+            ModelCheckpoint(dirpath=os.path.expandvars(config.CHECKPOINTS_DIR),filename='{config.RUN_NAME}-{epoch}-{val_loss:.2f}-{val_iou:.2f}',every_n_epochs=1), 
             #ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
             LearningRateMonitor(logging_interval='epoch'),
         ],
-        log_every_n_steps=1
+        log_every_n_steps=1,
     )
-
-    trainer.fit(model, data_module)
+    if config.LOAD_CHECKPOINTS:
+        trainer.fit(model, data_module,ckpt_path=config.LOAD_CHECKPOINTS) #ckpt_path = './checkpoints/name.clkpt'
+    else:
+        trainer.fit(model, data_module) #ckpt_path = './checkpoints/name.clkpt'
 
 # lighting logs: tensorboard --logdir=lightning_logs/ --load_fast=false

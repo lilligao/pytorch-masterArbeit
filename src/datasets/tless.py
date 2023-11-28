@@ -10,7 +10,7 @@ import torch
 import torchvision.transforms.functional as TF
 from PIL import Image
 from torch.nn import functional as F
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
 
 import glob
@@ -32,8 +32,14 @@ class TLESSDataModule(L.LightningDataModule):
         pass
 
     def setup(self, stage):
-        self.train_dataset = TLESSDataset(root=self.root, split=self.train_split) #[0:10]
-        self.val_dataset = TLESSDataset(root=self.root, split=self.val_split)  #[0:10]
+        #self.train_dataset = TLESSDataset(root=self.root, split=self.train_split) #[0:10]
+        #self.val_dataset = TLESSDataset(root=self.root, split=self.val_split)  #[0:10]
+        data= TLESSDataset(root=self.root, split=self.train_split) #[0:10]
+        n_valid = config.VAL_SIZE
+        data_train, data_valid = random_split(data, (len(data) - n_valid, n_valid),
+                                             generator=torch.Generator().manual_seed(42),)
+        self.train_dataset = data_train
+        self.val_dataset = data_valid
 
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
