@@ -10,7 +10,7 @@ import os
 
 if __name__ == '__main__':
     L.seed_everything(42)   # for reproducibility for training, aus welchen Seed, Zufaelligkeit raus, wichtig fuer data augmentation (random gewichte)
-    if config.LOAD_CHECKPOINTS:
+    if config.LOAD_CHECKPOINTS is not None:
         model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
     else:
         model = SegFormer()
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         ],
         log_every_n_steps=1,
     )
-    if config.LOAD_CHECKPOINTS:
+    if config.LOAD_CHECKPOINTS is not None:
         trainer.fit(model, data_module,ckpt_path=config.LOAD_CHECKPOINTS) #ckpt_path = './checkpoints/name.clkpt'
     else:
         trainer.fit(model, data_module) #ckpt_path = './checkpoints/name.clkpt'

@@ -13,7 +13,7 @@ parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local
 parser.add_argument('--dataset', type=str, default='TLESS')
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr')
-parser.add_argument('--val_split', type=str, default='test_primesense')
+parser.add_argument('--val_split', type=str, default='train_pbr')
 parser.add_argument('--val_size', type=str, default=200)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
