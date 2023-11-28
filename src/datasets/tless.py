@@ -32,15 +32,16 @@ class TLESSDataModule(L.LightningDataModule):
         pass
 
     def setup(self, stage):
-        #self.train_dataset = TLESSDataset(root=self.root, split=self.train_split) #[0:10]
-        #self.val_dataset = TLESSDataset(root=self.root, split=self.val_split)  #[0:10]
-        data= TLESSDataset(root=self.root, split=self.train_split) #[0:10]
         n_valid = config.VAL_SIZE
-        data_train, data_valid = random_split(data, (len(data) - n_valid, n_valid),
-                                             generator=torch.Generator().manual_seed(42),)
-        self.train_dataset = data_train
-        self.val_dataset = data_valid
-
+        indexes = range(50000)
+        train_index, val_index = random_split(
+            dataset=indexes,
+            lengths=[len(indexes)-n_valid, n_valid],
+            generator=torch.Generator().manual_seed(42)
+        )
+        self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
+        self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
+        
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
     
@@ -50,17 +51,22 @@ class TLESSDataModule(L.LightningDataModule):
  
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
-    def __init__(self, root, split):
+    def __init__(self, root, split, step=None, ind=[]):
         self.root = os.path.expandvars(root)
         self.split = split
+        self.step = step
+        self.ind = ind
 
         if self.split not in ['train_pbr','test_primesense', 'train_primesense','train_render_reconst']:
             raise ValueError(f'Invalid split: {self.split}')
         
         self.imgs = list(sorted(glob.glob(os.path.join(self.root, split, "*", "rgb",  "*.jpg" if split == 'train_pbr' else "*.png"))))
-        self.depths = list(sorted(glob.glob(os.path.join(self.root, split, "*", "rgb",  "*.png"))))
+        self.depths = list(sorted(glob.glob(os.path.join(self.root, split, "*", "depth",  "*.png"))))
         self.scene_gt_infos = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt_info.json"))))
         self.scene_gts = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt.json"))))
+
+        self.imgs = [self.imgs[i] for i in ind]
+        self.depths = [self.depths[i] for i in ind]
 
         self.ignore_index = config.IGNORE_INDEX
         self.void_classes = [0]
@@ -125,7 +131,7 @@ class TLESSDataset(torch.utils.data.Dataset):
  
         img = TF.to_tensor(img)
         
-        if self.split.startswith('train'):
+        if self.step.startswith('train'):
             # Random Resize
             if config.USE_SCALING:
                 random_scaler = RandResize(scale=(0.5, 2.0))

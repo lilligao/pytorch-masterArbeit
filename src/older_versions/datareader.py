@@ -7,17 +7,23 @@ import torchvision.transforms as transforms
 import json
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as TF
+from torch.utils.data import DataLoader, random_split
 
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
-    def __init__(self, root, transforms, split):
+    def __init__(self, root, transforms, split, step=None, ind=[]):
         self.root = root
         self.transforms = transforms
         self.split = split
+        self.step = step
+        self.ind = ind
         self.imgs = list(sorted(glob.glob(os.path.join(root, split, "*", "rgb",  "*.jpg" if split == 'train_pbr' else "*.png"))))
         # self.masks = list(sorted(glob.glob(os.path.join(root, split, "*", "mask_visib", "*.png"))))
         self.scene_gt_infos = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt_info.json"))))
         self.scene_gts = list(sorted(glob.glob(os.path.join(root, split, "*", "scene_gt.json"))))
+
+        self.imgs = [self.imgs[i] for i in ind]
+
  
     
     def __getitem__(self, idx):
@@ -80,6 +86,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         # Data Augmentations
         if self.transforms is not None:
             img = self.transforms(img)
+        
+        if self.step.startswith('train'):
+            print("training")
  
         return img, target
     
@@ -90,9 +99,24 @@ class TLESSDataset(torch.utils.data.Dataset):
         
  
 if __name__ == '__main__':
-    dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
-    num_imgs = len(dataset)
-    img, target = dataset[3002]
+
+    n_valid = 200
+    indexes = range(50000)
+    train_index, val_index = random_split(
+        dataset=indexes,
+        lengths=[len(indexes)-n_valid, n_valid],
+        generator=torch.Generator().manual_seed(0)
+    )
+    print("train:",train_index.indices)
+    print("val:",val_index.indices)
+    train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices,transforms=None) #[0:10]
+    val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices, transforms=None)  #[0:10]
+
+
+    #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
+    num_imgs_train = len(train_dataset)
+    num_imgs = len(val_dataset)
+    img, target = train_dataset[102]
     unique_values = set()
     for mask in target['masks']:
         unique_values.update(torch.unique(mask).tolist())
@@ -102,6 +126,7 @@ if __name__ == '__main__':
     print("label:", type(target["label"]))
     print("mask:", type(target["masks"]))
     print("mask_visib:", type(target["masks_visib"]))
+    print('num_imgs:',num_imgs_train)
     print('num_imgs:',num_imgs)
     print('labels: ', unique_values)
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
