@@ -31,3 +31,24 @@ scancel <job_id>
 
 # 3. check available nodes:
 sinfo_t_idle
+
+# job.sh
+
+# Create a workspace to store the archive
+ws_allocate data-ssd 60
+# Create the archive from a local dataset folder (example)
+tar -cvzf $(ws_find data-ssd)/dataset.tgz dataset/
+
+
+#!/bin/sh
+# Extract compressed input dataset on local SSD
+tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
+#cp -r ~/pytorch-masterArbeit/src  $TMPDIR/pytorch-masterArbeit/src
+# start job
+#enroot start --root --rw -m $TMPDIR/pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=120 #--root=$TMPDIR/pytorch-masterArbeit/data/tless --checkpoints=$TMPDIR/results
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/pytorch-masterArbeit/data/tless:/workspace/data/tless python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt3 --epochs=200
+# Before job completes save results on a workspace
+#rsync -av $TMPDIR/pytorch-masterArbeit/checkpoints $(ws_find data-ssd)/checkpoints-${SLURM_JOB_ID}/
+
+# copy checkpoints from server
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints

@@ -90,9 +90,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         
  
 if __name__ == '__main__':
-    dataset = TLESSDataset(root='./data/tless', transforms=None, split='test_primesense')
+    dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
     num_imgs = len(dataset)
-    img, target = dataset[10000]
+    img, target = dataset[3002]
     unique_values = set()
     for mask in target['masks']:
         unique_values.update(torch.unique(mask).tolist())

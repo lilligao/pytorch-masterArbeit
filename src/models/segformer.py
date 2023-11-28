@@ -24,6 +24,7 @@ class SegFormer(L.LightningModule):
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
 
 
     def training_step(self, batch, batch_index):
@@ -53,7 +54,7 @@ class SegFormer(L.LightningModule):
             wandb.log({'step': step,"train_iou_step": self.train_iou})
             wandb.log({'epoch': epoch, "train_loss_epoch": loss}) 
             wandb.log({'epoch': epoch,"train_iou_epoch": self.train_iou})
-        
+
         return loss
     
 
@@ -70,6 +71,7 @@ class SegFormer(L.LightningModule):
 
         self.val_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
+        # on epoche = True
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
@@ -80,6 +82,24 @@ class SegFormer(L.LightningModule):
             wandb.log({'step': step,"val_iou_step": self.val_iou})
             wandb.log({'epoch': epoch, "val_loss_epoch": loss}) 
             wandb.log({'epoch': epoch,"val_iou_epoch": self.val_iou})
+
+    
+
+    def test_step(self, batch, batch_idx):
+        #images, _, labels = batch
+        images, labels = batch
+
+        print("test image shape",images.shape)
+        print("test label shape",labels.shape)
+
+        loss, logits = self.model(images, labels.squeeze(dim=1))
+    
+        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+
+        self.test_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
+
+        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
     
     def configure_optimizers(self):
