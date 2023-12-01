@@ -20,7 +20,7 @@ import config
 
 
 class TLESSDataModule(L.LightningDataModule):
-    def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=""):
+    def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=None):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -44,7 +44,8 @@ class TLESSDataModule(L.LightningDataModule):
         # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
-        self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  # batch size = 1??? epoche==
+        if self.test_split is not None:
+            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
@@ -124,11 +125,11 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         # Label Encoding
         # void_classes: map the values in label 0-> 255
-        # for void_class in self.void_classes:
-        #     label[label == void_class] = self.ignore_index
-        # # map 1-30 -> 0-29
-        # for valid_class in self.valid_classes:
-        #     label[label == valid_class] = self.class_map[valid_class]
+        for void_class in self.void_classes:
+            label[label == void_class] = self.ignore_index
+        # map 1-30 -> 0-29
+        for valid_class in self.valid_classes:
+            label[label == valid_class] = self.class_map[valid_class]
         
         label = label.clone().detach().unsqueeze(0)     #torch.tensor(label, dtype=torch.long).unsqueeze(0)
  
