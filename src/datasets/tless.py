@@ -20,33 +20,41 @@ import config
 
 
 class TLESSDataModule(L.LightningDataModule):
-    def __init__(self, batch_size, num_workers, root, train_split, val_split):
+    def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=""):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.root = os.path.expandvars(root)
         self.train_split = train_split
         self.val_split = val_split
+        self.test_split = test_split
 
     def prepare_data(self):
         pass
 
     def setup(self, stage):
         n_valid = config.VAL_SIZE
+        # ???? what is the best proportion training dataset to evaluation datset??
         indexes = range(50000)
         train_index, val_index = random_split(
             dataset=indexes,
             lengths=[len(indexes)-n_valid, n_valid],
             generator=torch.Generator().manual_seed(42)
         )
+        # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
+        self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  # batch size = 1??? epoche==
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
     
     def val_dataloader(self):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False)
+    
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset, shuffle=False, num_workers=self.num_workers, drop_last=False)
+
 
  
 # TLESS dataset class for detector training
@@ -65,8 +73,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         self.scene_gt_infos = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt_info.json"))))
         self.scene_gts = list(sorted(glob.glob(os.path.join(self.root, split, "*", "scene_gt.json"))))
 
-        self.imgs = [self.imgs[i] for i in ind]
-        self.depths = [self.depths[i] for i in ind]
+        if ind!=[]:
+            self.imgs = [self.imgs[i] for i in ind]
+            self.depths = [self.depths[i] for i in ind]
 
         self.ignore_index = config.IGNORE_INDEX
         self.void_classes = [0]
@@ -114,8 +123,10 @@ class TLESSDataset(torch.utils.data.Dataset):
         
 
         # Label Encoding
+        # void_classes: map the values in label 0-> 255
         for void_class in self.void_classes:
             label[label == void_class] = self.ignore_index
+        # map 1-30 -> 0-29
         for valid_class in self.valid_classes:
             label[label == valid_class] = self.class_map[valid_class]
         

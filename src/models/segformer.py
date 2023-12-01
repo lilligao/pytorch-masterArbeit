@@ -52,8 +52,6 @@ class SegFormer(L.LightningModule):
         if wandb.run is not None:
             wandb.log({'step': step, "train_loss_step": loss}) 
             wandb.log({'step': step,"train_iou_step": self.train_iou})
-            wandb.log({'epoch': epoch, "train_loss_epoch": loss}) 
-            wandb.log({'epoch': epoch,"train_iou_epoch": self.train_iou})
 
         return loss
     
@@ -65,7 +63,7 @@ class SegFormer(L.LightningModule):
         print("evaluation image shape",images.shape)
         print("evaluation label shape",labels.shape)
 
-        loss, logits = self.model(images, labels.squeeze(dim=1))
+        loss, logits = self.model(images, labels.squeeze(dim=1)) # ??? warum squeeze dim = 1????
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
@@ -80,8 +78,6 @@ class SegFormer(L.LightningModule):
         if wandb.run is not None:
             wandb.log({'step': step, "val_loss_step": loss}) 
             wandb.log({'step': step,"val_iou_step": self.val_iou})
-            wandb.log({'epoch': epoch, "val_loss_epoch": loss}) 
-            wandb.log({'epoch': epoch,"val_iou_epoch": self.val_iou})
 
     
 
@@ -96,10 +92,26 @@ class SegFormer(L.LightningModule):
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
-        self.test_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
+        pred_classes = torch.softmax(upsampled_logits, dim=1)
+
+        self.test_iou(pred_classes, labels.squeeze(dim=1))
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+        mask_data = torch.argmax(pred_classes, dim=1).squeeze(0).numpy() # the maximum element
+        mask_data_label =  labels.squeeze().numpy()
+        class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
+        mask_img = wandb.Image(
+                images,
+                masks={
+                    "predictions": {"mask_data": mask_data, "class_labels": class_labels},
+                    "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
+                },
+            )
+        if wandb.run is not None:
+            # log images to W&B
+             wandb.log({"predictions" : mask_img})
 
     
     def configure_optimizers(self):
