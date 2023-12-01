@@ -124,11 +124,11 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         # Label Encoding
         # void_classes: map the values in label 0-> 255
-        for void_class in self.void_classes:
-            label[label == void_class] = self.ignore_index
-        # map 1-30 -> 0-29
-        for valid_class in self.valid_classes:
-            label[label == valid_class] = self.class_map[valid_class]
+        # for void_class in self.void_classes:
+        #     label[label == void_class] = self.ignore_index
+        # # map 1-30 -> 0-29
+        # for valid_class in self.valid_classes:
+        #     label[label == valid_class] = self.class_map[valid_class]
         
         label = label.clone().detach().unsqueeze(0)     #torch.tensor(label, dtype=torch.long).unsqueeze(0)
  

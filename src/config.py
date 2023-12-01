@@ -59,6 +59,6 @@ if DATASET == 'TLESS':
     NUMBER_TRAIN_IMAGES = 50000 # 50000 total
     NUMBER_VAL_IMAGES = 200  # 10080 total
     BATCH_SIZE = 8  # 8 for train on server with gpu, 2 for cpu
-    NUM_CLASSES = 30 # ???30 or 31
+    NUM_CLASSES = 31 # ???30 or 31
     IGNORE_INDEX = 255
     NUM_WORKERS = 8   
