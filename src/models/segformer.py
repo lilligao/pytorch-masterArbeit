@@ -101,7 +101,8 @@ class SegFormer(L.LightningModule):
 
         mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
         mask_data = mask_data_tensor.numpy()
-        mask_data_label =  labels.squeeze().numpy()
+        mask_data_label_tensor =  labels.squeeze().cpu()
+        mask_data_label = mask_data_label_tensor.numpy()
         class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
         mask_img = wandb.Image(
                 images,
