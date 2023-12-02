@@ -99,7 +99,7 @@ class SegFormer(L.LightningModule):
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        mask_data = torch.argmax(pred_classes, dim=1).squeeze(0).numpy() # the maximum element
+        mask_data = torch.argmax(pred_classes.cpu(), dim=1).squeeze(0).numpy() # the maximum element
         mask_data_label =  labels.squeeze().numpy()
         class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
         mask_img = wandb.Image(
