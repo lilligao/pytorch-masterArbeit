@@ -15,7 +15,7 @@ parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr')
 parser.add_argument('--val_split', type=str, default='train_pbr')
 parser.add_argument('--test_split', type=str, default='test_primesense')
-parser.add_argument('--val_size', type=str, default=200)
+parser.add_argument('--val_size', type=str, default=10000)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
 
@@ -56,8 +56,8 @@ CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
 
 if DATASET == 'TLESS':
-    NUMBER_TRAIN_IMAGES = 50000 # 50000 total
-    NUMBER_VAL_IMAGES = 200  # 10080 total
+    NUMBER_TRAIN_IMAGES = 40000 # 50000 total
+    NUMBER_VAL_IMAGES = 10000  # 10080 total
     BATCH_SIZE = 8  # 8 for train on server with gpu, 2 for cpu
     NUM_CLASSES = 31 # ???30 or 31
     IGNORE_INDEX = 255
