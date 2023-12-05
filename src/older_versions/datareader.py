@@ -39,7 +39,7 @@ class TLESSDataset(torch.utils.data.Dataset):
             scene_gt = json.load(f)[str(int(im_id))]
         obj_ids = [gt['obj_id'] for gt in scene_gt]    
         print("obj_ids", obj_ids)           
-        assert(len(obj_ids)<31)
+        assert(len(obj_ids)<31 and max(obj_ids)<31 and min(obj_ids)>0)
         # Load masks from mask
         masks_path = list(sorted(glob.glob(os.path.join(self.root, self.split, scene_id, "mask", f"{im_id}_*.png"))))
         masks = torch.zeros((len(masks_path), img.size[1], img.size[0]), dtype=torch.uint8)

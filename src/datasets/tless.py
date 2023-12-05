@@ -123,7 +123,7 @@ class TLESSDataset(torch.utils.data.Dataset):
             label[masks_visib[i]==255] = id
         
 
-        # Label Encoding
+        # Label Encoding ???? input is encoded -> output hat gemappte Werte?? muss wieder zurueck mappen???
         # void_classes: map the values in label 0-> 255
         # for void_class in self.void_classes:
         #     label[label == void_class] = self.ignore_index
