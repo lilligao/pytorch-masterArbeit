@@ -161,7 +161,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     img = F.pad(img, border, 'constant', 0)
                     masks = F.pad(masks, border, 'constant', 0)
                     masks_visib = F.pad(masks_visib, border, 'constant', 0)
-                    label = F.pad(label, border, 'constant', self.ignore_index)
+                    label = F.pad(label, border, 'constant', 0)
 
             # Random Horizontal Flip
             if config.USE_FLIPPING:
@@ -224,8 +224,8 @@ class RandResize(object):
         new_h = int(h * scale_factor_h)
 
         image = F.interpolate(image, size=(new_h, new_w), mode="bilinear", align_corners=False)
-        masks = F.interpolate(masks, size=(new_h, new_w), mode="bilinear", align_corners=False)
-        masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="bilinear", align_corners=False)
+        masks = F.interpolate(masks, size=(new_h, new_w),mode="nearest")
+        masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="nearest")
         label = F.interpolate(label, size=(new_h, new_w), mode="nearest")
 
         return image.squeeze(), masks.squeeze(0), masks_visib.squeeze(0), label.squeeze(0).to(dtype=torch.int64)
