@@ -31,8 +31,9 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch # if masks / masks visible are also in outpus
         images, labels = batch
 
-        # print("train image shape",images.shape)
-        # print("train label shape",labels.shape)
+        print("train image shape",images.shape)
+        print("train label shape",labels.shape)
+        print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
         loss, logits = self.model(images, labels.squeeze(dim=1))
         
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
@@ -60,8 +61,9 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("evaluation image shape",images.shape)
-        print("evaluation label shape",labels.shape)
+        print("validdation image shape",images.shape)
+        print("validdation label shape",labels.shape)
+        print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
         loss, logits = self.model(images, labels.squeeze(dim=1)) # ??? warum squeeze dim = 1????
     
