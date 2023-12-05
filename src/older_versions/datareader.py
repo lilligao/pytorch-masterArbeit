@@ -40,14 +40,12 @@ class TLESSDataModule(L.LightningDataModule):
 
     def setup(self, stage):
         n_valid = 200
-        # ???? what is the best proportion training dataset to evaluation datset??
         indexes = range(50000)
         train_index, val_index = random_split(
             dataset=indexes,
             lengths=[len(indexes)-n_valid, n_valid],
             generator=torch.Generator().manual_seed(42)
         )
-        # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
         if self.test_split is not None:
@@ -255,18 +253,20 @@ if __name__ == '__main__':
     #print("val:",val_index.indices)
     train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices) #[0:10]
     val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices)  #[0:10]
+    test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
 
 
     #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
     num_imgs_train = len(train_dataset)
     num_imgs = len(val_dataset)
-    #img, target = train_dataset[102]
-    for i in range(0,num_imgs_train,200):
-        img, target = train_dataset[i]
-        a = torch.unique(target["label"]).tolist()
-        print('test: ', torch.unique(target["label"]).tolist())
-        assert(len(a)<31 and max(a)<31 and min(a)>=0)
-    unique_values = set()
+    num_imgs_test = len(test_dataset)
+    img, target = train_dataset[102]
+    # for i in range(0,num_imgs_train,200):
+    #     img, target = train_dataset[i]
+    #     a = torch.unique(target["label"]).tolist()
+    #     print('test: ', torch.unique(target["label"]).tolist())
+    #     assert(len(a)<31 and max(a)<31 and min(a)>=0)
+    # unique_values = set()
     
     image = img
     print("iimage:", type(image))
@@ -275,6 +275,7 @@ if __name__ == '__main__':
     print("mask_visib:", type(target["masks_visib"]))
     print('num_imgs:',num_imgs_train)
     print('num_imgs:',num_imgs)
+    print('num_imgs:',num_imgs_test)
     
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
     

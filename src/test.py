@@ -47,5 +47,5 @@ if __name__ == '__main__':
     )
 
     #test the model
-    trainer.test(model, datamodule=data_module) # which dataset am besten for testing？？？ which criterion for test dataset???
+    trainer.test(model, datamodule=data_module) 
 

@@ -18,7 +18,6 @@ if __name__ == '__main__':
     img = img.unsqueeze(0)
     #loss, logits = self.model(images, labels.squeeze(dim=1))
     
-    # ???? gives only 30 classes back, what about the background class? use the target label to delete the background?
     pred = model(img)
     print(len(pred)) # gives a tuple back
     pred = model(img)[0]

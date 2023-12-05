@@ -34,18 +34,16 @@ class TLESSDataModule(L.LightningDataModule):
 
     def setup(self, stage):
         n_valid = config.VAL_SIZE
-        # ???? what is the best proportion training dataset to evaluation datset??
         indexes = range(50000)
         train_index, val_index = random_split(
             dataset=indexes,
             lengths=[len(indexes)-n_valid, n_valid],
             generator=torch.Generator().manual_seed(42)
         )
-        # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
         if self.test_split is not None:
-            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
+            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  # ??? warum nur 2520 Test images? 
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
@@ -123,7 +121,7 @@ class TLESSDataset(torch.utils.data.Dataset):
             label[masks_visib[i]==255] = id
         
 
-        # Label Encoding ???? input is encoded -> output hat gemappte Werte?? muss wieder zurueck mappen???
+        # Label Encoding
         # void_classes: map the values in label 0-> 255
         # for void_class in self.void_classes:
         #     label[label == void_class] = self.ignore_index
