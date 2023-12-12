@@ -24,7 +24,7 @@ class SegFormer(L.LightningModule):
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) # ??? warum nan???
 
 
     def training_step(self, batch, batch_index):
@@ -99,7 +99,7 @@ class SegFormer(L.LightningModule):
         self.test_iou(pred_classes, labels.squeeze(dim=1))
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
         mask_data = mask_data_tensor.numpy()

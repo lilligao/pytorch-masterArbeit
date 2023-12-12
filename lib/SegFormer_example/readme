@@ -49,7 +49,7 @@ tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
 # for train
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt3 --epochs=200
 # for test
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt4/config.RUN_NAME=0-epoch=149-val_loss=0.05-val_iou=0.93.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt4
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epochepoch=180-val_loss=0.05-val_iou=0.93.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt5
 # Before job completes save results on a workspace
 #rsync -av $TMPDIR/pytorch-masterArbeit/checkpoints $(ws_find data-ssd)/checkpoints-${SLURM_JOB_ID}/
 

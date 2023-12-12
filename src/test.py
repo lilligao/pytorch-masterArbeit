@@ -17,7 +17,7 @@ if __name__ == '__main__':
     model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
 
     data_module = TLESSDataModule(
-        batch_size=config.BATCH_SIZE,
+        batch_size=1,
         num_workers=config.NUM_WORKERS,
         root=config.ROOT,
         train_split=config.TRAIN_SPLIT,
