@@ -67,7 +67,7 @@ class TLESSDataModule(L.LightningDataModule):
             self.val_dataset =  ConcatDataset(val_set)
         else:
             train_set = []
-            for split_i in self.train_split:
+            for split_i in splits:
                 train_dataset = TLESSDataset(root=self.root, split=split_i,step="train") 
                 print("training images:", len(train_dataset))
                 train_set.append(train_dataset)

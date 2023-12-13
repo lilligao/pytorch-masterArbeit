@@ -48,8 +48,8 @@ tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
 #enroot start --root --rw -m $TMPDIR/pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=120 #--root=$TMPDIR/pytorch-masterArbeit/data/tless --checkpoints=$TMPDIR/results
 # for train
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt6_backbone_b1 --epochs=151 --backbone=b1
---val_split=test_primesense # test dataset for validation
---train_split=train_pbr;train_primesense --val_split=train_pbr;train_primesense
+--val_split='test_primesense' # test dataset for validation
+--train_split='train_pbr;train_primesense;train_render_reconst' --val_split='train_pbr;train_primesense;train_render_reconst'
 # for test
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epoch=150*.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt6
 
