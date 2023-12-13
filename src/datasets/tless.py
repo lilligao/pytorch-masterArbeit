@@ -10,7 +10,7 @@ import torch
 import torchvision.transforms.functional as TF
 from PIL import Image
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
 
 import glob
@@ -18,7 +18,7 @@ import json
 
 import config
 
-
+NUMBER_TRAIN_IMAGES = 0
 class TLESSDataModule(L.LightningDataModule):
     def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=None):
         super().__init__()
@@ -34,21 +34,49 @@ class TLESSDataModule(L.LightningDataModule):
 
     def setup(self, stage):
         if self.train_split == self.val_split:
-            n_valid = config.VAL_SIZE
-            indexes = range(50000)
-            train_index, val_index = random_split(
-                dataset=indexes,
-                lengths=[len(indexes)-n_valid, n_valid],
-                generator=torch.Generator().manual_seed(42)
-            )
+            splits = self.train_split.split(";")
+            train_set = []
+            val_set = []
+            for split_i in splits:
+                full_size_train = 0
+                if split_i == "train_pbr": 
+                    full_size_train = 50000 
+                elif split_i == "train_primesense":
+                    full_size_train = 37584 
+                elif split_i == "train_render_reconst":
+                    full_size_train = 76860 
+                else:
+                    raise ValueError(f'Invalid split: {split_i}')
 
-            self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
-            self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices) 
+                train_size = int(0.8 * full_size_train)
+                val_size = full_size_train - train_size
+                indexes = range(full_size_train)
+                train_index, val_index = random_split(
+                    dataset=indexes,
+                    lengths=[train_size, val_size],
+                    generator=torch.Generator().manual_seed(42)
+                )
+                train_dataset = TLESSDataset(root=self.root, split=split_i,step="train", ind=train_index.indices)
+                val_dataset = TLESSDataset(root=self.root, split=split_i,step="val", ind=val_index.indices) 
+                train_set.append(train_dataset)
+                val_set.append(val_dataset)
+
+            self.train_dataset = ConcatDataset(train_set)
+            self.val_dataset =  ConcatDataset(val_set)
         else:
-            self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train") 
+            train_set = []
+            for split_i in self.train_split:
+                train_dataset = TLESSDataset(root=self.root, split=split_i,step="train") 
+                train_set.append(train_dataset)
+            
+            self.train_dataset = ConcatDataset(train_set)
             self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val") 
+            
         if self.test_split is not None:
             self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
+
+        global NUMBER_TRAIN_IMAGES
+        NUMBER_TRAIN_IMAGES = len(self.train_dataset)
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)

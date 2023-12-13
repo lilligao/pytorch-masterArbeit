@@ -8,6 +8,7 @@ from transformers import SegformerForSemanticSegmentation, SegformerConfig
 import config
 from utils.lr_schedulers import PolyLR
 import wandb
+import datasets.tless as tless
 
 class SegFormer(L.LightningModule):
     def __init__(self):
@@ -61,8 +62,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("validdation image shape",images.shape)
-        print("validdation label shape",labels.shape)
+        print("validation image shape",images.shape)
+        print("validation label shape",labels.shape)
         #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
         loss, logits = self.model(images, labels.squeeze(dim=1)) # squeeze dim = 1 because labels size [4, 1, 540, 720]
@@ -120,12 +121,9 @@ class SegFormer(L.LightningModule):
     
     def configure_optimizers(self):
         # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
-        if config.TRAIN_SPLIT == config.TEST_SPLIT:
-            number_train_images = config.NUMBER_TRAIN_IMAGES - config.VAL_SIZE
-        else:
-            number_train_images = config.NUMBER_TRAIN_IMAGES 
-        iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
-        #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
+        number_train_images = tless.NUMBER_TRAIN_IMAGES 
+        #iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
+        iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
         print("iterations per epoche", iterations_per_epoch)
         print("total iterations", total_iterations)
