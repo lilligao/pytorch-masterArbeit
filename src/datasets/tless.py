@@ -33,8 +33,8 @@ class TLESSDataModule(L.LightningDataModule):
         pass
 
     def setup(self, stage):
+        splits = self.train_split.split(";")
         if self.train_split == self.val_split:
-            splits = self.train_split.split(";")
             train_set = []
             val_set = []
             for split_i in splits:
