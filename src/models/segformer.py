@@ -22,17 +22,18 @@ class SegFormer(L.LightningModule):
             {'params': self.model.decode_head.parameters(), 'lr': 10 * config.LEARNING_RATE},
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
-        self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) # ??? warum nan???
 
 
     def training_step(self, batch, batch_index):
         #images, _, labels = batch # if masks / masks visible are also in outpus
         images, labels = batch
 
-        # print("train image shape",images.shape)
-        # print("train label shape",labels.shape)
+        #print("train image shape",images.shape)
+        #print("train label shape",labels.shape)
+        #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
         loss, logits = self.model(images, labels.squeeze(dim=1))
         
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
@@ -60,10 +61,11 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("evaluation image shape",images.shape)
-        print("evaluation label shape",labels.shape)
+        print("validdation image shape",images.shape)
+        print("validdation label shape",labels.shape)
+        #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
-        loss, logits = self.model(images, labels.squeeze(dim=1)) # ??? warum squeeze dim = 1????
+        loss, logits = self.model(images, labels.squeeze(dim=1)) # squeeze dim = 1 because labels size [4, 1, 540, 720]
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
@@ -97,7 +99,7 @@ class SegFormer(L.LightningModule):
         self.test_iou(pred_classes, labels.squeeze(dim=1))
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
         mask_data = mask_data_tensor.numpy()

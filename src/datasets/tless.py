@@ -34,18 +34,16 @@ class TLESSDataModule(L.LightningDataModule):
 
     def setup(self, stage):
         n_valid = config.VAL_SIZE
-        # ???? what is the best proportion training dataset to evaluation datset??
         indexes = range(50000)
         train_index, val_index = random_split(
             dataset=indexes,
             lengths=[len(indexes)-n_valid, n_valid],
             generator=torch.Generator().manual_seed(42)
         )
-        # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
         if self.test_split is not None:
-            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
+            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  # ??? warum nur 2520 Test images? 
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
@@ -54,7 +52,9 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, shuffle=False, num_workers=self.num_workers, drop_last=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False)
+        print('num_imgs test dataloader:',len(test_dataloader))
+        return test_dataloader
 
 
  
@@ -161,7 +161,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     img = F.pad(img, border, 'constant', 0)
                     masks = F.pad(masks, border, 'constant', 0)
                     masks_visib = F.pad(masks_visib, border, 'constant', 0)
-                    label = F.pad(label, border, 'constant', self.ignore_index)
+                    label = F.pad(label, border, 'constant', 0)
 
             # Random Horizontal Flip
             if config.USE_FLIPPING:
@@ -224,8 +224,8 @@ class RandResize(object):
         new_h = int(h * scale_factor_h)
 
         image = F.interpolate(image, size=(new_h, new_w), mode="bilinear", align_corners=False)
-        masks = F.interpolate(masks, size=(new_h, new_w), mode="bilinear", align_corners=False)
-        masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="bilinear", align_corners=False)
+        masks = F.interpolate(masks, size=(new_h, new_w),mode="nearest")
+        masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="nearest")
         label = F.interpolate(label, size=(new_h, new_w), mode="nearest")
 
         return image.squeeze(), masks.squeeze(0), masks_visib.squeeze(0), label.squeeze(0).to(dtype=torch.int64)

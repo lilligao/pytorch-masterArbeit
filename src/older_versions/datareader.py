@@ -40,14 +40,12 @@ class TLESSDataModule(L.LightningDataModule):
 
     def setup(self, stage):
         n_valid = 200
-        # ???? what is the best proportion training dataset to evaluation datset??
         indexes = range(50000)
         train_index, val_index = random_split(
             dataset=indexes,
             lengths=[len(indexes)-n_valid, n_valid],
             generator=torch.Generator().manual_seed(42)
         )
-        # ??? ansonsten wie kann man Datensatz splitten und nur scale & flip & crop only for training data and not evaluation data?
         self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
         self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
         if self.test_split is not None:
@@ -192,6 +190,51 @@ class TLESSDataset(torch.utils.data.Dataset):
       
 
  
+        img = TF.to_tensor(img)
+        
+
+        if self.step.startswith('train'):
+            print('contains classes before: ', torch.unique(label).tolist())
+            # Random Resize
+            if True:
+                random_scaler = RandResize(scale=(0.5, 0.9))
+                
+                img, masks, masks_visib, label = random_scaler(img.unsqueeze(0).float(), masks.unsqueeze(0).float(), masks_visib.unsqueeze(0).float(), label.unsqueeze(0).float())
+                
+                # Pad image if it's too small after the random resize
+                if img.shape[1] < 512 or img.shape[2] < 512:
+                    height, width = img.shape[1], img.shape[2]
+                    pad_height = max(512 - height, 0)
+                    pad_width = max(512 - width, 0)
+                    pad_height_half = pad_height // 2
+                    pad_width_half = pad_width // 2
+
+                    border = (pad_width_half, pad_width - pad_width_half, pad_height_half, pad_height - pad_height_half)
+                    img = F.pad(img, border, 'constant', 0)
+                    masks = F.pad(masks, border, 'constant', 0)
+                    masks_visib = F.pad(masks_visib, border, 'constant', 0)
+                    label = F.pad(label, border, 'constant', self.ignore_index)
+            print('contains classes after padding: ', torch.unique(label).tolist())
+            
+            # Random Horizontal Flip
+            if True:
+                if random.random() < 0.5:
+                    img = TF.hflip(img)
+                    masks = TF.hflip(masks)
+                    masks_visib = TF.hflip(masks_visib)
+                    label = TF.hflip(label)
+            print('contains classes after flipping: ', torch.unique(label).tolist())
+            # Random Crop
+            if True:
+                i, j, h, w = transforms.RandomCrop(size=(512, 512)).get_params(img, output_size=(512, 512))
+                img = TF.crop(img, i, j, h, w)
+                masks = TF.crop(masks, i, j, h, w)
+                masks_visib = TF.crop(masks_visib, i, j, h, w)
+                label = TF.crop(label, i, j, h, w) 
+            print('contains classes after random cropping: ', torch.unique(label).tolist())
+      
+
+ 
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
         target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)
@@ -200,6 +243,46 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["scene_id"] = torch.tensor([int(scene_id)])
         target["image_id"] = torch.tensor([int(im_id)])
         target["label"] = label # masken Bild
+        
+        return img, target  #target["label"]
+    
+    
+class RandResize(object):
+    """
+    Randomly resize image & label with scale factor in [scale_min, scale_max]
+    Source: https://github.com/Haochen-Wang409/U2PL/blob/main/u2pl/dataset/augmentation.py
+    """
+    def __init__(self, scale, aspect_ratio=None):
+        self.scale = scale
+        self.aspect_ratio = aspect_ratio
+
+    def __call__(self, image, masks, masks_visib, label):
+        if random.random() < 0.5:
+            temp_scale = self.scale[0] + (1.0 - self.scale[0]) * random.random()
+        else:
+            temp_scale = 1.0 + (self.scale[1] - 1.0) * random.random()
+        
+        temp_aspect_ratio = 1.0
+        
+        if self.aspect_ratio is not None:
+            temp_aspect_ratio = (
+                self.aspect_ratio[0]
+                + (self.aspect_ratio[1] - self.aspect_ratio[0]) * random.random()
+            )
+            temp_aspect_ratio = math.sqrt(temp_aspect_ratio)
+
+        scale_factor_w = temp_scale * temp_aspect_ratio
+        scale_factor_h = temp_scale / temp_aspect_ratio
+        h, w = image.size()[-2:]
+        new_w = int(w * scale_factor_w)
+        new_h = int(h * scale_factor_h)
+
+        image = F.interpolate(image, size=(new_h, new_w), mode="bilinear", align_corners=False)
+        masks = F.interpolate(masks, size=(new_h, new_w), mode="nearest")
+        masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="nearest")
+        label = F.interpolate(label, size=(new_h, new_w), mode="nearest")
+
+        return image.squeeze(), masks.squeeze(0), masks_visib.squeeze(0), label.squeeze(0).to(dtype=torch.int64)
         
         return img, target  #target["label"]
     
@@ -255,6 +338,35 @@ if __name__ == '__main__':
     #print("val:",val_index.indices)
     train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices) #[0:10]
     val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices)  #[0:10]
+    test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
+
+    test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8, drop_last=False)
+
+    #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
+    num_imgs_train = len(train_dataset)
+    num_imgs = len(val_dataset)
+    num_imgs_test = len(test_dataset)
+    img, target = train_dataset[102]
+    # for i in range(0,num_imgs_train,200):
+    #     img, target = train_dataset[i]
+    #     a = torch.unique(target["label"]).tolist()
+    #     print('test: ', torch.unique(target["label"]).tolist())
+    #     assert(len(a)<31 and max(a)<31 and min(a)>=0)
+    # unique_values = set()
+    
+    image = img
+
+    n_valid = 200
+    indexes = range(50000)
+    train_index, val_index = random_split(
+        dataset=indexes,
+        lengths=[len(indexes)-n_valid, n_valid],
+        generator=torch.Generator().manual_seed(0)
+    )
+    #print("train:",train_index.indices)
+    #print("val:",val_index.indices)
+    train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices) #[0:10]
+    val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices)  #[0:10]
 
 
     #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
@@ -269,10 +381,11 @@ if __name__ == '__main__':
     print("mask:", type(target["masks"]))
     print("mask_visib:", type(target["masks_visib"]))
     print('num_imgs:',num_imgs_train)
+    print('num_imgs:',num_imgs_train)
     print('num_imgs:',num_imgs)
     
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
-    print('test: ', torch.unique(target["label"]).tolist())
+    
     print('image:', image.shape)
 
     unique_values = set()
@@ -283,7 +396,17 @@ if __name__ == '__main__':
     
     label_array = target["label"].squeeze(0).numpy()
     img = image.permute(1, 2, 0)
+
+    unique_values = set()
+    for mask in target["masks"]:
+        unique_values.update(torch.unique(mask).tolist())
+    
+    print('labels: ', unique_values)
+    
+    label_array = target["label"].squeeze(0).numpy()
+    img = image.permute(1, 2, 0)
     img_array = np.array(img)
+    #print(label_array)
     #print(label_array)
     print('label array:', label_array.shape)
     fig,ax = plt.subplots(1,2)
