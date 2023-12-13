@@ -52,7 +52,9 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False)
+        test_dataloader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False)
+        print('num_imgs test dataloader:',len(test_dataloader))
+        return test_dataloader
 
 
  

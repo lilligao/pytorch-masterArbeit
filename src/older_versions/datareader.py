@@ -255,6 +255,7 @@ if __name__ == '__main__':
     val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices)  #[0:10]
     test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
 
+    test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8, drop_last=False)
 
     #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
     num_imgs_train = len(train_dataset)
@@ -275,7 +276,8 @@ if __name__ == '__main__':
     print("mask_visib:", type(target["masks_visib"]))
     print('num_imgs:',num_imgs_train)
     print('num_imgs:',num_imgs)
-    print('num_imgs:',num_imgs_test)
+    print('num_imgs test dataset:',num_imgs_test)
+    print('num_imgs test dataloader:',len(test_dataloader))
     
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
     
