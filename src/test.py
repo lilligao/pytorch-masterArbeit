@@ -13,8 +13,9 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 import os
 
 if __name__ == '__main__':
-    assert(config.LOAD_CHECKPOINTS!=None)
-    model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+    #assert(config.LOAD_CHECKPOINTS!=None)
+    chkpt_dir = "/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/checkpoints/Attempt5_31Classes/epochepoch=180-val_loss=0.05-val_iou=0.93.ckpt"
+    model = SegFormer.load_from_checkpoint(chkpt_dir)
 
     data_module = TLESSDataModule(
         batch_size=1,
@@ -28,9 +29,9 @@ if __name__ == '__main__':
      # initialize the Trainer
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='gpu',    # cpu
+        accelerator='cpu',    # cpu
         strategy='auto',
-        devices=config.DEVICES,
+        devices=1,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         limit_train_batches=1.0, # or 0.25 for 25% # cpu:10
