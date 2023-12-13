@@ -62,8 +62,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("validation image shape",images.shape)
-        print("validation label shape",labels.shape)
+        #print("validation image shape",images.shape)
+        #print("validation label shape",labels.shape)
         #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
         loss, logits = self.model(images, labels.squeeze(dim=1)) # squeeze dim = 1 because labels size [4, 1, 540, 720]

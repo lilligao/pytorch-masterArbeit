@@ -38,7 +38,7 @@ class TLESSDataModule(L.LightningDataModule):
             train_set = []
             val_set = []
             for split_i in splits:
-                print(split_i)
+                #print(split_i)
                 full_size_train = 0
                 if split_i == "train_pbr": 
                     full_size_train = 50000 
@@ -58,20 +58,20 @@ class TLESSDataModule(L.LightningDataModule):
                     generator=torch.Generator().manual_seed(42)
                 )
                 train_dataset = TLESSDataset(root=self.root, split=split_i,step="train", ind=train_index.indices)
-                print("training images:", len(train_dataset))
+                #print("training images:", len(train_dataset))
                 val_dataset = TLESSDataset(root=self.root, split=split_i,step="val", ind=val_index.indices) 
                 train_set.append(train_dataset)
                 val_set.append(val_dataset)
-            print("training set length:", len(train_set))
+            #print("training set length:", len(train_set))
             self.train_dataset = ConcatDataset(train_set)
             self.val_dataset =  ConcatDataset(val_set)
         else:
             train_set = []
             for split_i in splits:
                 train_dataset = TLESSDataset(root=self.root, split=split_i,step="train") 
-                print("training images:", len(train_dataset))
+                #print("training images:", len(train_dataset))
                 train_set.append(train_dataset)
-            print("training set length:", len(train_set))
+            #print("training set length:", len(train_set))
             self.train_dataset = ConcatDataset(train_set)
             self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val") 
             
