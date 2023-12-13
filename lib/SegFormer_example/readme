@@ -47,9 +47,12 @@ tar -C $TMPDIR/ -xvzf $(ws_find data-ssd)/dataset.tgz
 # start job
 #enroot start --root --rw -m $TMPDIR/pytorch-masterArbeit/:/workspace nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt2 --epochs=120 #--root=$TMPDIR/pytorch-masterArbeit/data/tless --checkpoints=$TMPDIR/results
 # for train
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt3 --epochs=200
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt6_backbone_b1 --epochs=151 --backbone=b1
 # for test
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epochepoch=180-val_loss=0.05-val_iou=0.93.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt5
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epoch=150*.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt6
+
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epochepoch=180-val_loss=0.05-val_iou=0.93.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt5
+
 # Before job completes save results on a workspace
 #rsync -av $TMPDIR/pytorch-masterArbeit/checkpoints $(ws_find data-ssd)/checkpoints-${SLURM_JOB_ID}/
 

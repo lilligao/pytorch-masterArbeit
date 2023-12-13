@@ -11,10 +11,14 @@ from datasets.tless import TLESSDataModule
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 import os
+from pathlib import Path
+import glob
 
 if __name__ == '__main__':
     assert(config.LOAD_CHECKPOINTS!=None)
-    model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+    path = Path(config.LOAD_CHECKPOINTS) # path to the root dir from where you want to start searching
+    chkpt = list(glob.glob(path))
+    model = SegFormer.load_from_checkpoint(chkpt[0])
 
     data_module = TLESSDataModule(
         batch_size=1,
