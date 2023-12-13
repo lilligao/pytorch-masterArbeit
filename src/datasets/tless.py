@@ -38,6 +38,7 @@ class TLESSDataModule(L.LightningDataModule):
             train_set = []
             val_set = []
             for split_i in splits:
+                print(split_i)
                 full_size_train = 0
                 if split_i == "train_pbr": 
                     full_size_train = 50000 
