@@ -33,17 +33,22 @@ class TLESSDataModule(L.LightningDataModule):
         pass
 
     def setup(self, stage):
-        n_valid = config.VAL_SIZE
-        indexes = range(50000)
-        train_index, val_index = random_split(
-            dataset=indexes,
-            lengths=[len(indexes)-n_valid, n_valid],
-            generator=torch.Generator().manual_seed(42)
-        )
-        self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
-        self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices)  
+        if self.train_split == self.val_split:
+            n_valid = config.VAL_SIZE
+            indexes = range(50000)
+            train_index, val_index = random_split(
+                dataset=indexes,
+                lengths=[len(indexes)-n_valid, n_valid],
+                generator=torch.Generator().manual_seed(42)
+            )
+
+            self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train", ind=train_index.indices) 
+            self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val", ind= val_index.indices) 
+        else:
+            self.train_dataset = TLESSDataset(root=self.root, split=self.train_split,step="train") 
+            self.val_dataset = TLESSDataset(root=self.root, split=self.val_split,step="val") 
         if self.test_split is not None:
-            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  # ??? warum nur 2520 Test images? 
+            self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
         
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
@@ -52,9 +57,7 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False)
     
     def test_dataloader(self):
-        test_dataloader = DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False)
-        print('num_imgs test dataloader:',len(test_dataloader))
-        return test_dataloader
+        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False)
 
 
  

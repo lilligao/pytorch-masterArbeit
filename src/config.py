@@ -56,7 +56,7 @@ CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
 
 if DATASET == 'TLESS':
-    NUMBER_TRAIN_IMAGES = 40000 # 50000 total
+    NUMBER_TRAIN_IMAGES = 50000 # 50000 total
     NUMBER_VAL_IMAGES = 10000  # 10080 total
     BATCH_SIZE = 8  # 8 for train on server with gpu, 2 for cpu
     NUM_CLASSES = 31 

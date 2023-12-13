@@ -24,7 +24,7 @@ class SegFormer(L.LightningModule):
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) # ??? warum nan???
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) 
 
 
     def training_step(self, batch, batch_index):
@@ -120,7 +120,11 @@ class SegFormer(L.LightningModule):
     
     def configure_optimizers(self):
         # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
-        iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
+        if config.TRAIN_SPLIT == config.TEST_SPLIT:
+            number_train_images = config.NUMBER_TRAIN_IMAGES - config.VAL_SIZE
+        else:
+            number_train_images = config.NUMBER_TRAIN_IMAGES 
+        iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
         #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
         print("iterations per epoche", iterations_per_epoch)
