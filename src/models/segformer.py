@@ -102,9 +102,8 @@ class SegFormer(L.LightningModule):
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        print(config.PLOT_TESTIMG)
-        print("type:", type(config.PLOT_TESTIMG))
-        if config.PLOT_TESTIMG:
+        ua = str("true").upper()
+        if config.PLOT_TESTIMG.upper().startswith(ua):
             mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
