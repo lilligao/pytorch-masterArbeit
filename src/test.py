@@ -18,7 +18,6 @@ if __name__ == '__main__':
     assert(config.LOAD_CHECKPOINTS!=None)
     path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
     chkpt = list(glob.glob(path))
-    model = SegFormer.load_from_checkpoint(chkpt[0])
 
     data_module = TLESSDataModule(
         batch_size=1,
@@ -41,7 +40,7 @@ if __name__ == '__main__':
         limit_val_batches=1.0, # cpu:10
         max_steps=-1, # cpu:10
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
-        logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=True),
+        logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         callbacks=[
             ModelCheckpoint(dirpath=os.path.expandvars(config.CHECKPOINTS_DIR),filename='{config.RUN_NAME}-{epoch}-{val_loss:.2f}-{val_iou:.2f}',every_n_epochs=1, save_top_k= -1), 
             #ModelCheckpoint(dirpath=f'./checkpoints/{config.RUN_NAME}'), # gewichte des Modells gespeichert nach bestimmter Epochen / beste Modell raus zu nehmen !! iteration nummer dran hängen
@@ -49,7 +48,8 @@ if __name__ == '__main__':
         ],
         log_every_n_steps=1,
     )
-
-    #test the model
-    trainer.test(model, datamodule=data_module) 
+    for i in range(len(chkpt)):
+        model = SegFormer.load_from_checkpoint(chkpt[i])
+        #test the model
+        trainer.test(model, datamodule=data_module) 
 

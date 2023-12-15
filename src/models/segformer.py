@@ -102,21 +102,22 @@ class SegFormer(L.LightningModule):
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
-        mask_data = mask_data_tensor.numpy()
-        mask_data_label_tensor =  labels.squeeze().cpu()
-        mask_data_label = mask_data_label_tensor.numpy()
-        class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
-        mask_img = wandb.Image(
-                images,
-                masks={
-                    "predictions": {"mask_data": mask_data, "class_labels": class_labels},
-                    "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
-                },
-            )
-        if wandb.run is not None:
-            # log images to W&B
-             wandb.log({"predictions" : mask_img})
+        if config.PLOT_TESTIMG:
+            mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
+            mask_data = mask_data_tensor.numpy()
+            mask_data_label_tensor =  labels.squeeze().cpu()
+            mask_data_label = mask_data_label_tensor.numpy()
+            class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
+            mask_img = wandb.Image(
+                    images,
+                    masks={
+                        "predictions": {"mask_data": mask_data, "class_labels": class_labels},
+                        "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
+                    },
+                )
+            if wandb.run is not None:
+                # log images to W&B
+                wandb.log({"predictions" : mask_img})
 
     
     def configure_optimizers(self):

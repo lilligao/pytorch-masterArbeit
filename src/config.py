@@ -18,6 +18,7 @@ parser.add_argument('--test_split', type=str, default='test_primesense')
 parser.add_argument('--val_size', type=str, default=10000)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
+parser.add_argument('--plot_testimg', type=bool, default=True)
 
 parser.add_argument('--use_scaling', type=bool, default=True) #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=bool, default=True) # vertikales flipping, rotation, farb sachen!!!
@@ -54,6 +55,7 @@ TEST_SPLIT = args.test_split
 VAL_SIZE = args.val_size
 CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
+PLOT_TESTIMG = args.plot_testimg
 
 if DATASET == 'TLESS':
     NUMBER_TRAIN_IMAGES = 50000 # 50000 total
