@@ -101,9 +101,6 @@ class SegFormer(L.LightningModule):
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        step = self.global_step
-        if wandb.run is not None:
-            wandb.log({'step': step, "test_lost_step": loss}) 
 
         ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):

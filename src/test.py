@@ -44,7 +44,6 @@ if __name__ == '__main__':
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1,
-        limit_test_batches=100
     )
     for i in range(len(chkpt)):
         model = SegFormer.load_from_checkpoint(chkpt[i])
