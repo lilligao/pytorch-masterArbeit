@@ -33,7 +33,7 @@ if __name__ == '__main__':
         max_epochs=config.NUM_EPOCHS,
         accelerator='gpu',    # cpu
         strategy='auto',
-        devices=100,
+        devices=1,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
@@ -44,6 +44,7 @@ if __name__ == '__main__':
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1,
+        limit_test_batches=100
     )
     for i in range(len(chkpt)):
         model = SegFormer.load_from_checkpoint(chkpt[i])
