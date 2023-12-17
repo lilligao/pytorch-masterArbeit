@@ -14,7 +14,6 @@ import os
 from pathlib import Path
 import glob
 
-STEP = 0
 if __name__ == '__main__':
     assert(config.LOAD_CHECKPOINTS!=None)
     path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
@@ -48,7 +47,6 @@ if __name__ == '__main__':
     )
     for i in range(len(chkpt)):
         model = SegFormer.load_from_checkpoint(chkpt[i])
-        STEP = i
         #test the model
         trainer.test(model, datamodule=data_module,verbose=True) 
 
