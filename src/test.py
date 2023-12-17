@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import glob
 
+STEP = 0
 if __name__ == '__main__':
     assert(config.LOAD_CHECKPOINTS!=None)
     path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
@@ -33,7 +34,7 @@ if __name__ == '__main__':
         max_epochs=config.NUM_EPOCHS,
         accelerator='gpu',    # cpu
         strategy='auto',
-        devices=1,
+        devices=100,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
@@ -47,6 +48,7 @@ if __name__ == '__main__':
     )
     for i in range(len(chkpt)):
         model = SegFormer.load_from_checkpoint(chkpt[i])
+        STEP = i
         #test the model
-        trainer.test(model, datamodule=data_module) 
+        trainer.test(model, datamodule=data_module,verbose=True) 
 
