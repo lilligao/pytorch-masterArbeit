@@ -46,6 +46,7 @@ if __name__ == '__main__':
         log_every_n_steps=1,
     )
     for i in range(len(chkpt)):
+        print("checkpoint: ", chkpt[i])
         model = SegFormer.load_from_checkpoint(chkpt[i])
         #test the model
         trainer.test(model, datamodule=data_module,verbose=True) 
