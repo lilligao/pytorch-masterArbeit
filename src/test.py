@@ -44,6 +44,7 @@ if __name__ == '__main__':
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1,
+        max_time={"days": 2}
     )
     for i in range(len(chkpt)):
         print("checkpoint: ", chkpt[i])

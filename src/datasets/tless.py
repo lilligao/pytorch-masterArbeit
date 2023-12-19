@@ -12,6 +12,7 @@ from PIL import Image
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
+from torchvision.transforms import InterpolationMode
 
 import glob
 import json
@@ -213,9 +214,14 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = TF.crop(masks, i, j, h, w)
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
-      
+        elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
+            tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
+            tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
+            img = tf_img(img)
+            masks = tf(masks)
+            masks_visib = tf(masks_visib)
+            label = tf(label)
 
- 
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
         target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)

@@ -4,6 +4,7 @@ import torch
 from PIL import Image
 import glob
 import torchvision.transforms as transforms
+from torchvision.transforms import InterpolationMode
 import json
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as TF
@@ -14,13 +15,8 @@ import os
 import random
 
 import lightning as L
-import numpy as np
-import torch
-import torchvision.transforms.functional as TF
 from PIL import Image
 from torch.nn import functional as F
-from torch.utils.data import DataLoader, random_split
-from torchvision import transforms
 
 import glob
 import json
@@ -187,6 +183,14 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
             print('contains classes after random cropping: ', torch.unique(label).tolist())
+        elif self.step.startswith('val'):
+                tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
+                tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
+                img = tf_img(img)
+                masks = tf(masks)
+                masks_visib = tf(masks_visib)
+                label = tf(label)
+      
       
 
  
@@ -252,7 +256,7 @@ if __name__ == '__main__':
     #print("train:",train_index.indices)
     #print("val:",val_index.indices)
     train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices) #[0:10]
-    val_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="val", ind= val_index.indices)  #[0:10]
+    val_dataset = TLESSDataset(root='./data/tless', split='train_primesense',step="val")  #[0:10]
     test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
 
     test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8, drop_last=False)
@@ -261,7 +265,7 @@ if __name__ == '__main__':
     num_imgs_train = len(train_dataset)
     num_imgs = len(val_dataset)
     num_imgs_test = len(test_dataset)
-    img, target = train_dataset[102]
+    img, target = val_dataset[1]
     # for i in range(0,num_imgs_train,200):
     #     img, target = train_dataset[i]
     #     a = torch.unique(target["label"]).tolist()

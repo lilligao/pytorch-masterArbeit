@@ -41,6 +41,8 @@ if __name__ == '__main__':
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1,
+        max_time={"days": 2},
+        gradient_clip_val=0.5
     )
     if config.LOAD_CHECKPOINTS is not None:
         trainer.fit(model, data_module,ckpt_path=config.LOAD_CHECKPOINTS) #ckpt_path = './checkpoints/name.clkpt'

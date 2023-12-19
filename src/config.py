@@ -23,6 +23,7 @@ parser.add_argument('--plot_testimg', type=str, default=True)
 parser.add_argument('--use_scaling', type=bool, default=True) #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=bool, default=True) # vertikales flipping, rotation, farb sachen!!!
 parser.add_argument('--use_flipping', type=bool, default=True)
+parser.add_argument('--scale_val', type=str, default='False')
 
 args = parser.parse_args()
 
@@ -45,6 +46,7 @@ LEARNING_RATE = args.lr
 USE_SCALING = args.use_scaling
 USE_CROPPING = args.use_cropping
 USE_FLIPPING = args.use_flipping
+SCALE_VAL = args.scale_val
 
 ## Dataset & Dataloader
 DATASET = args.dataset

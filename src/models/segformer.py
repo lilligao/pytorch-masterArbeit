@@ -41,6 +41,7 @@ class SegFormer(L.LightningModule):
         self.train_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
+        # !!! Metriken!!!
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
