@@ -19,7 +19,7 @@ class SegFormer(L.LightningModule):
 
         self.optimizer = torch.optim.AdamW(params=[
             {'params': self.model.segformer.parameters(), 'lr': config.LEARNING_RATE},
-            {'params': self.model.decode_head.parameters(), 'lr': 10 * config.LEARNING_RATE},
+            {'params': self.model.decode_head.parameters(), 'lr': config.LEARNING_RATE_FACTOR * config.LEARNING_RATE},
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX

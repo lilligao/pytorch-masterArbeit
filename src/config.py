@@ -10,6 +10,7 @@ parser.add_argument('--run', type=str, default='Segformer_train')
 parser.add_argument('--backbone', type=str, default='b2') ## alle backbones ein mal probieren
 parser.add_argument('--epochs', type=int, default=250)  # gpu: 250, local:1
 parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local:2e-1
+parser.add_argument('--lr_factor', type=int, default=10)
 parser.add_argument('--dataset', type=str, default='TLESS')
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr') # sensor daten und synthetic daten probieren
@@ -41,6 +42,7 @@ MOMENTUM = 0.9
 WEIGHT_DECAY = 0.01
 PRECISION = '16-mixed'   #gpu: '16-mixed', cpu: bf16-mixed
 LEARNING_RATE = args.lr
+LEARNING_RATE_FACTOR = args.lr_factor
 
 ## Data Augmentation
 USE_SCALING = args.use_scaling
