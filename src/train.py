@@ -41,7 +41,7 @@ if __name__ == '__main__':
             LearningRateMonitor(logging_interval='epoch'),
         ],
         log_every_n_steps=1,
-        max_time={"days": 2},
+        max_time={"days": 1, "hours": 23},
         gradient_clip_val=0.5
     )
     if config.LOAD_CHECKPOINTS is not None:
