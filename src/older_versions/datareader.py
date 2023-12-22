@@ -18,8 +18,14 @@ import lightning as L
 from PIL import Image
 from torch.nn import functional as F
 
+import sys
+ 
+# setting path
+sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/')
+
 import glob
 import json
+import config
 
 class TLESSDataModule(L.LightningDataModule):
     def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=None):
@@ -176,7 +182,8 @@ class TLESSDataset(torch.utils.data.Dataset):
                     label = TF.hflip(label)
             print('contains classes after flipping: ', torch.unique(label).tolist())
             # Random Crop
-            if True:
+            if str(config.USE_CROPPING).upper()==str('True').upper():
+                print("use cropping!!")
                 i, j, h, w = transforms.RandomCrop(size=(512, 512)).get_params(img, output_size=(512, 512))
                 img = TF.crop(img, i, j, h, w)
                 masks = TF.crop(masks, i, j, h, w)
@@ -265,7 +272,7 @@ if __name__ == '__main__':
     num_imgs_train = len(train_dataset)
     num_imgs = len(val_dataset)
     num_imgs_test = len(test_dataset)
-    img, target = val_dataset[1]
+    img, target = train_dataset[1]
     # for i in range(0,num_imgs_train,200):
     #     img, target = train_dataset[i]
     #     a = torch.unique(target["label"]).tolist()

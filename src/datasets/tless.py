@@ -181,7 +181,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         
         if self.step.startswith('train'):
             # Random Resize
-            if config.USE_SCALING:
+            if str(config.USE_SCALING).upper()==str('True').upper():
                 random_scaler = RandResize(scale=(0.5, 2.0))
                 img, masks, masks_visib, label = random_scaler(img.unsqueeze(0).float(), masks.unsqueeze(0).float(), masks_visib.unsqueeze(0).float(), label.unsqueeze(0).float())
 
@@ -200,7 +200,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     label = F.pad(label, border, 'constant', 0)
 
             # Random Horizontal Flip
-            if config.USE_FLIPPING:
+            if str(config.USE_FLIPPING).upper()==str('True').upper():
                 if random.random() < 0.5:
                     img = TF.hflip(img)
                     masks = TF.hflip(masks)
@@ -208,7 +208,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     label = TF.hflip(label)
 
             # Random Crop
-            if config.USE_CROPPING:
+            if str(config.USE_CROPPING).upper()==str('True').upper():
                 i, j, h, w = transforms.RandomCrop(size=(512, 512)).get_params(img, output_size=(512, 512))
                 img = TF.crop(img, i, j, h, w)
                 masks = TF.crop(masks, i, j, h, w)
