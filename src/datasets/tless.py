@@ -214,6 +214,16 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = TF.crop(masks, i, j, h, w)
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
+                
+            # Normal resize
+            if str(config.USE_NORMAL_RESIZE).upper()==str('True').upper():
+                tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
+                tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
+                img = tf_img(img)
+                masks = tf(masks)
+                masks_visib = tf(masks_visib)
+                label = tf(label)
+
         elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
             tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
             tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
