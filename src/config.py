@@ -27,6 +27,8 @@ parser.add_argument('--use_flipping', type=str, default='True')
 parser.add_argument('--use_normal_resize', type=str, default='False')
 parser.add_argument('--scale_val', type=str, default='False')
 
+parser.add_argument('--train_size', type=int, default=512)
+
 args = parser.parse_args()
 
 ## W&B Logging (optional)
@@ -62,6 +64,8 @@ VAL_SIZE = args.val_size
 CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
 PLOT_TESTIMG = args.plot_testimg
+
+TRAIN_SIZE = args.train_size
 
 if DATASET == 'TLESS':
     NUMBER_TRAIN_IMAGES = 50000 # 50000 total

@@ -186,10 +186,10 @@ class TLESSDataset(torch.utils.data.Dataset):
                 img, masks, masks_visib, label = random_scaler(img.unsqueeze(0).float(), masks.unsqueeze(0).float(), masks_visib.unsqueeze(0).float(), label.unsqueeze(0).float())
 
                 # Pad image if it's too small after the random resize
-                if img.shape[1] < 512 or img.shape[2] < 512:
+                if img.shape[1] < config.TRAIN_SIZE or img.shape[2] < config.TRAIN_SIZE:
                     height, width = img.shape[1], img.shape[2]
-                    pad_height = max(512 - height, 0)
-                    pad_width = max(512 - width, 0)
+                    pad_height = max(config.TRAIN_SIZE - height, 0)
+                    pad_width = max(config.TRAIN_SIZE - width, 0)
                     pad_height_half = pad_height // 2
                     pad_width_half = pad_width // 2
 
@@ -209,7 +209,7 @@ class TLESSDataset(torch.utils.data.Dataset):
 
             # Random Crop
             if str(config.USE_CROPPING).upper()==str('True').upper():
-                i, j, h, w = transforms.RandomCrop(size=(512, 512)).get_params(img, output_size=(512, 512))
+                i, j, h, w = transforms.RandomCrop(size=(config.TRAIN_SIZE, config.TRAIN_SIZE)).get_params(img, output_size=(config.TRAIN_SIZE, config.TRAIN_SIZE))
                 img = TF.crop(img, i, j, h, w)
                 masks = TF.crop(masks, i, j, h, w)
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
@@ -217,8 +217,8 @@ class TLESSDataset(torch.utils.data.Dataset):
                 
             # Normal resize
             if str(config.USE_NORMAL_RESIZE).upper()==str('True').upper():
-                tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
-                tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
+                tf_img = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.BILINEAR)
+                tf = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.NEAREST)
                 img = tf_img(img)
                 masks = tf(masks)
                 masks_visib = tf(masks_visib)
