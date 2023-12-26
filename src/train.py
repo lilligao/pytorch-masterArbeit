@@ -42,7 +42,9 @@ if __name__ == '__main__':
         ],
         log_every_n_steps=1,
         max_time={"days": 1, "hours": 23},
-        gradient_clip_val=0.5
+        gradient_clip_val=config.GRADIENT_CLIP, # try other values!!!
+        gradient_clip_algorithm=str(config.GRADIENT_CLIP_ALGORITHM),
+        accumulate_grad_batches=config.ACCUMULATE_GRAD_BATCHES
     )
     if config.LOAD_CHECKPOINTS is not None:
         trainer.fit(model, data_module,ckpt_path=config.LOAD_CHECKPOINTS) #ckpt_path = './checkpoints/name.clkpt'

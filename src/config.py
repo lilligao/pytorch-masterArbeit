@@ -29,6 +29,10 @@ parser.add_argument('--scale_val', type=str, default='False')
 
 parser.add_argument('--train_size', type=int, default=512)
 
+parser.add_argument('--gradient_clip', type=float, default=0.5)
+parser.add_argument('--gradient_clip_algorithm', type=str, default='norm')
+parser.add_argument('--accumulate_grad_batches', type=int, default=1)
+
 args = parser.parse_args()
 
 ## W&B Logging (optional)
@@ -66,6 +70,10 @@ LOAD_CHECKPOINTS = args.load_checkpoints
 PLOT_TESTIMG = args.plot_testimg
 
 TRAIN_SIZE = args.train_size
+
+GRADIENT_CLIP =args.gradient_clip
+GRADIENT_CLIP_ALGORITHM = args.gradient_clip_algorithm
+ACCUMULATE_GRAD_BATCHES = args.accumulate_grad_batches
 
 if DATASET == 'TLESS':
     NUMBER_TRAIN_IMAGES = 50000 # 50000 total
