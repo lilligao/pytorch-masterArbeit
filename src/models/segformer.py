@@ -24,11 +24,11 @@ class SegFormer(L.LightningModule):
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
-        self.train_map = MeanAveragePrecision(iou_type="segm")
+        #self.train_map = MeanAveragePrecision(iou_type="segm")
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.val_map = MeanAveragePrecision(iou_type="segm")
+        #self.val_map = MeanAveragePrecision(iou_type="segm")
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_map = MeanAveragePrecision(iou_type="segm")
+        #self.test_map = MeanAveragePrecision(iou_type="segm")
         
 
 
@@ -46,13 +46,13 @@ class SegFormer(L.LightningModule):
         preds = torch.softmax(upsampled_logits, dim=1)
 
         self.train_iou(preds, target)
-        self.train_map.update(preds, target)
+        #self.train_map.update(preds, target)
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
         # !!! Metriken!!!
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
     
@@ -72,12 +72,12 @@ class SegFormer(L.LightningModule):
         preds = torch.softmax(upsampled_logits, dim=1)
 
         self.val_iou(preds, target)
-        self.val_map.update(preds, target)
+        #self.val_map.update(preds, target)
 
         # on epoche = True
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
     
 
     def test_step(self, batch, batch_idx):
@@ -94,11 +94,11 @@ class SegFormer(L.LightningModule):
         preds = torch.softmax(upsampled_logits, dim=1)
 
         self.test_iou(preds, target)
-        self.test_map.update(preds, target)
+        #self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
 
         ua = str("true").upper()
