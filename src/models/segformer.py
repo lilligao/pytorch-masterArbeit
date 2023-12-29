@@ -3,6 +3,7 @@ import math
 import lightning as L
 import torch
 import torchmetrics
+from torchmetrics.detection import MeanAveragePrecision
 from transformers import SegformerForSemanticSegmentation, SegformerConfig
 
 import config
@@ -23,8 +24,12 @@ class SegFormer(L.LightningModule):
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
+        self.train_map = MeanAveragePrecision(iou_type="segm")
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) 
+        self.val_map = MeanAveragePrecision(iou_type="segm")
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_map = MeanAveragePrecision(iou_type="segm")
+        
 
 
     def training_step(self, batch, batch_index):
@@ -34,26 +39,20 @@ class SegFormer(L.LightningModule):
         #print("train image shape",images.shape)
         #print("train label shape",labels.shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
-        loss, logits = self.model(images, labels.squeeze(dim=1))
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target)
         
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
 
-        self.train_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
+        self.train_iou(preds, target)
+        self.train_map.update(preds, target)
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
         # !!! Metriken!!!
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
-        # wandb.log({'batch': batch_index, 'loss': 0.3}) for log on step
-        # gpu
-        epoch = self.current_epoch
-        step = self.global_step
-        # wandb.log({'epoch': epoch, 'val_acc': 0.94}) for log on epoche
-
-        if wandb.run is not None:
-            wandb.log({'step': step, "train_loss_step": loss}) 
-            wandb.log({'step': step,"train_iou_step": self.train_iou})
+        self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
     
@@ -66,22 +65,19 @@ class SegFormer(L.LightningModule):
         #print("validation label shape",labels.shape)
         #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
-        loss, logits = self.model(images, labels.squeeze(dim=1)) # squeeze dim = 1 because labels size [4, 1, 540, 720]
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
 
-        self.val_iou(torch.softmax(upsampled_logits, dim=1), labels.squeeze(dim=1))
+        self.val_iou(preds, target)
+        self.val_map.update(preds, target)
 
         # on epoche = True
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
-        epoch = self.current_epoch
-        step = self.global_step
-        if wandb.run is not None:
-            wandb.log({'step': step, "val_loss_step": loss}) 
-            wandb.log({'step': step,"val_iou_step": self.val_iou})
-
+        self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
     
 
     def test_step(self, batch, batch_idx):
@@ -91,21 +87,23 @@ class SegFormer(L.LightningModule):
         print("test image shape",images.shape)
         print("test label shape",labels.shape)
 
-        loss, logits = self.model(images, labels.squeeze(dim=1))
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target)
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
 
-        pred_classes = torch.softmax(upsampled_logits, dim=1)
-
-        self.test_iou(pred_classes, labels.squeeze(dim=1))
+        self.test_iou(preds, target)
+        self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
 
         ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
-            mask_data_tensor = torch.argmax(pred_classes, dim=1).squeeze(0).cpu() # the maximum element
+            mask_data_tensor = torch.argmax(preds, dim=1).squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
             mask_data_label = mask_data_label_tensor.numpy()
