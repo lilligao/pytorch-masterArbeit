@@ -96,11 +96,11 @@ class TLESSDataModule(L.LightningDataModule):
 
         targets = []
         imgs = []
-        print("type of batch: ", type(batch))
-        print("length of batch: ", len(batch))
         for sample in batch:
             imgs.append(sample[0])
             targets.append(sample[1]["label"])
+            print("imgs: ", sample[0])
+            print("targets: ", sample[1]["label"])
         return torch.stack(imgs), torch.stack(targets)
        
 

@@ -37,7 +37,7 @@ class SegFormer(L.LightningModule):
         images, labels = batch
 
         print("train image shape",images.shape)
-        print("train label shape",labels["label"].shape)
+        print("train label shape",labels.shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
