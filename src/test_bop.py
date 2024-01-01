@@ -57,7 +57,7 @@ if __name__ == '__main__':
     for i in range(num_imgs):
         img, target = dataset[i]
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        img, target_img_mask = img.to(device), target["masks_visib"].to(device)
+        img = img.to(device)
         img = img.unsqueeze(0)
         #loss, logits = self.model(images, labels.squeeze(dim=1))
         # method took to segment all objects in the image
@@ -91,10 +91,10 @@ if __name__ == '__main__':
 
             test_iou = BinaryJaccardIndex()
             if j in target_obj:
-                target_mask = target_img_mask[idx,:,:]==255
+                target_mask =  target["masks_visib"][idx,:,:]==255
                 idx += 1
             else: # if something detected which is not in target, create a mask with all False
-                target_mask = target_img_mask[1,:,:]==999
+                target_mask =  target["masks_visib"][1,:,:]==999
             
             score = test_iou(mask_visible, target_mask).item()
 
