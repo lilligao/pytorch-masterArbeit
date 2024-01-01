@@ -114,7 +114,8 @@ if __name__ == '__main__':
 
     # convert into json
     # file name is mydata
-    with open("./outputs/segformerb5_tless-bopdataset.json", "w") as final:
+    file_name = "./outputs/" + config.RUN_NAME + "_tless-test.json"
+    with open(file_name, "w") as final:
         json.dump(results, final, indent=2)
 
 
