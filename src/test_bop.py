@@ -89,7 +89,7 @@ if __name__ == '__main__':
             # plt.savefig('data/tless/label_img_test_'+str(i)+'_'+str(j)+'.png')
             # plt.close()
 
-            test_iou = BinaryJaccardIndex()
+            test_iou = BinaryJaccardIndex().to(device)
             if j in target_obj:
                 target_mask =  target["masks_visib"][idx,:,:]==255
                 idx += 1
