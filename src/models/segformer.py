@@ -39,7 +39,7 @@ class SegFormer(L.LightningModule):
         print("train image shape",images.shape)
         print("train label shape",labels["label"].shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
-        target = labels["label"].squeeze(dim=1)
+        target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
         
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
@@ -65,7 +65,7 @@ class SegFormer(L.LightningModule):
         #print("validation label shape",labels.shape)
         #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
-        target = labels["label"].squeeze(dim=1)
+        target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
@@ -87,7 +87,7 @@ class SegFormer(L.LightningModule):
         print("test image shape",images.shape)
         print("test label shape",labels.shape)
 
-        target = labels["label"].squeeze(dim=1)
+        target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
