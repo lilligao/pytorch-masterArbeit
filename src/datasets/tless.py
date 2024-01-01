@@ -237,11 +237,11 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)
         target["masks"] = masks
         target["masks_visib"] = masks_visib
-        target["scene_id"] = torch.tensor([int(scene_id)])
-        target["image_id"] = torch.tensor([int(im_id)])
+        target["scene_id"] = int(scene_id)
+        target["image_id"] = int(im_id)
         target["label"] = label # masken Bild
         
-        return img, target["label"]  #target["label"]
+        return img, target  #target["label"]
     
     
 class RandResize(object):
