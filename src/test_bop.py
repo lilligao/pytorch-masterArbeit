@@ -6,7 +6,7 @@ import time
 from itertools import groupby
 import json
 from torchmetrics.classification import BinaryJaccardIndex
-
+import config
 
 def binary_mask_to_rle(binary_mask):
     rle = {'counts': [], 'size': list(binary_mask.shape)}
@@ -35,10 +35,10 @@ def get_bbox(binary_mask):
     return [x_min, y_min, x_max-x_min, y_max-y_min]
 
 if __name__ == '__main__':
-    # assert(config.LOAD_CHECKPOINTS!=None)
-    # path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
-    # model = SegFormer.load_from_checkpoint(path)
-    model = SegFormer.load_from_checkpoint("./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=107-val_loss=0.14-val_iou=0.76.ckpt")
+    assert(config.LOAD_CHECKPOINTS!=None)
+    path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
+    model = SegFormer.load_from_checkpoint(path)
+    #model = SegFormer.load_from_checkpoint("./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=107-val_loss=0.14-val_iou=0.76.ckpt")
     model= model.model
     if torch.cuda.is_available():
         model.cuda()
