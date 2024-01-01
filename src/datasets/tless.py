@@ -84,10 +84,10 @@ class TLESSDataModule(L.LightningDataModule):
         print("number of training images:", NUMBER_TRAIN_IMAGES)
         
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False)
     
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
+        return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False)
     
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False) #, collate_fn=self.collate_fn
