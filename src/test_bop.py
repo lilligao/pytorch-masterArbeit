@@ -47,6 +47,8 @@ if __name__ == '__main__':
     # model = SegFormer.load_from_checkpoint(path)
     model = SegFormer.load_from_checkpoint("./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=107-val_loss=0.14-val_iou=0.76.ckpt")
     model= model.model
+    if torch.cuda.is_available():
+        model.cuda()
     dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test")
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
