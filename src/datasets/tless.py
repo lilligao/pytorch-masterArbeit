@@ -90,17 +90,14 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
+        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False) #, collate_fn=self.collate_fn
     
     def collate_fn(self, batch):
-
         targets = []
         imgs = []
         for sample in batch:
             imgs.append(sample[0])
             targets.append(sample[1]["label"])
-            print("imgs: ", sample[0])
-            print("targets: ", sample[1]["label"])
         return torch.stack(imgs), torch.stack(targets)
        
 
@@ -253,7 +250,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["image_id"] = int(im_id)
         target["label"] = label # masken Bild
         
-        return img, target  #target["label"]
+        return img, target["label"]  #target["label"]
     
     
 class RandResize(object):
