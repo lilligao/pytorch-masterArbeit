@@ -36,8 +36,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch # if masks / masks visible are also in outpus
         images, labels = batch
 
-        #print("train image shape",images.shape)
-        #print("train label shape",labels.shape)
+        print("train image shape",images.shape)
+        print("train label shape",labels["label"].shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
         target = labels["label"].squeeze(dim=1)
         loss, logits = self.model(images, target)
