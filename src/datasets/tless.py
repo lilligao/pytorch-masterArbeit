@@ -98,12 +98,6 @@ class TLESSDataModule(L.LightningDataModule):
         for sample in batch:
             imgs.append(sample[0])
             targets.append(sample[1]["label"])
-            print("sample[2]:", sample[2])
-            print("sample[3]:", sample[3])
-            print("sample[4]:", sample[4])
-            print("sample[5]:", sample[5])
-            print("sample[6]:", sample[6])
-            print("sample[7]:", sample[7])
         return torch.stack(imgs), torch.stack(targets)
        
 
