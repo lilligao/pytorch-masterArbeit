@@ -81,7 +81,7 @@ if __name__ == '__main__':
         for j in detected_obj:
 
             mask_visible = preds==j
-            fortran_mask = np.asfortranarray(mask_visible)
+            fortran_mask = np.asfortranarray(mask_visible.cpu())
             rle = binary_mask_to_rle(fortran_mask)
 
             bbox = get_bbox(mask_visible)
