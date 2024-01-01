@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print("length of num imgs",num_imgs)
     
     results = []
-    for i in range(num_imgs):
+    for i in range(2):
         img, target = dataset[i]
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = img.to(device)
