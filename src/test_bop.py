@@ -1,18 +1,11 @@
-import lightning as L
 from datasets.tless import TLESSDataset
 import numpy as np
-import matplotlib.pyplot as plt
-import config
 from models.segformer import SegFormer
-from torch.utils.data import DataLoader
-import train
 import torch
 import time
 from itertools import groupby
 import json
-import torchmetrics
 from torchmetrics.classification import BinaryJaccardIndex
-from torch import tensor
 
 
 def binary_mask_to_rle(binary_mask):
