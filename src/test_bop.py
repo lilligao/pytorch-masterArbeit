@@ -54,7 +54,7 @@ if __name__ == '__main__':
     print("length of num imgs",num_imgs)
     
     results = []
-    for i in range(num_imgs):
+    for i in range(2):
         img, target = dataset[i]
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = img.to(device)
@@ -68,7 +68,9 @@ if __name__ == '__main__':
         # interpolate output of model
         preds = torch.nn.functional.interpolate(preds, size=img.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(preds, dim=1) # normalize and calculating the possibility
-        preds = torch.argmax(preds, dim=1).squeeze(0) # delete the first dimension
+        scores, preds = torch.max(preds, dim=1)# delete the first dimension
+        preds = preds.squeeze(0) 
+        scores = scores.squeeze(0)
 
         # all detected objects without background
         detected_obj = torch.unique(preds).tolist()
@@ -82,6 +84,7 @@ if __name__ == '__main__':
 
             mask_visible = preds==j
             mask_visible = mask_visible.cpu()
+            scores = scores.cpu()
             fortran_mask = np.asfortranarray(mask_visible)
             rle = binary_mask_to_rle(fortran_mask)
 
@@ -97,13 +100,15 @@ if __name__ == '__main__':
             else: # if something detected which is not in target, create a mask with all False
                 target_mask =  target["masks_visib"][1,:,:]==999
             
-            score = test_iou(mask_visible, target_mask).item()
+            iou = test_iou(mask_visible, target_mask).item()
+            score = torch.mean(scores[mask_visible]).item()
 
             result_i = {}
             result_i["scene_id"] = target["scene_id"]
             result_i["image_id"] = target["image_id"]
             result_i["category_id"] = j
             result_i["score"] = score
+            result_i["iou"] = iou
             result_i["bbox"] = bbox
             result_i["segmentation"] = rle
             result_i["time"] = time_pred
