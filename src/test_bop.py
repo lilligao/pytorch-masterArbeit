@@ -84,7 +84,7 @@ if __name__ == '__main__':
             fortran_mask = np.asfortranarray(mask_visible.cpu())
             rle = binary_mask_to_rle(fortran_mask)
 
-            bbox = get_bbox(mask_visible)
+            bbox = get_bbox(mask_visible.cpu())
             # plt.imshow(mask_visible)
             # plt.savefig('data/tless/label_img_test_'+str(i)+'_'+str(j)+'.png')
             # plt.close()
@@ -109,8 +109,7 @@ if __name__ == '__main__':
 
             results.append(result_i)
             
-        print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done")
-
+        print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done, time: " + str(time_pred))
         del preds
     
 
