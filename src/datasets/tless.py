@@ -92,13 +92,13 @@ class TLESSDataModule(L.LightningDataModule):
     def test_dataloader(self):
         return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False) #, collate_fn=self.collate_fn
     
-    def collate_fn(self, batch):
-        targets = []
-        imgs = []
-        for sample in batch:
-            imgs.append(sample[0])
-            targets.append(sample[1]["label"])
-        return torch.stack(imgs), torch.stack(targets)
+    # def collate_fn(self, batch):
+    #     targets = []
+    #     imgs = []
+    #     for sample in batch:
+    #         imgs.append(sample[0])
+    #         targets.append(sample[1]["label"])
+    #     return torch.stack(imgs), torch.stack(targets)
        
 
 
