@@ -50,7 +50,7 @@ class SegFormer(L.LightningModule):
 
         
         print("preds shape",preds.shape)
-        print("target shape",preds.shape)
+        print("target shape",target.shape)
         self.train_iou(preds, target)
         self.train_ap(preds,target)
         #self.train_map.update(preds, target)
