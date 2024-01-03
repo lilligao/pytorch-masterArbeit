@@ -29,7 +29,6 @@ class SegFormer(L.LightningModule):
         # metrics for validation
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        self.val_map = MeanAveragePrecision(iou_type="segm")
         # metrics for testing
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
@@ -87,6 +86,30 @@ class SegFormer(L.LightningModule):
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+     
+    
+
+    def test_step(self, batch, batch_idx):
+        #images, _, labels = batch
+        images, labels = batch
+
+        print("test image shape",images.shape)
+        print("test label shape",labels.shape)
+
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target)
+    
+        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
+
+        self.test_iou(preds, target)
+        self.test_ap(preds, target)
+        #self.test_map.update(preds, target)
+
+        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
@@ -154,40 +177,7 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
-        self.val_map.update(preds=preds_map, target=targets_map)
-
-        
-    def on_validation_epoch_end(self):
-        print(self.val_map.device)
-        mAPs =  {"val_" + k: v for k, v in self.val_map.compute().items()} #.to(self.device)
-        
-        self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.val_map.reset()
-        
-    
-
-    def test_step(self, batch, batch_idx):
-        #images, _, labels = batch
-        images, labels = batch
-
-        print("test image shape",images.shape)
-        print("test label shape",labels.shape)
-
-        target = labels.squeeze(dim=1)
-        loss, logits = self.model(images, target)
-    
-        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(upsampled_logits, dim=1)
-
-        self.test_iou(preds, target)
-        self.test_ap(preds, target)
-        #self.test_map.update(preds, target)
-
-        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        #self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
+        self.test_map.update(preds=preds_map, target=targets_map)       
 
         ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
@@ -207,6 +197,11 @@ class SegFormer(L.LightningModule):
                 # log images to W&B
                 wandb.log({"predictions" : mask_img})
 
+    def on_test_epoch_end(self):
+        mAPs =  {"val_" + k: v for k, v in self.test_map.compute().items()} #.to(self.device)
+        self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.test_map.reset()
+    
     
     def configure_optimizers(self):
         # optimizer wird fuer jede Step gemacht, einmal über die Datensatz
