@@ -39,8 +39,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch # if masks / masks visible are also in outpus
         images, labels = batch
 
-        print("train image shape",images.shape)
-        print("train label shape",labels.shape)
+        # print("train image shape",images.shape)
+        # print("train label shape",labels.shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
@@ -48,17 +48,15 @@ class SegFormer(L.LightningModule):
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
 
-        
-        print("preds shape",preds.shape)
-        print("target shape",target.shape)
         self.train_iou(preds, target)
-        self.train_ap(preds,target)
+        self.train_ap(preds, target)
         #self.train_map.update(preds, target)
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
         # !!! Metriken!!!
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_ap', self.train_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
@@ -79,11 +77,13 @@ class SegFormer(L.LightningModule):
         preds = torch.softmax(upsampled_logits, dim=1)
 
         self.val_iou(preds, target)
+        self.val_ap(preds, target)
         #self.val_map.update(preds, target)
 
         # on epoche = True
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
     
 
@@ -101,10 +101,12 @@ class SegFormer(L.LightningModule):
         preds = torch.softmax(upsampled_logits, dim=1)
 
         self.test_iou(preds, target)
+        self.test_ap(preds, target)
         #self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('test_mAP', self.test_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
 
