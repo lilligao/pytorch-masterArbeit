@@ -104,6 +104,8 @@ class SegFormer(L.LightningModule):
                         labels=torch.tensor([j]),
                     )
                 )
+        print("preds map", preds_map)
+        print("targets map", targets_map)
 
 
         # for i in range(batch_size):
