@@ -143,9 +143,6 @@ class SegFormer(L.LightningModule):
         #         )
         #     )
        
-    
-        print(preds_map)
-        print(targets_map)
         self.train_map.update(preds=preds_map, target=targets_map)
 
         return loss
