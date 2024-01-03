@@ -24,12 +24,15 @@ class SegFormer(L.LightningModule):
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
+        self.train_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         #self.train_map = MeanAveragePrecision(iou_type="segm")
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         #self.val_map = MeanAveragePrecision(iou_type="segm")
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         #self.test_map = MeanAveragePrecision(iou_type="segm")
-        
+         
 
 
     def training_step(self, batch, batch_index):
@@ -45,7 +48,11 @@ class SegFormer(L.LightningModule):
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
 
+        
+        print("preds shape",preds.shape)
+        print("target shape",preds.shape)
         self.train_iou(preds, target)
+        self.train_ap(preds,target)
         #self.train_map.update(preds, target)
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
