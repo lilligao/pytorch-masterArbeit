@@ -26,7 +26,6 @@ class SegFormer(L.LightningModule):
         # metrics for training
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
         self.train_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        self.train_map = MeanAveragePrecision(iou_type="segm")
         # metrics for validation
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
@@ -61,6 +60,33 @@ class SegFormer(L.LightningModule):
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_ap', self.train_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+        return loss
+    
+
+    def validation_step(self, batch, batch_index):
+        #images, _, labels = batch
+        images, labels = batch
+
+        #print("validation image shape",images.shape)
+        #print("validation label shape",labels.shape)
+        #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
+
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
+    
+        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
+
+        self.val_iou(preds, target)
+        self.val_ap(preds, target)
+        #self.val_map.update(preds, target)
+
+        # on epoche = True
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
@@ -131,49 +157,18 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
-
-        # for i in range(batch_size):
-        #     mask_tgt = target["masks_visib"][p,:,:]==255
-        #     mask_tgt = mask_tgt.unsqueeze(0)
-        #     #print("mask_tgt.shape", mask_tgt.shape)
-        #     targets_map.append(
-        #         dict(
-        #             masks=mask_tgt,
-        #             labels=tensor([target_obj[p]]),
-        #         )
-        #     )
-       
-        self.train_map.update(preds=preds_map, target=targets_map)
-
-        return loss
-    
-
-    def validation_step(self, batch, batch_index):
-        #images, _, labels = batch
-        images, labels = batch
-
-        #print("validation image shape",images.shape)
-        #print("validation label shape",labels.shape)
-        #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
-
-        target = labels.squeeze(dim=1)
-        loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
-    
-        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(upsampled_logits, dim=1)
-
-        self.val_iou(preds, target)
-        self.val_ap(preds, target)
-        #self.val_map.update(preds, target)
-
-        # on epoche = True
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.val_map.update(preds=preds_map, target=targets_map)
 
         
-
+    def validation_epoch_end(self, validation_step_outputs):
+        mAPs = {"val_" + k: v for k, v in self.val_map.compute().items()}
+        self.print(mAPs)
+        mAPs.pop("val_map_per_class")
+        mAPs.pop("val_mar_100_per_class")
+        mAPs.pop("map_small")
+        
+        self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.val_map.reset()
         
     
 
