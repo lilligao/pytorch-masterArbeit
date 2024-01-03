@@ -90,8 +90,9 @@ if __name__ == '__main__':
             for i in range(batch_size):
                 mask_tgt = target["masks_visib"][p,:,:]==255
                 #print("mask_tgt.shape", target["masks_visib"][p,:,:].shape)
-                #print("mask_tgt.shape", mask_tgt.shape)
-                mask_tgt = mask_tgt.unsqueeze(0)
+                print("mask_tgt.shape", mask_tgt.unsqueeze(0).shape)
+                mask_tgt = (target["masks_visib"][p,:,:]==255).unsqueeze(0)
+                print("mask_tgt.shape", mask_tgt.shape)
                 #print("mask_tgt.shape", mask_tgt.shape)
                 targets_map.append(
                     dict(

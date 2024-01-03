@@ -33,6 +33,7 @@ class SegFormer(L.LightningModule):
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         self.test_map = MeanAveragePrecision(iou_type="segm")
+        self.test_map.compute_with_cache = False
          
 
 
