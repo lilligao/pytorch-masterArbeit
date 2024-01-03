@@ -93,16 +93,14 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("test image shape",images.shape)
-        print("test label shape",labels.shape)
+        # print("test image shape",images.shape)
+        # print("test label shape",labels.shape)
 
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
     
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
-
-        print("softmax shape",preds.shape)
 
         self.test_iou(preds, target)
         self.test_ap(preds, target)
@@ -115,8 +113,6 @@ class SegFormer(L.LightningModule):
 
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
-        print("max shape",preds.shape)
-        print("score shape",scores.shape)
 
         batch_size = preds.shape[0]
 
@@ -211,7 +207,5 @@ class SegFormer(L.LightningModule):
         iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
         #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
-        print("iterations per epoche", iterations_per_epoch)
-        print("total iterations", total_iterations)
         scheduler = PolyLR(self.optimizer, max_iterations=total_iterations, power=1.0)
         return [self.optimizer], [{'scheduler': scheduler, 'interval': 'step'}]
