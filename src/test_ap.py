@@ -72,6 +72,10 @@ if __name__ == '__main__':
         preds = preds.squeeze(0) 
         scores = scores.squeeze(0)
 
+        #print("preds.shape", preds.shape)
+        #print("mask_visible.shape",mask_visible.unsqueeze(0).shape)
+        #print("scores shape",scores.shape)
+
         # all detected objects without background
         detected_obj = torch.unique(preds).tolist()
         detected_obj.remove(0)
@@ -85,6 +89,8 @@ if __name__ == '__main__':
         for p in range(len(target_obj)):
             for i in range(batch_size):
                 mask_tgt = target["masks_visib"][p,:,:]==255
+                #print("mask_tgt.shape", target["masks_visib"][p,:,:].shape)
+                #print("mask_tgt.shape", mask_tgt.shape)
                 mask_tgt = mask_tgt.unsqueeze(0)
                 #print("mask_tgt.shape", mask_tgt.shape)
                 targets_map.append(
@@ -129,7 +135,6 @@ if __name__ == '__main__':
             for i in range(batch_size):
                 # detections: detection results in a tensor with shape [max_det_per_image, 6],
                 #  each row representing [x_min, y_min, x_max, y_max, score, class]
-                labels = j
                 # non_zero_indices retrieval adds extra dimension into dim=1
                 #  so needs to squeeze it out
                 preds_map.append(
