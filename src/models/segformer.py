@@ -73,34 +73,64 @@ class SegFormer(L.LightningModule):
         targets_map = []
 
         for i in range(batch_size):
+            # predictions
             preds_i = preds[i,:,:]
             scores_i = scores[i,:,:]
             detected_obj = torch.unique(preds_i).tolist()
-            detected_obj.remove(0)
+
+            # targets
+            target_i = target[i,:,:]
+            target_obj = torch.unique(target_i).tolist()
+
+            print("pred obj ids", detected_obj)
+            print("target obj ids", target_obj)
 
             for j in detected_obj:
-                mask_visible = preds_i==j
-                score = torch.mean(scores_i[mask_visible]).item()
+                mask_pred = preds_i==j
+                score = torch.mean(scores_i[mask_pred]).item()
                 preds_map.append(
                     dict(
-                        masks=mask_visible.unsqueeze(0),
+                        masks=mask_pred.unsqueeze(0),
                         scores=torch.tensor([score]),
                         labels=torch.tensor([j]),
                     )
                 )
-        for i in range(batch_size):
-            target_i = target[i,:,:]
-            target_obj = torch.unique(target_i).tolist()
-            target_obj.remove(0)
+                if j in target_obj:
+                    mask_tgt = target_i==j
+                    targets_map.append(
+                        dict(
+                            masks=mask_tgt.unsqueeze(0),
+                            labels=torch.tensor([j]),
+                        )
+                    )
+                else: # if something detected which is not in target, create a mask with all False
+                    mask_tgt =  target_i==999
+                    targets_map.append(
+                        dict(
+                            masks=mask_tgt.unsqueeze(0),
+                            labels=torch.tensor([0]),
+                        )
+                    )
 
             for j in target_obj:
-                mask_tgt = target_i==j
-                targets_map.append(
-                    dict(
-                        masks=mask_tgt.unsqueeze(0),
-                        labels=torch.tensor([j]),
+                if j not in detected_obj:
+                    mask_tgt = target_i==j
+                    targets_map.append(
+                        dict(
+                            masks=mask_tgt.unsqueeze(0),
+                            labels=torch.tensor([j]),
+                        )
                     )
-                )
+
+                    mask_pred = preds_i==999
+                    score = torch.mean(scores_i[mask_pred]).item()
+                    preds_map.append(
+                        dict(
+                            masks=mask_pred.unsqueeze(0),
+                            scores=torch.tensor([score]),
+                            labels=torch.tensor([0]),
+                        )
+                    )
 
         # for i in range(batch_size):
         #     mask_tgt = target["masks_visib"][p,:,:]==255
@@ -114,6 +144,8 @@ class SegFormer(L.LightningModule):
         #     )
        
     
+        print(preds_map)
+        print(targets_map)
         self.train_map.update(preds=preds_map, target=targets_map)
 
         return loss
