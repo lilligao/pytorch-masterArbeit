@@ -158,9 +158,8 @@ class SegFormer(L.LightningModule):
 
         
     def on_validation_epoch_end(self):
-        print(self.device)
         self.val_map.to(self.device)
-        mAPs = self.val_map.compute()
+        mAPs =  {"val_" + k: v for k, v in self.val_map.compute().items()}
         
         self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.val_map.reset()
