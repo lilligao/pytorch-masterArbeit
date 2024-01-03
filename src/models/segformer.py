@@ -23,15 +23,17 @@ class SegFormer(L.LightningModule):
             {'params': self.model.decode_head.parameters(), 'lr': config.LEARNING_RATE_FACTOR * config.LEARNING_RATE},
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
+        # metrics for training
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
         self.train_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        #self.train_map = MeanAveragePrecision(iou_type="segm")
+        # metrics for validation
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        #self.val_map = MeanAveragePrecision(iou_type="segm")
+        self.val_map = MeanAveragePrecision(iou_type="segm")
+        # metrics for testing
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        #self.test_map = MeanAveragePrecision(iou_type="segm")
+        self.test_map = MeanAveragePrecision(iou_type="segm")
          
 
 
@@ -85,6 +87,46 @@ class SegFormer(L.LightningModule):
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+        scores, preds = torch.max(preds, dim=1)# delete the first dimension
+        preds = preds.squeeze(0) 
+        scores = scores.squeeze(0)
+
+        print("preds shape", preds.shape)
+        print("scores shape", scores.shape)
+
+        # mean Average precision
+        targets_map = []
+        batch_size = preds.shape[0]
+
+        # for i in range(batch_size):
+
+
+        # for i in range(batch_size):
+        #     mask_tgt = target["masks_visib"][p,:,:]==255
+        #     mask_tgt = mask_tgt.unsqueeze(0)
+        #     #print("mask_tgt.shape", mask_tgt.shape)
+        #     targets_map.append(
+        #         dict(
+        #             masks=mask_tgt,
+        #             labels=tensor([target_obj[p]]),
+        #         )
+        #     )
+        # preds_map = []
+        # for i in range(batch_size):
+        #     # detections: detection results in a tensor with shape [max_det_per_image, 6],
+        #     #  each row representing [x_min, y_min, x_max, y_max, score, class]
+        #     labels = j
+        #     # non_zero_indices retrieval adds extra dimension into dim=1
+        #     #  so needs to squeeze it out
+        #     preds_map.append(
+        #         dict(
+        #             masks=mask_visible.unsqueeze(0),
+        #             scores=tensor([score]),
+        #             labels=tensor([j]),
+        #         )
+        #     )
+        # self.val_ap.update(preds=preds_map, target=targets_map)
     
 
     def test_step(self, batch, batch_idx):
