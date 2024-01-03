@@ -102,6 +102,8 @@ class SegFormer(L.LightningModule):
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
 
+        print("softmax shape",preds.shape)
+
         self.test_iou(preds, target)
         self.test_ap(preds, target)
         #self.test_map.update(preds, target)
@@ -113,8 +115,10 @@ class SegFormer(L.LightningModule):
 
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
+        print("max shape",preds.shape)
         preds = preds.squeeze(0) 
         scores = scores.squeeze(0)
+        print("max squeezed shape",preds.shape)
 
         batch_size = preds.shape[0]
 
