@@ -121,56 +121,48 @@ class SegFormer(L.LightningModule):
 
         for i in range(batch_size):
             # predictions
-            preds_i = preds[i,:,:]
-            scores_i = scores[i,:,:]
-            detected_obj = torch.unique(preds_i).tolist()
+            detected_obj = torch.unique(preds[i,:,:]).tolist()
 
             # targets
-            target_i = target[i,:,:]
-            target_obj = torch.unique(target_i).tolist()
+            target_obj = torch.unique(target[i,:,:]).tolist()
 
             for j in detected_obj:
-                mask_pred = preds_i==j
-                score = torch.mean(scores_i[mask_pred]).item()
+                score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
                 preds_map.append(
                     dict(
-                        masks=mask_pred.unsqueeze(0),
+                        masks = preds[i,:,:]==j.unsqueeze(0),
                         scores=torch.tensor([score]),
                         labels=torch.tensor([j]),
                     )
                 )
                 if j in target_obj:
-                    mask_tgt = target_i==j
                     targets_map.append(
                         dict(
-                            masks=mask_tgt.unsqueeze(0),
+                            masks = (target[i,:,:]==j).unsqueeze(0),
                             labels=torch.tensor([j]),
                         )
                     )
                 else: # if something detected which is not in target, create a mask with all False
-                    mask_tgt =  target_i==999
                     targets_map.append(
                         dict(
-                            masks=mask_tgt.unsqueeze(0),
+                            masks = (target[i,:,:]==999).unsqueeze(0),
                             labels=torch.tensor([0]),
                         )
                     )
 
             for j in target_obj:
                 if j not in detected_obj:
-                    mask_tgt = target_i==j
                     targets_map.append(
                         dict(
-                            masks=mask_tgt.unsqueeze(0),
+                            masks=(target[i,:,:]==j).unsqueeze(0),
                             labels=torch.tensor([j]),
                         )
                     )
 
-                    mask_pred = preds_i==999
-                    score = torch.mean(scores_i[mask_pred]).item()
+                    score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
                     preds_map.append(
                         dict(
-                            masks=mask_pred.unsqueeze(0),
+                            masks=(preds[i,:,:]==999).unsqueeze(0),
                             scores=torch.tensor([score]),
                             labels=torch.tensor([0]),
                         )
