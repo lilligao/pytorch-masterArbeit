@@ -67,9 +67,6 @@ class SegFormer(L.LightningModule):
         preds = preds.squeeze(0) 
         scores = scores.squeeze(0)
 
-        print("preds shape", preds.shape)
-        print("scores shape", scores.shape)
-
         batch_size = preds.shape[0]
 
         preds_map = []
@@ -104,9 +101,6 @@ class SegFormer(L.LightningModule):
                         labels=torch.tensor([j]),
                     )
                 )
-        print("preds map", preds_map)
-        print("targets map", targets_map)
-
 
         # for i in range(batch_size):
         #     mask_tgt = target["masks_visib"][p,:,:]==255
@@ -120,7 +114,7 @@ class SegFormer(L.LightningModule):
         #     )
        
     
-        self.train_ap.update(preds=preds_map, target=targets_map)
+        self.train_map.update(preds=preds_map, target=targets_map)
 
         return loss
     

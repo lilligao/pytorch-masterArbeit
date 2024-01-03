@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
             results.append(result_i)
             
-        #print(preds_map)
+        print(preds_map)
         metric_map.update(preds=preds_map, target=targets_map)
         pprint(metric_map.compute())
         print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done, time: " + str(time_pred))
