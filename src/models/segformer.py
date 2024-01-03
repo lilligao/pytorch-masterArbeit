@@ -116,9 +116,7 @@ class SegFormer(L.LightningModule):
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
         print("max shape",preds.shape)
-        preds = preds.squeeze(0) 
-        scores = scores.squeeze(0)
-        print("max squeezed shape",preds.shape)
+        print("score shape",scores.shape)
 
         batch_size = preds.shape[0]
 
@@ -185,7 +183,7 @@ class SegFormer(L.LightningModule):
 
         ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
-            mask_data_tensor = torch.argmax(preds, dim=1).squeeze(0).cpu() # the maximum element
+            mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
             mask_data_label = mask_data_label_tensor.numpy()
