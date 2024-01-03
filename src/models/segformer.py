@@ -98,7 +98,7 @@ class SegFormer(L.LightningModule):
 
             for j in target_obj:
                 mask_tgt = target_i==j
-                preds_map.append(
+                targets_map.append(
                     dict(
                         masks=mask_tgt.unsqueeze(0),
                         labels=torch.tensor([j]),
