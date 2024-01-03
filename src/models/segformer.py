@@ -108,9 +108,6 @@ class SegFormer(L.LightningModule):
             target_i = target[i,:,:]
             target_obj = torch.unique(target_i).tolist()
 
-            print("pred obj ids", detected_obj)
-            print("target obj ids", target_obj)
-
             for j in detected_obj:
                 mask_pred = preds_i==j
                 score = torch.mean(scores_i[mask_pred]).item()
@@ -161,11 +158,7 @@ class SegFormer(L.LightningModule):
 
         
     def on_validation_epoch_end(self):
-        mAPs = {"val_" + k: v for k, v in self.val_map.compute().items()}
-        self.print(mAPs)
-        mAPs.pop("val_map_per_class")
-        mAPs.pop("val_mar_100_per_class")
-        mAPs.pop("map_small")
+        mAPs = self.val_map.compute()
         
         self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.val_map.reset()
