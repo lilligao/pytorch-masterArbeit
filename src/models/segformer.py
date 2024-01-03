@@ -61,6 +61,16 @@ class SegFormer(L.LightningModule):
         self.log('train_ap', self.train_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
+        preds = preds.squeeze(0) 
+        scores = scores.squeeze(0)
+
+        print("preds shape", preds.shape)
+        print("scores shape", scores.shape)
+
+        # mean Average precision
+        targets_map = []
+        batch_size = preds.shape[0]
+
         return loss
     
 
