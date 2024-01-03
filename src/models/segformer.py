@@ -154,8 +154,8 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
-        self.val_map = self.val_map.to(self.device)
         self.val_map.update(preds=preds_map, target=targets_map)
+        self.val_map = self.val_map.to(self.device)
 
         
     def on_validation_epoch_end(self):
