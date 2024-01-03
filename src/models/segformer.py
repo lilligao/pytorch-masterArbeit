@@ -189,7 +189,7 @@ class SegFormer(L.LightningModule):
                 wandb.log({"predictions" : mask_img})
 
     def on_test_epoch_end(self):
-        mAPs =  {"val_" + k: v for k, v in self.test_map.compute().items()} #.to(self.device)
+        mAPs =  {"val_" + k: v for k, v in self.test_map.compute_on_cpu().items()} #.to(self.device)
         self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.test_map.reset()
     
