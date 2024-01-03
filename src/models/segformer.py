@@ -61,33 +61,6 @@ class SegFormer(L.LightningModule):
         self.log('train_ap', self.train_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        return loss
-    
-
-    def validation_step(self, batch, batch_index):
-        #images, _, labels = batch
-        images, labels = batch
-
-        #print("validation image shape",images.shape)
-        #print("validation label shape",labels.shape)
-        #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
-
-        target = labels.squeeze(dim=1)
-        loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
-    
-        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(upsampled_logits, dim=1)
-
-        self.val_iou(preds, target)
-        self.val_ap(preds, target)
-        #self.val_map.update(preds, target)
-
-        # on epoche = True
-        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
         preds = preds.squeeze(0) 
@@ -155,14 +128,111 @@ class SegFormer(L.LightningModule):
                         )
                     )
         self.val_map.update(preds=preds_map, target=targets_map)
-        return self.val_map
+        self.val_map.compute()
+       
+
+        return loss
+    
+
+    def validation_step(self, batch, batch_index):
+        #images, _, labels = batch
+        images, labels = batch
+
+        #print("validation image shape",images.shape)
+        #print("validation label shape",labels.shape)
+        #print('valid: ', torch.unique(labels.squeeze(dim=1)).tolist())
+
+        target = labels.squeeze(dim=1)
+        loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
+    
+        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
+
+        self.val_iou(preds, target)
+        self.val_ap(preds, target)
+        #self.val_map.update(preds, target)
+
+        # on epoche = True
+        self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+    #     # mean Average precision
+    #     scores, preds = torch.max(preds, dim=1)# delete the first dimension
+    #     preds = preds.squeeze(0) 
+    #     scores = scores.squeeze(0)
+
+    #     batch_size = preds.shape[0]
+
+    #     preds_map = []
+    #     targets_map = []
+
+    #     for i in range(batch_size):
+    #         # predictions
+    #         preds_i = preds[i,:,:]
+    #         scores_i = scores[i,:,:]
+    #         detected_obj = torch.unique(preds_i).tolist()
+
+    #         # targets
+    #         target_i = target[i,:,:]
+    #         target_obj = torch.unique(target_i).tolist()
+
+    #         for j in detected_obj:
+    #             mask_pred = preds_i==j
+    #             score = torch.mean(scores_i[mask_pred]).item()
+    #             preds_map.append(
+    #                 dict(
+    #                     masks=mask_pred.unsqueeze(0),
+    #                     scores=torch.tensor([score]),
+    #                     labels=torch.tensor([j]),
+    #                 )
+    #             )
+    #             if j in target_obj:
+    #                 mask_tgt = target_i==j
+    #                 targets_map.append(
+    #                     dict(
+    #                         masks=mask_tgt.unsqueeze(0),
+    #                         labels=torch.tensor([j]),
+    #                     )
+    #                 )
+    #             else: # if something detected which is not in target, create a mask with all False
+    #                 mask_tgt =  target_i==999
+    #                 targets_map.append(
+    #                     dict(
+    #                         masks=mask_tgt.unsqueeze(0),
+    #                         labels=torch.tensor([0]),
+    #                     )
+    #                 )
+
+    #         for j in target_obj:
+    #             if j not in detected_obj:
+    #                 mask_tgt = target_i==j
+    #                 targets_map.append(
+    #                     dict(
+    #                         masks=mask_tgt.unsqueeze(0),
+    #                         labels=torch.tensor([j]),
+    #                     )
+    #                 )
+
+    #                 mask_pred = preds_i==999
+    #                 score = torch.mean(scores_i[mask_pred]).item()
+    #                 preds_map.append(
+    #                     dict(
+    #                         masks=mask_pred.unsqueeze(0),
+    #                         scores=torch.tensor([score]),
+    #                         labels=torch.tensor([0]),
+    #                     )
+    #                 )
+    #     self.val_map.update(preds=preds_map, target=targets_map)
+    #     self.val_map = self.val_map.to(self.device)
 
         
-    def on_validation_epoch_end(self, output):
-        mAPs = output.compute()
+    # def on_validation_epoch_end(self):
+    #     mAPs = self.val_map.compute()
         
-        self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.val_map.reset()
+    #     self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+    #     self.val_map.reset()
         
     
 
