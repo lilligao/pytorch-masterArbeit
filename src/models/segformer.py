@@ -160,7 +160,7 @@ class SegFormer(L.LightningModule):
         self.val_map.update(preds=preds_map, target=targets_map)
 
         
-    def validation_epoch_end(self, validation_step_outputs):
+    def on_validation_epoch_end(self):
         mAPs = {"val_" + k: v for k, v in self.val_map.compute().items()}
         self.print(mAPs)
         mAPs.pop("val_map_per_class")
