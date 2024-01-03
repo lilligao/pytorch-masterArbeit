@@ -130,7 +130,7 @@ class SegFormer(L.LightningModule):
                 score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
                 preds_map.append(
                     dict(
-                        masks = preds[i,:,:]==j.unsqueeze(0),
+                        masks = (preds[i,:,:]==j).unsqueeze(0),
                         scores=torch.tensor([score]),
                         labels=torch.tensor([j]),
                     )
