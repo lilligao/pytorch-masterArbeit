@@ -210,7 +210,7 @@ class SegFormer(L.LightningModule):
             mAPs.pop("classes")
             mAPs.pop("map_per_class")
             mAPs.pop("mar_100_per_class")
-            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
     
     
