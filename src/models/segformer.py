@@ -33,6 +33,8 @@ class SegFormer(L.LightningModule):
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         self.test_map = MeanAveragePrecision(iou_type="segm")
+        self.test_map.compute_with_cache = False
+        self.test_map.compute_on_cpu = True
          
 
 
@@ -173,8 +175,6 @@ class SegFormer(L.LightningModule):
         print("target mask", targets_map[1]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
         torch.cuda.empty_cache()       
-        self.test_map.compute_with_cache = False
-        self.test_map.compute_on_cpu = True
         mAPs = self.test_map.compute() #.to(self.device)
         mAPs.pop("classes")
         self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)

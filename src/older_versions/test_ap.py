@@ -1,3 +1,6 @@
+import sys
+# setting path
+sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/')
 from datasets.tless import TLESSDataset
 import numpy as np
 from models.segformer import SegFormer
