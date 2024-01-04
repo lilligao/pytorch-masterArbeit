@@ -35,7 +35,7 @@ if __name__ == '__main__':
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
     
-    metric_map = MeanAveragePrecision(iou_type="segm")
+    metric_map = MeanAveragePrecision(iou_type="segm", max_detection_thresholds=[1,10,31])
     for data in dataloader:
         images, labels = data
 
@@ -90,23 +90,23 @@ if __name__ == '__main__':
                         )
                     )
 
-            # for j in target_obj:
-            #     if j not in detected_obj:
-            #         targets_map.append(
-            #             dict(
-            #                 masks=(target[i,:,:]==j).unsqueeze(0),
-            #                 labels=torch.tensor([j]),
-            #             )
-            #         )
+            for j in target_obj:
+                if j not in detected_obj:
+                    targets_map.append(
+                        dict(
+                            masks=(target[i,:,:]==j).unsqueeze(0),
+                            labels=torch.tensor([j]),
+                        )
+                    )
 
-            #         score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
-            #         preds_map.append(
-            #             dict(
-            #                 masks=(preds[i,:,:]==999).unsqueeze(0),
-            #                 scores=torch.tensor([score]),
-            #                 labels=torch.tensor([0]),
-            #             )
-            #         )
+                    score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
+                    preds_map.append(
+                        dict(
+                            masks=(preds[i,:,:]==999).unsqueeze(0),
+                            scores=torch.tensor([score]),
+                            labels=torch.tensor([0]),
+                        )
+                    )
         print("preds list", len(preds_map))
         print("target list", len(targets_map))
         print("preds mask", preds_map[1]["masks"].shape)
