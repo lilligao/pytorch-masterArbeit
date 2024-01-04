@@ -94,8 +94,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        print("test image shape",images.shape)
-        print("test label shape",labels.shape)
+        # print("test image shape",images.shape)
+        # print("test label shape",labels.shape)
 
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
@@ -180,8 +180,8 @@ class SegFormer(L.LightningModule):
         if config.MAP_PROIMG.upper().startswith(ua):       
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
-            mAPs = mAPs.pop("map_per_class")
-            mAPs = mAPs.pop("mar_100_per_class")
+            mAPs.pop("map_per_class")
+            mAPs.pop("mar_100_per_class")
             self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
 
@@ -208,8 +208,8 @@ class SegFormer(L.LightningModule):
         if not config.MAP_PROIMG.upper().startswith(ua):       
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
-            mAPs = mAPs.pop("map_per_class")
-            mAPs = mAPs.pop("mar_100_per_class")
+            mAPs.pop("map_per_class")
+            mAPs.pop("mar_100_per_class")
             self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
     
