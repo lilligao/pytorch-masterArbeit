@@ -14,6 +14,8 @@ class SegFormer(L.LightningModule):
     def __init__(self):
         super().__init__()
 
+        ua = str("true").upper()
+
         model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
         self.model = SegformerForSemanticSegmentation(model_config)
         self.model = self.model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)  # this loads imagenet weights
@@ -30,10 +32,13 @@ class SegFormer(L.LightningModule):
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         # metrics for testing
-        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
-        self.test_map = MeanAveragePrecision(iou_type="segm")
-        self.test_map.compute_with_cache = False
+        if config.TEST_IOU.upper().startswith(ua): 
+            self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        if config.TEST_AP.upper().startswith(ua): 
+            self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
+        if config.TEST_MAP.upper().startswith(ua): 
+            self.test_map = MeanAveragePrecision(iou_type="segm")
+            self.test_map.compute_with_cache = False
          
 
 
