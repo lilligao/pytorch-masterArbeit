@@ -98,10 +98,10 @@ class SegFormer(L.LightningModule):
         # print("test label shape",labels.shape)
 
         target = labels.squeeze(dim=1)
-        loss, logits = self.model(images, target)
+        loss, preds = self.model(images, target)
     
-        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(upsampled_logits, dim=1)
+        preds = torch.nn.functional.interpolate(preds, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(preds, dim=1)
 
         self.test_iou(preds, target)
         self.test_ap(preds, target)
