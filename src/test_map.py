@@ -41,6 +41,9 @@ if __name__ == '__main__':
 
         # print("test image shape",images.shape)
         # print("test label shape",labels.shape)
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        images = images.to(device)
+        labels = labels.to(device)
 
         target = labels.squeeze(dim=1)
         loss, logits = model(images, target)

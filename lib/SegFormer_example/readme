@@ -54,7 +54,8 @@ enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount
 # for test
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epoch=150*.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt6
 
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epochepoch=180-val_loss=0.05-val_iou=0.93.ckpt' --project='Masterarbeit Segformer Train' --run=TestOfAttempt5
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/*' --plot_testimg=False
+--project='Masterarbeit Segformer Train' --run=TestOfAttempt5
 
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$TMPDIR/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/Attempt5_31Classes/epoch*.ckpt' --plot_testimg=False
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/train.py
