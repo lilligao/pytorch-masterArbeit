@@ -167,6 +167,10 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
+        print("preds list", len(preds_map))
+        print("target list", len(targets_map))
+        print("preds mask", preds_map[5]["masks"].shape)
+        print("preds mask", targets_map[5]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
         torch.cuda.empty_cache()       
 
