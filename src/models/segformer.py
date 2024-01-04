@@ -193,7 +193,6 @@ class SegFormer(L.LightningModule):
             # print("preds mask", preds_map[1]["masks"].shape)
             # print("target mask", targets_map[1]["masks"].shape)
             self.test_map.update(preds=preds_map, target=targets_map)
-            torch.cuda.empty_cache()
 
             if config.MAP_PROIMG.upper().startswith(ua):
                 # map
@@ -203,6 +202,7 @@ class SegFormer(L.LightningModule):
                 mAPs.pop("mar_100_per_class")
                 self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
                 self.test_map.reset()
+                torch.cuda.empty_cache()
 
     def on_test_epoch_end(self):
         ua = str("true").upper()
