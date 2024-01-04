@@ -93,8 +93,8 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        # print("test image shape",images.shape)
-        # print("test label shape",labels.shape)
+        print("test image shape",images.shape)
+        print("test label shape",labels.shape)
 
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target)
