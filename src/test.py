@@ -39,7 +39,7 @@ if __name__ == '__main__':
         devices=1,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
-        limit_test_batches=500,
+        limit_test_batches=config.LIMIT_TEST_BATCHES,
         reload_dataloaders_every_n_epochs=1,
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
