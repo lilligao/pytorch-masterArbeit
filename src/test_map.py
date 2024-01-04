@@ -35,7 +35,7 @@ if __name__ == '__main__':
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
     
-    metric_map = MeanAveragePrecision(iou_type="segm", max_detection_thresholds=[1,10,31])
+    metric_map = MeanAveragePrecision(iou_type="segm")
     for data in dataloader:
         images, labels = data
 
