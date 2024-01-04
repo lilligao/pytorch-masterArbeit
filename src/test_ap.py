@@ -12,32 +12,6 @@ import config
 from torch import tensor
 from pprint import pprint
 
-def binary_mask_to_rle(binary_mask):
-    rle = {'counts': [], 'size': list(binary_mask.shape)}
-    counts = rle.get('counts')
-    for i, (value, elements) in enumerate(groupby(binary_mask.ravel(order='F'))):
-        if i == 0 and value == 1:
-            counts.append(0)
-        counts.append(len(list(elements)))
-    return rle
-
-
-def get_bbox(binary_mask):
-    binary_mask = binary_mask.numpy()
-
-    segmentation = np.where(binary_mask == 1)
-
-     # Bounding Box
-    bbox = 0, 0, 0, 0
-    if len(segmentation) != 0 and len(segmentation[1]) != 0 and len(segmentation[0]) != 0:
-        x_min = int(np.min(segmentation[1]))
-        x_max = int(np.max(segmentation[1]))
-        y_min = int(np.min(segmentation[0]))
-        y_max = int(np.max(segmentation[0]))
-
-        bbox = x_min, x_max, y_min, y_max
-    return [x_min, y_min, x_max-x_min, y_max-y_min]
-
 if __name__ == '__main__':
     # assert(config.LOAD_CHECKPOINTS!=None)
     # path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
@@ -50,8 +24,6 @@ if __name__ == '__main__':
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
     
-    results = []
-     
     metric_map = MeanAveragePrecision(iou_type="segm")
     for i in range(num_imgs):
         img, target = dataset[i]
@@ -90,9 +62,9 @@ if __name__ == '__main__':
             for i in range(batch_size):
                 mask_tgt = target["masks_visib"][p,:,:]==255
                 #print("mask_tgt.shape", target["masks_visib"][p,:,:].shape)
-                print("mask_tgt.shape", mask_tgt.unsqueeze(0).shape)
+                #print("mask_tgt.shape", mask_tgt.unsqueeze(0).shape)
                 mask_tgt = (target["masks_visib"][p,:,:]==255).unsqueeze(0)
-                print("mask_tgt.shape", mask_tgt.shape)
+                #print("mask_tgt.shape", mask_tgt.shape)
                 #print("mask_tgt.shape", mask_tgt.shape)
                 targets_map.append(
                     dict(
@@ -107,10 +79,6 @@ if __name__ == '__main__':
             mask_visible = preds==j
             mask_visible = mask_visible.cpu()
             scores = scores.cpu()
-            fortran_mask = np.asfortranarray(mask_visible)
-            rle = binary_mask_to_rle(fortran_mask)
-
-            bbox = get_bbox(mask_visible)
             # plt.imshow(mask_visible)
             # plt.savefig('data/tless/label_img_test_'+str(i)+'_'+str(j)+'.png')
             # plt.close()
@@ -127,9 +95,9 @@ if __name__ == '__main__':
 
             metric_ap = AveragePrecision(task="multiclass", num_classes=31, average="macro")
             ap = metric_ap(preds_softmax, target["label"])
-            print("preds_softmax.shape", preds_softmax.shape)
-            #print("mask_visible.shape",mask_visible.unsqueeze(0).shape)
-            print("target label shape",target["label"].shape)
+            # print("preds_softmax.shape", preds_softmax.shape)
+            # print("mask_visible.shape",mask_visible.unsqueeze(0).shape)
+            # print("target label shape",target["label"].shape)
             print(ap)
 
             
@@ -145,23 +113,16 @@ if __name__ == '__main__':
                         labels=tensor([j]),
                     )
                 )
-
-            result_i = {}
-            result_i["scene_id"] = target["scene_id"]
-            result_i["image_id"] = target["image_id"]
-            result_i["category_id"] = j
-            result_i["score"] = score
-            result_i["iou"] = iou
-            result_i["bbox"] = bbox
-            result_i["segmentation"] = rle
-            result_i["time"] = time_pred
-
-            results.append(result_i)
             
-        print(preds_map)
+        #print(preds_map)
         metric_map.update(preds=preds_map, target=targets_map)
+        print("preds list", len(preds_map))
+        print("target list", len(targets_map))
+        print("preds mask", preds_map[1]["masks"].shape)
+        print("target mask", targets_map[1]["masks"].shape)
         pprint(metric_map.compute())
         print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done, time: " + str(time_pred))
+
         
         del preds,preds_softmax, preds_map, targets_map, metric_ap, ap
     
