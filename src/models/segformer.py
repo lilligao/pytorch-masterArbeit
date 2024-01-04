@@ -168,18 +168,24 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
-        print("preds list", len(preds_map))
-        print("target list", len(targets_map))
-        print("preds mask", preds_map[1]["masks"].shape)
-        print("target mask", targets_map[1]["masks"].shape)
+        # print("preds list", len(preds_map))
+        # print("target list", len(targets_map))
+        # print("preds mask", preds_map[1]["masks"].shape)
+        # print("target mask", targets_map[1]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
-        torch.cuda.empty_cache()       
-        mAPs = self.test_map.compute() #.to(self.device)
-        mAPs.pop("classes")
-        self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-        self.test_map.reset()
+        torch.cuda.empty_cache()
+
 
         ua = str("true").upper()
+        if config.MAP_PROIMG.upper().startswith(ua):       
+            mAPs = self.test_map.compute() #.to(self.device)
+            mAPs.pop("classes")
+            mAPs = mAPs.pop("map_per_class")
+            mAPs = mAPs.pop("mar_100_per_class")
+            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            self.test_map.reset()
+
+        
         if config.PLOT_TESTIMG.upper().startswith(ua):
             mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
@@ -197,12 +203,15 @@ class SegFormer(L.LightningModule):
                 # log images to W&B
                 wandb.log({"predictions" : mask_img})
 
-    # def on_test_epoch_end(self):
-    #     self.test_map.compute_with_cache = False
-    #     self.test_map.compute_on_cpu = True
-    #     mAPs = self.test_map.compute() #.to(self.device)
-    #     self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-    #     self.test_map.reset()
+    def on_test_epoch_end(self):
+        ua = str("true").upper()
+        if not config.MAP_PROIMG.upper().startswith(ua):       
+            mAPs = self.test_map.compute() #.to(self.device)
+            mAPs.pop("classes")
+            mAPs = mAPs.pop("map_per_class")
+            mAPs = mAPs.pop("mar_100_per_class")
+            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            self.test_map.reset()
     
     
     def configure_optimizers(self):
