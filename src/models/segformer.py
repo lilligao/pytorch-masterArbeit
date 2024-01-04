@@ -91,6 +91,7 @@ class SegFormer(L.LightningModule):
     
 
     def test_step(self, batch, batch_idx):
+        ua = str("true").upper()
         #images, _, labels = batch
         images, labels = batch
 
@@ -98,20 +99,22 @@ class SegFormer(L.LightningModule):
         # print("test label shape",labels.shape)
 
         target = labels.squeeze(dim=1)
-        loss, preds = self.model(images, target)
+        loss, logits = self.model(images, target)
     
-        preds = torch.nn.functional.interpolate(preds, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(preds, dim=1)
+        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+        preds = torch.softmax(upsampled_logits, dim=1)
 
-        self.test_iou(preds, target)
-        self.test_ap(preds, target)
+        if config.TEST_IOU.upper().startswith(ua):
+            self.test_iou(preds, target)
+        if config.TEST_AP.upper().startswith(ua):
+            self.test_ap(preds, target)
         #self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-        ua = str("true").upper()
+        
 
         if config.PLOT_TESTIMG.upper().startswith(ua):
             # plot
@@ -131,7 +134,7 @@ class SegFormer(L.LightningModule):
                 # log images to W&B
                 wandb.log({"predictions" : mask_img})
         
-        else: 
+        if config.TEST_MAP.upper().startswith(ua): 
              # mean Average precision
             scores, preds = torch.max(preds, dim=1)# delete the first dimension
 
@@ -206,7 +209,7 @@ class SegFormer(L.LightningModule):
 
     def on_test_epoch_end(self):
         ua = str("true").upper()
-        if not config.MAP_PROIMG.upper().startswith(ua) and not config.PLOT_TESTIMG.upper().startswith(ua):       
+        if config.TEST_MAP.upper().startswith(ua) and not config.MAP_PROIMG.upper().startswith(ua):       
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
             mAPs.pop("map_per_class")
