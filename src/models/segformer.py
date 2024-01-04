@@ -168,7 +168,8 @@ class SegFormer(L.LightningModule):
                             labels=torch.tensor([0]),
                         )
                     )
-        self.test_map.update(preds=preds_map, target=targets_map)       
+        self.test_map.update(preds=preds_map, target=targets_map)
+        torch.cuda.empty_cache()       
 
         ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
