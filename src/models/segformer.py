@@ -176,6 +176,7 @@ class SegFormer(L.LightningModule):
         self.test_map.compute_with_cache = False
         self.test_map.compute_on_cpu = True
         mAPs = self.test_map.compute() #.to(self.device)
+        mAPs.pop("classes")
         self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
         self.test_map.reset()
 
