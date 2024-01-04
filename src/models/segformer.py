@@ -33,7 +33,6 @@ class SegFormer(L.LightningModule):
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
         self.test_map = MeanAveragePrecision(iou_type="segm")
-        self.test_map.compute_with_cache = False
          
 
 
@@ -190,7 +189,8 @@ class SegFormer(L.LightningModule):
                 wandb.log({"predictions" : mask_img})
 
     def on_test_epoch_end(self):
-        mAPs = self.test_map.compute() #.to(self.device)
+        self.test_map.compute_with_cache = False
+        mAPs = self.test_map.compute_on_cpu() #.to(self.device)
         self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.test_map.reset()
     

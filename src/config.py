@@ -19,7 +19,7 @@ parser.add_argument('--test_split', type=str, default='test_primesense')
 parser.add_argument('--val_size', type=str, default=10000)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
-parser.add_argument('--plot_testimg', type=str, default=True)
+parser.add_argument('--plot_testimg', type=str, default='True')
 
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
