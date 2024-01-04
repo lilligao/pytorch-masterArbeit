@@ -25,7 +25,6 @@ parser.add_argument('--limit_test', type=int, default=500)
 parser.add_argument('--test_iou', type=str, default='False')
 parser.add_argument('--test_ap', type=str, default='False')
 parser.add_argument('--test_map', type=str, default='False')
-parser.add_argument('--mAP_proImg', type=str, default='False')
 
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
