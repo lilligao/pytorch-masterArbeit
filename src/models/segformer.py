@@ -111,14 +111,13 @@ class SegFormer(L.LightningModule):
 
         if config.TEST_IOU.upper().startswith(ua):
             self.test_iou(preds, target)
+            self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         if config.TEST_AP.upper().startswith(ua):
             self.test_ap(preds, target)
+            self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
         
 
         if config.PLOT_TESTIMG.upper().startswith(ua):
