@@ -175,7 +175,8 @@ class SegFormer(L.LightningModule):
         print("target mask", targets_map[1]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
         torch.cuda.empty_cache()       
-        mAPs = self.test_map.compute() #.to(self.device)
+        #mAPs = self.test_map.compute() #.to(self.device)
+        mAPs = {"test" + k: v for k, v in self.test_map.compute().items()}
         mAPs.pop("classes")
         self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
         self.test_map.reset()
