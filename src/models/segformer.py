@@ -179,11 +179,6 @@ class SegFormer(L.LightningModule):
 
         if config.PLOT_TESTIMG.upper().startswith(ua):
             # map
-            mAPs = self.test_map.compute() #.to(self.device)
-            mAPs.pop("classes")
-            mAPs.pop("map_per_class")
-            mAPs.pop("mar_100_per_class")
-            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
 
             # plot
