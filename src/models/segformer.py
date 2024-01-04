@@ -190,7 +190,8 @@ class SegFormer(L.LightningModule):
 
     def on_test_epoch_end(self):
         self.test_map.compute_with_cache = False
-        mAPs = self.test_map.compute_on_cpu() #.to(self.device)
+        self.test_map.compute_on_cpu = True
+        mAPs = self.test_map.compute() #.to(self.device)
         self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.test_map.reset()
     
