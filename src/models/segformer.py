@@ -176,7 +176,9 @@ class SegFormer(L.LightningModule):
 
 
         ua = str("true").upper()
-        if config.MAP_PROIMG.upper().startswith(ua):       
+
+        if config.PLOT_TESTIMG.upper().startswith(ua):
+            # map
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
             mAPs.pop("map_per_class")
@@ -184,8 +186,7 @@ class SegFormer(L.LightningModule):
             self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
 
-        
-        if config.PLOT_TESTIMG.upper().startswith(ua):
+            # plot
             mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
@@ -201,10 +202,19 @@ class SegFormer(L.LightningModule):
             if wandb.run is not None:
                 # log images to W&B
                 wandb.log({"predictions" : mask_img})
+        
+        elif config.MAP_PROIMG.upper().startswith(ua):
+            # map
+            mAPs = self.test_map.compute() #.to(self.device)
+            mAPs.pop("classes")
+            mAPs.pop("map_per_class")
+            mAPs.pop("mar_100_per_class")
+            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            self.test_map.reset()
 
     def on_test_epoch_end(self):
         ua = str("true").upper()
-        if not config.MAP_PROIMG.upper().startswith(ua):       
+        if not config.MAP_PROIMG.upper().startswith(ua) and not config.PLOT_TESTIMG.upper().startswith(ua):       
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
             mAPs.pop("map_per_class")
