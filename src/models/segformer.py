@@ -14,8 +14,6 @@ class SegFormer(L.LightningModule):
     def __init__(self):
         super().__init__()
 
-        ua = str("true").upper()
-
         model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
         self.model = SegformerForSemanticSegmentation(model_config)
         self.model = self.model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)  # this loads imagenet weights
@@ -176,6 +174,7 @@ class SegFormer(L.LightningModule):
         # print("target mask", targets_map[1]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
 
+        ua = str("true").upper()
         if config.MAP_PROIMG.upper().startswith(ua):
             # map
             mAPs = self.test_map.compute() #.to(self.device)
@@ -187,7 +186,6 @@ class SegFormer(L.LightningModule):
             torch.cuda.empty_cache()
 
         
-        ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
             # plot
             mask_data_tensor = torch.argmax(preds, dim=1).squeeze(0).cpu() # the maximum element
