@@ -121,6 +121,7 @@ class SegFormer(L.LightningModule):
         targets_map = []
 
         for i in range(batch_size):
+            scores_i = scores[i,:,:]
             # predictions ???? consider 0 in map oder niche????
             detected_obj = torch.unique(preds[i,:,:]).tolist()
             detected_obj.remove(0)
@@ -132,7 +133,7 @@ class SegFormer(L.LightningModule):
             for j in detected_obj:
                 mask_preds = preds[i,:,:]==j
                 mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
-                score = torch.mean(scores[i,:,:][mask_preds]).item()
+                score = torch.mean(scores_i[mask_preds]).item()
                 preds_map.append(
                     dict(
                         masks = mask_preds.unsqueeze(0),
@@ -158,7 +159,7 @@ class SegFormer(L.LightningModule):
                         )
                     )
 
-                    score = torch.mean(scores[i,:,:][mask_tgt]).item() # score of areas that exists obj in target
+                    score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
                     preds_map.append(
                         dict(
                             masks=mask_preds.unsqueeze(0),

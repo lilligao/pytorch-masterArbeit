@@ -68,7 +68,8 @@ if __name__ == '__main__':
         targets_map = []
 
         for i in range(batch_size):
-            # predictions
+            scores_i = scores[i,:,:]
+            # predictions ???? consider 0 in map oder niche????
             detected_obj = torch.unique(preds[i,:,:]).tolist()
             detected_obj.remove(0)
             
@@ -79,7 +80,7 @@ if __name__ == '__main__':
             for j in detected_obj:
                 mask_preds = preds[i,:,:]==j
                 mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
-                score = torch.mean(scores[i,:,:][mask_preds]).item()
+                score = torch.mean(scores_i[mask_preds]).item()
                 preds_map.append(
                     dict(
                         masks = mask_preds.unsqueeze(0),
@@ -105,12 +106,12 @@ if __name__ == '__main__':
                         )
                     )
 
-                    score = torch.mean(scores[i,:,:][mask_tgt]).item()
+                    score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
                     preds_map.append(
                         dict(
                             masks=mask_preds.unsqueeze(0),
                             scores=torch.tensor([score]),
-                            labels=torch.tensor([j]),
+                            labels=torch.tensor([j]), # the object j has mask of False
                         )
                     )
         print("preds list", len(preds_map))
