@@ -27,18 +27,16 @@ class SegFormer(L.LightningModule):
         # lightning: config optimizers -> scheduler anlegen!!!
         # metrics for training
         self.train_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX) #, ignore_index=config.IGNORE_INDEX
-        self.train_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
+        self.train_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
         # metrics for validation
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro")
+        self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
         # metrics for testing
-        if config.TEST_IOU.upper().startswith(ua): 
-            self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        if config.TEST_AP.upper().startswith(ua): 
-            self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
-        if config.TEST_MAP.upper().startswith(ua): 
-            self.test_map = MeanAveragePrecision(iou_type="segm")
-            self.test_map.compute_with_cache = False
+
+        self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
+        self.test_map = MeanAveragePrecision(iou_type="segm")
+        self.test_map.compute_with_cache = False
          
 
 
@@ -96,7 +94,6 @@ class SegFormer(L.LightningModule):
     
 
     def test_step(self, batch, batch_idx):
-        ua = str("true").upper()
         #images, _, labels = batch
         images, labels = batch
 
@@ -109,17 +106,88 @@ class SegFormer(L.LightningModule):
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
 
-        if config.TEST_IOU.upper().startswith(ua):
-            self.test_iou(preds, target)
-            self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        if config.TEST_AP.upper().startswith(ua):
-            self.test_ap(preds, target)
-            self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.test_iou(preds, target)
+        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.test_ap(preds, target)
+        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.test_map.update(preds, target)
 
         self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         
+         # mean Average precision
+        scores, preds = torch.max(preds, dim=1)# delete the first dimension
 
+        batch_size = preds.shape[0]
+
+        preds_map = []
+        targets_map = []
+
+        for i in range(batch_size):
+            # predictions
+            detected_obj = torch.unique(preds[i,:,:]).tolist()
+
+            # targets
+            target_obj = torch.unique(target[i,:,:]).tolist()
+
+            for j in detected_obj:
+                score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
+                preds_map.append(
+                    dict(
+                        masks = (preds[i,:,:]==j).unsqueeze(0),
+                        scores=torch.tensor([score]),
+                        labels=torch.tensor([j]),
+                    )
+                )
+                if j in target_obj:
+                    targets_map.append(
+                        dict(
+                            masks = (target[i,:,:]==j).unsqueeze(0),
+                            labels=torch.tensor([j]),
+                        )
+                    )
+                else: # if something detected which is not in target, create a mask with all False
+                    targets_map.append(
+                        dict(
+                            masks = (target[i,:,:]==999).unsqueeze(0),
+                            labels=torch.tensor([0]),
+                        )
+                    )
+
+            for j in target_obj:
+                if j not in detected_obj:
+                    targets_map.append(
+                        dict(
+                            masks=(target[i,:,:]==j).unsqueeze(0),
+                            labels=torch.tensor([j]),
+                        )
+                    )
+
+                    score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
+                    preds_map.append(
+                        dict(
+                            masks=(preds[i,:,:]==999).unsqueeze(0),
+                            scores=torch.tensor([score]),
+                            labels=torch.tensor([0]),
+                        )
+                    )
+        # print("preds list", len(preds_map))
+        # print("target list", len(targets_map))
+        # print("preds mask", preds_map[1]["masks"].shape)
+        # print("target mask", targets_map[1]["masks"].shape)
+        self.test_map.update(preds=preds_map, target=targets_map)
+
+        if config.MAP_PROIMG.upper().startswith(ua):
+            # map
+            mAPs = self.test_map.compute() #.to(self.device)
+            mAPs.pop("classes")
+            mAPs.pop("map_per_class")
+            mAPs.pop("mar_100_per_class")
+            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            self.test_map.reset()
+            torch.cuda.empty_cache()
+
+        
+        ua = str("true").upper()
         if config.PLOT_TESTIMG.upper().startswith(ua):
             # plot
             mask_data_tensor = torch.argmax(preds, dim=1).squeeze(0).cpu() # the maximum element
@@ -138,88 +206,19 @@ class SegFormer(L.LightningModule):
                 # log images to W&B
                 wandb.log({"predictions" : mask_img})
         
-        if config.TEST_MAP.upper().startswith(ua): 
-             # mean Average precision
-            scores, preds = torch.max(preds, dim=1)# delete the first dimension
-
-            batch_size = preds.shape[0]
-
-            preds_map = []
-            targets_map = []
-
-            for i in range(batch_size):
-                # predictions
-                detected_obj = torch.unique(preds[i,:,:]).tolist()
-
-                # targets
-                target_obj = torch.unique(target[i,:,:]).tolist()
-
-                for j in detected_obj:
-                    score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
-                    preds_map.append(
-                        dict(
-                            masks = (preds[i,:,:]==j).unsqueeze(0),
-                            scores=torch.tensor([score]),
-                            labels=torch.tensor([j]),
-                        )
-                    )
-                    if j in target_obj:
-                        targets_map.append(
-                            dict(
-                                masks = (target[i,:,:]==j).unsqueeze(0),
-                                labels=torch.tensor([j]),
-                            )
-                        )
-                    else: # if something detected which is not in target, create a mask with all False
-                        targets_map.append(
-                            dict(
-                                masks = (target[i,:,:]==999).unsqueeze(0),
-                                labels=torch.tensor([0]),
-                            )
-                        )
-
-                for j in target_obj:
-                    if j not in detected_obj:
-                        targets_map.append(
-                            dict(
-                                masks=(target[i,:,:]==j).unsqueeze(0),
-                                labels=torch.tensor([j]),
-                            )
-                        )
-
-                        score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
-                        preds_map.append(
-                            dict(
-                                masks=(preds[i,:,:]==999).unsqueeze(0),
-                                scores=torch.tensor([score]),
-                                labels=torch.tensor([0]),
-                            )
-                        )
-            # print("preds list", len(preds_map))
-            # print("target list", len(targets_map))
-            # print("preds mask", preds_map[1]["masks"].shape)
-            # print("target mask", targets_map[1]["masks"].shape)
-            self.test_map.update(preds=preds_map, target=targets_map)
-
-            if config.MAP_PROIMG.upper().startswith(ua):
-                # map
-                mAPs = self.test_map.compute() #.to(self.device)
-                mAPs.pop("classes")
-                mAPs.pop("map_per_class")
-                mAPs.pop("mar_100_per_class")
-                self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-                self.test_map.reset()
-                torch.cuda.empty_cache()
-
+            
     def on_test_epoch_end(self):
         ua = str("true").upper()
-        if config.TEST_MAP.upper().startswith(ua) and not config.MAP_PROIMG.upper().startswith(ua):       
+        self.test_iou.reset()
+        self.test_ap.reset()
+        if not config.MAP_PROIMG.upper().startswith(ua):       
             mAPs = self.test_map.compute() #.to(self.device)
             mAPs.pop("classes")
             mAPs.pop("map_per_class")
             mAPs.pop("mar_100_per_class")
             self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.test_map.reset()
+            torch.cuda.empty_cache()
     
     
     def configure_optimizers(self):

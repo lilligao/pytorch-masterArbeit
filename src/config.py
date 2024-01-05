@@ -21,10 +21,6 @@ parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
 parser.add_argument('--plot_testimg', type=str, default='False')
 parser.add_argument('--mAP_proImg', type=str, default='False')
-parser.add_argument('--limit_test', type=int, default=500)
-parser.add_argument('--test_iou', type=str, default='False')
-parser.add_argument('--test_ap', type=str, default='False')
-parser.add_argument('--test_map', type=str, default='False')
 
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
@@ -76,10 +72,6 @@ CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
 PLOT_TESTIMG = args.plot_testimg
 MAP_PROIMG = args.mAP_proImg
-LIMIT_TEST_BATCHES = args.limit_test
-TEST_IOU = args.test_iou
-TEST_AP = args.test_ap
-TEST_MAP = args.test_map
 
 TRAIN_SIZE = args.train_size
 
