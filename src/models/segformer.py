@@ -121,51 +121,49 @@ class SegFormer(L.LightningModule):
         targets_map = []
 
         for i in range(batch_size):
-            # predictions
+            # predictions ???? consider 0 in map oder niche????
             detected_obj = torch.unique(preds[i,:,:]).tolist()
-
+            detected_obj.remove(0)
+            
             # targets
             target_obj = torch.unique(target[i,:,:]).tolist()
+            target_obj.remove(0)
 
             for j in detected_obj:
-                score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
+                mask_preds = preds[i,:,:]==j
+                mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
+                score = torch.mean(scores[i,:,:][mask_preds]).item()
                 preds_map.append(
                     dict(
-                        masks = (preds[i,:,:]==j).unsqueeze(0),
+                        masks = mask_preds.unsqueeze(0),
                         scores=torch.tensor([score]),
                         labels=torch.tensor([j]),
                     )
                 )
-                if j in target_obj:
-                    targets_map.append(
-                        dict(
-                            masks = (target[i,:,:]==j).unsqueeze(0),
-                            labels=torch.tensor([j]),
-                        )
+                targets_map.append(
+                    dict(
+                        masks = mask_tgt.unsqueeze(0),
+                        labels=torch.tensor([j]),
                     )
-                else: # if something detected which is not in target, create a mask with all False
-                    targets_map.append(
-                        dict(
-                            masks = (target[i,:,:]==999).unsqueeze(0),
-                            labels=torch.tensor([0]),
-                        )
-                    )
+                )
 
             for j in target_obj:
                 if j not in detected_obj:
+                    mask_tgt = target[i,:,:]==j
+                    mask_preds = preds[i,:,:]==999
                     targets_map.append(
                         dict(
-                            masks=(target[i,:,:]==j).unsqueeze(0),
+                            masks=mask_tgt.unsqueeze(0),
                             labels=torch.tensor([j]),
                         )
                     )
 
-                    score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
+                    score = torch.mean(scores[i,:,:][mask_tgt]).item() # score of areas that exists obj in target
                     preds_map.append(
                         dict(
-                            masks=(preds[i,:,:]==999).unsqueeze(0),
+                            masks=mask_preds.unsqueeze(0),
                             scores=torch.tensor([score]),
-                            labels=torch.tensor([0]),
+                            labels=torch.tensor([j]), # the object j has mask of False
                         )
                     )
         # print("preds list", len(preds_map))

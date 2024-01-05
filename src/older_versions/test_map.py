@@ -20,10 +20,14 @@ from pprint import pprint
 def collate_fn(batch):
         targets = []
         imgs = []
+        scene_ids = []
+        img_ids = []
         for sample in batch:
             imgs.append(sample[0])
             targets.append(sample[1]["label"])
-        return torch.stack(imgs), torch.stack(targets)
+            scene_ids.append(tensor(sample[1]["scene_id"]))
+            img_ids.append(tensor(sample[1]["image_id"]))
+        return torch.stack(imgs), torch.stack(targets), torch.stack(scene_ids), torch.stack(img_ids)
 
 if __name__ == '__main__':
     # assert(config.LOAD_CHECKPOINTS!=None)
@@ -35,13 +39,13 @@ if __name__ == '__main__':
         model.cuda()
     dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test")
 
-    dataloader =DataLoader(dataset, batch_size=1, shuffle=True, num_workers=2, drop_last=False, collate_fn=collate_fn)
+    dataloader =DataLoader(dataset, batch_size=1, shuffle=False, num_workers=1, drop_last=False, collate_fn=collate_fn)
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
     
     metric_map = MeanAveragePrecision(iou_type="segm")
     for data in dataloader:
-        images, labels = data
+        images, labels, scene_ids, img_ids = data
 
         # print("test image shape",images.shape)
         # print("test label shape",labels.shape)
@@ -66,49 +70,47 @@ if __name__ == '__main__':
         for i in range(batch_size):
             # predictions
             detected_obj = torch.unique(preds[i,:,:]).tolist()
-
+            detected_obj.remove(0)
+            
             # targets
             target_obj = torch.unique(target[i,:,:]).tolist()
+            target_obj.remove(0)
 
             for j in detected_obj:
-                score = torch.mean(scores[i,:,:][preds[i,:,:]==j]).item()
+                mask_preds = preds[i,:,:]==j
+                mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
+                score = torch.mean(scores[i,:,:][mask_preds]).item()
                 preds_map.append(
                     dict(
-                        masks = (preds[i,:,:]==j).unsqueeze(0),
+                        masks = mask_preds.unsqueeze(0),
                         scores=torch.tensor([score]),
                         labels=torch.tensor([j]),
                     )
                 )
-                if j in target_obj:
-                    targets_map.append(
-                        dict(
-                            masks = (target[i,:,:]==j).unsqueeze(0),
-                            labels=torch.tensor([j]),
-                        )
+                targets_map.append(
+                    dict(
+                        masks = mask_tgt.unsqueeze(0),
+                        labels=torch.tensor([j]),
                     )
-                else: # if something detected which is not in target, create a mask with all False
-                    targets_map.append(
-                        dict(
-                            masks = (target[i,:,:]==999).unsqueeze(0),
-                            labels=torch.tensor([0]),
-                        )
-                    )
+                )
 
             for j in target_obj:
                 if j not in detected_obj:
+                    mask_tgt = target[i,:,:]==j
+                    mask_preds = preds[i,:,:]==999
                     targets_map.append(
                         dict(
-                            masks=(target[i,:,:]==j).unsqueeze(0),
+                            masks=mask_tgt.unsqueeze(0),
                             labels=torch.tensor([j]),
                         )
                     )
 
-                    score = torch.mean(scores[i,:,:][preds[i,:,:]==999]).item()
+                    score = torch.mean(scores[i,:,:][mask_tgt]).item()
                     preds_map.append(
                         dict(
-                            masks=(preds[i,:,:]==999).unsqueeze(0),
+                            masks=mask_preds.unsqueeze(0),
                             scores=torch.tensor([score]),
-                            labels=torch.tensor([0]),
+                            labels=torch.tensor([j]),
                         )
                     )
         print("preds list", len(preds_map))
@@ -123,7 +125,7 @@ if __name__ == '__main__':
         # print("preds mask", preds_map[1]["masks"].shape)
         # print("target mask", targets_map[1]["masks"].shape)
         pprint(metric_map.compute())
-        #print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done")
+        print("scene: " + str(scene_ids) + ", image: " + str(img_ids) + " done")
 
         
         del preds,logits

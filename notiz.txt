@@ -23,9 +23,9 @@ BOP - Challegenge
 
 
 
-用一个epoche的结果 plot所有test images 用所有test -> 23005624 -> job_test_plot.sh
+用一个epoche的结果 plot所有test images 用所有test -> 23005694 -> job_test_plot.sh
 用一个epoche的结果 算单个map 用1000张bop test 🈶
-用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005591 / 所有test
+用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005718 / 所有test 23005719
 再训练一次 23005648
 
 

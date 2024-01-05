@@ -14,9 +14,6 @@ import os
 from pathlib import Path
 import glob
 
-import os
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:200"
-
 if __name__ == '__main__':
     assert(config.LOAD_CHECKPOINTS!=None)
     path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
