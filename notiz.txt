@@ -1,0 +1,70 @@
+Ich habe noch eine organisatorische Frage. Derzeit bin ich in einem studentischen Verein, KA-RaceIng, engagiert und wir werden bis August an verschiedenen Wettbewerben teilnehmen.
+
+
+bis mittel August -> Karaceing engangieren
+Ende August -> anfangen
+Oktober bis Mittel November -> in China
+die Anmeldung erst ab November?
+
+
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbr_crop_only/epoch=* ./b5_pbr_crop_only
+
+scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
+
+welche ausgewählte ViT?
+mit Python-> Pytorch
+Hardware?
+kriterien?
+youtube
+wie gut performance
+wie viel speicherplatz
+literatur?
+BOP - Challegenge
+
+
+
+用一个epoche的结果 plot所有test images 用所有test -> 23005624 -> job_test_plot.sh
+用一个epoche的结果 算单个map 用1000张bop test 🈶
+用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005591 / 所有test
+再训练一次 23005648
+
+
+
+job_val -> Attempt10: pbr und primesense für Training, Test für validiation
+job_val2 -> Attempt11: pbr und primesense für Training und validation, testdaten für testen
+job_val_b.sh -> SegFormer_b5 ->b5_pbrPrimesense_lr_1e-5 +
+job_b5_samelr.sh -> SegFormer_b5 -> b5_pbrPrimesense_lr_6e-5_lr_factor_1 + 意料之外的好
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5 gpu_4_a100 +
+job_b5_crop.sh -> SegFormer Data Augmentation -> b5_pbr_crop_only +
+job_b5_flip.sh -> SegFormer Data Augmentation -> b5_pbr_flip_crop -> flip and crop +
+job_b5_resize_crop.sh -> SegFormer Data Augmentation -> b5_pbr_resize_crop +
+job_b5_resize.sh -> SegFormer Data Augmentation -> b5_pbr_normal_resize +
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5_trImg_256 gpu_8 +
+job_b5_all.sh -> SegFormer Data Augmentation ->  b5_pbr_resize_flip_crop gpu_8 +
+
+job_gradient_accumulate -> LR Gradient Test -> clip_norm_0.5_accum_7 22983869 gpu_4_a100 + 还不错
+job_grad_1.sh -> LR Gradient Test -> clip_norm_1 22983871 gpu_4_a100 +
+job_grad_0.sh -> LR Gradient Test -> clip_norm_0 22983872 gpu_4 +
+job_value.sh -> LR Gradient Test -> clip_value_0.5 22983873 gpu_8 + better
+job_value_1.sh -> LR Gradient Test -> clip_value_1 22983874 gpu_4_a100 + not as good as 0.5
+job_norm.sh -> LR Gradient Test -> clip_norm_0.5  22983875  gpu_4_h100 +
+
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5_trImg_256  doppel Test gpu_4 22983880 +
+
+job_b5_samelr_acc.sh 22989349 -> accumulate 7 batches for 0.5 gradient clipping norm +
+job_b5_samelr_pbr.sh -> SegFormer_b5 -> b5_pbr_lr_6e-5_lr_factor_1  22989354 +
+job_b5_samelr_no_clip.sh -> run=b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip 22989546 +
+
+job_b5.sh  -> SegFormer -> 
+
+find out why primesense data!!!! has problem!!!
+
+Frage:
+scene_id
+image_id also as results of model????
+score ???
+bbox ???
+
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=132-val_loss=0.16-val_iou=0.75.ckpt
+
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5 SameLR epoche_28_val_iou_77' --run=bop_iou_epoche_28 --mAP_proImg=False

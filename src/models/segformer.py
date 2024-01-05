@@ -187,8 +187,7 @@ class SegFormer(L.LightningModule):
 
         
         if config.PLOT_TESTIMG.upper().startswith(ua):
-            # plot
-            mask_data_tensor = torch.argmax(preds, dim=1).squeeze(0).cpu() # the maximum element
+            mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
             mask_data_label = mask_data_label_tensor.numpy()
