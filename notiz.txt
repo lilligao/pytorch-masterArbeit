@@ -25,7 +25,7 @@ BOP - Challegenge
 
 用一个epoche的结果 plot所有test images 用所有test -> 23005694 -> job_test_plot.sh
 用一个epoche的结果 算单个map 用1000张bop test 🈶
-用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005718 / 所有test 23005719
+用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005718 /23007953 / 所有test 23005719 / 23007957
 再训练一次 23005648
 
 
@@ -67,4 +67,4 @@ bbox ???
 
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=132-val_loss=0.16-val_iou=0.75.ckpt
 
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5 SameLR epoche_28_val_iou_77' --run=bop_iou_epoche_28 --mAP_proImg=False
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5-SameLR' --run=bop_map_no_0_pro_Img_epoche_28 --mAP_proImg=True

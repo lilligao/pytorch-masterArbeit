@@ -12,6 +12,7 @@ from PIL import Image
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
+from torchvision.transforms import v2
 from torchvision.transforms import InterpolationMode
 
 import glob
@@ -189,6 +190,24 @@ class TLESSDataset(torch.utils.data.Dataset):
         img = TF.to_tensor(img)
         
         if self.step.startswith('train'):
+            if config.K_INTENSITY > 0:
+                transforms_list = [v2.RandomAutocontrast(p=1),
+                                v2.RandomEqualize(p=1),
+                                v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
+                                v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
+                                v2.RandomPosterize(p=1, bits=2),
+                                #v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
+                                v2.ColorJitter(hue=.3),
+                                v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
+                                v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
+                                v2.ColorJitter(saturation=.5), # in paper color balance???
+                                ]
+                transforms_list = random.sample(transforms_list,config.K_INTENSITY)
+                random.shuffle(transforms_list)
+                print(transforms_list)
+                transform_compose= v2.Compose(transforms_list)
+                if random.random() < 0.67:
+                    img = transform_compose(img)
             # Random Resize
             if str(config.USE_SCALING).upper()==str('True').upper():
                 random_scaler = RandResize(scale=(0.5, 2.0))

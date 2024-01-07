@@ -25,6 +25,7 @@ parser.add_argument('--mAP_proImg', type=str, default='False')
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
 parser.add_argument('--use_flipping', type=str, default='True')
+parser.add_argument('--k_intensity', type=int, default=0)
 parser.add_argument('--use_normal_resize', type=str, default='False')
 parser.add_argument('--scale_val', type=str, default='False')
 
@@ -56,6 +57,7 @@ LEARNING_RATE_FACTOR = args.lr_factor
 USE_SCALING = args.use_scaling
 USE_CROPPING = args.use_cropping
 USE_FLIPPING = args.use_flipping
+K_INTENSITY = args.k_intensity
 USE_NORMAL_RESIZE = args.use_normal_resize
 SCALE_VAL = args.scale_val
 
