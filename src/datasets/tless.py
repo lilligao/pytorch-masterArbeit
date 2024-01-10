@@ -12,6 +12,7 @@ from PIL import Image
 from torch.nn import functional as F
 from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
+from torchvision.transforms import v2
 from torchvision.transforms import InterpolationMode
 
 import glob
@@ -190,16 +191,16 @@ class TLESSDataset(torch.utils.data.Dataset):
         
         if self.step.startswith('train'):
             if config.K_INTENSITY > 0:
-                transforms_list = [transforms.RandomAutocontrast(p=1),
-                                transforms.RandomEqualize(p=1),
-                                transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
-                                transforms.RandomAdjustSharpness(p=1,sharpness_factor=2),
-                                #transforms.RandomPosterize(p=1, bits=2), # old version only supports rgb int, not sure if can update torch vision (Compatibility)
-                                #transforms.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
-                                transforms.ColorJitter(hue=.3),
-                                transforms.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
-                                transforms.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
-                                transforms.ColorJitter(saturation=.5), # in paper color balance???
+                transforms_list = [v2.RandomAutocontrast(p=1),
+                                v2.RandomEqualize(p=1),
+                                v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
+                                v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
+                                v2.RandomPosterize(p=1, bits=2),
+                                #v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
+                                v2.ColorJitter(hue=.3),
+                                v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
+                                v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
+                                v2.ColorJitter(saturation=.5), # in paper color balance???
                                 ]
                 transforms_list = random.sample(transforms_list,config.K_INTENSITY)
                 random.shuffle(transforms_list)
