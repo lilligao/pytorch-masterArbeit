@@ -31,7 +31,7 @@ parser.add_argument('--scale_val', type=str, default='False')
 
 parser.add_argument('--train_size', type=int, default=512)
 
-parser.add_argument('--gradient_clip', type=float, default=0)
+parser.add_argument('--gradient_clip', type=float, default=0.5)
 parser.add_argument('--gradient_clip_algorithm', type=str, default='norm')
 parser.add_argument('--accumulate_grad_batches', type=int, default=1)
 

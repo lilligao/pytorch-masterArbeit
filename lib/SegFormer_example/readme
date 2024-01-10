@@ -3,6 +3,7 @@
 enroot import docker://nvcr.io#nvidia/pytorch:23.02-py3
 # 2. Create .sqsh file
 enroot create --name nvidia_pytorch_23.02 nvidia+pytorch+23.02-py3.sqsh
+#23.04!!!
 # 3. Start container with interactive job and install requirements
 salloc -p dev_gpu_4_a100 -N 1 --ntasks-per-node=64 -t 30 --mem=510000 --gres=gpu:4
 
