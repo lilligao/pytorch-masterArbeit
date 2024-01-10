@@ -194,7 +194,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                                 transforms.RandomEqualize(p=1),
                                 transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
                                 transforms.RandomAdjustSharpness(p=1,sharpness_factor=2),
-                                #transforms.RandomPosterize(p=1, bits=2), # old version only supports rgb int
+                                #transforms.RandomPosterize(p=1, bits=2), # old version only supports rgb int, not sure if can update torch vision (Compatibility)
                                 #transforms.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
                                 transforms.ColorJitter(hue=.3),
                                 transforms.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???

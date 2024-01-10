@@ -11,6 +11,8 @@ scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbr_
 
 scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
 
+scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/Segformer_train_tless-test.json ./
+
 welche ausgewählte ViT?
 mit Python-> Pytorch
 Hardware?
@@ -65,6 +67,11 @@ image_id also as results of model????
 score ???
 bbox ???
 
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=132-val_loss=0.16-val_iou=0.75.ckpt
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=14-val_loss=0.13-val_iou=0.74.ckpt --run=SegFormer28
 
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5-SameLR' --run=bop_map_no_0_pro_Img_epoche_28 --mAP_proImg=True
+
+primesense training vollständig laufen lassen
+bop challenge paper schauen, ideen klauen I(verdeckte, und texlos)
+intensity based paper schauen und code probieren
+wandb sweep
