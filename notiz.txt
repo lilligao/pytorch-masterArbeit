@@ -67,11 +67,31 @@ image_id also as results of model????
 score ???
 bbox ???
 
-enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=14-val_loss=0.13-val_iou=0.74.ckpt --run=SegFormer28
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.04 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=1-val_loss=0.19-val_iou=0.65.ckpt --run=SegFormer28
+
+epoch=2-val_loss=0.18-val_iou=0.65.ckpt
+epoch=3-val_loss=0.12-val_iou=0.70.ckpt
+epoch=107-val_loss=0.14-val_iou=0.76.ckpt
+epoch=128-val_loss=0.14-val_iou=0.76.ckpt
+epoch=132-val_loss=0.16-val_iou=0.75.ckpt
 
 enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5-SameLR' --run=bop_map_no_0_pro_Img_epoche_28 --mAP_proImg=True
 
-primesense training vollständig laufen lassen
+11. Januar
+map for stabile version nochmal laufen lassen und vergleichen +
+ander bop challenge ergebnisse mit bop tool probieren und vergleichen + -> exakt das gleiche :)!!!
+see the image with bad map and check what's the problem +
+primesense training vollständig laufen lassen +
+compare the map using targets: if 1 output for each output then deutlich schlechter ergebnisse + 
+try multiple outputs for same objects detected in same image but different place: problem: how to separate multiple same objects?
+intensity based paper schauen und code probieren + aber warum immer kleiner als 1??? und macht es Sinn? (zeige beispiel)
+job_b5_intensity_2 
+---waiting list----
+intensity 1 & 3
+job_b4_samelr.sh
+JobName=job_b5_samelr_primesense.sh
+----------------------------------
+Try DETR
+write the chapter about iou, ap & map
 bop challenge paper schauen, ideen klauen I(verdeckte, und texlos)
-intensity based paper schauen und code probieren
 wandb sweep

@@ -14,7 +14,8 @@ if __name__ == '__main__':
     dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test")
     num_imgs = len(dataset)
     print("length of num imgs",num_imgs)
-    img, target = dataset[878]
+    img_nr = 998
+    img, target = dataset[img_nr]
     img = img.unsqueeze(0)
     #loss, logits = self.model(images, labels.squeeze(dim=1))
     
@@ -34,6 +35,7 @@ if __name__ == '__main__':
     # print(pred.numpy())
     # print(type(pred.numpy().astype(np.uint8)))
     # print(pred.numpy().ndim)
+    tgt_obj = torch.unique(target["label"]).tolist()
 
     print('contains classes: ', torch.unique(target["label"]).tolist())
     print('contains classes prediction: ', torch.unique(pred).tolist())
@@ -44,7 +46,7 @@ if __name__ == '__main__':
 
     # torch softmax -> wahrscheinlichkeiten & argmax-> ein layer, am Ende zu numpy() um from gpu zu numpy 
     #print(pred.shape)
-    ax[1,0].imshow(pred)
-    ax[1,1].imshow(target["label"].squeeze(0).numpy())
-    plt.savefig('data/tless/label_img_test.png')
+    ax[1,0].imshow(pred,vmin=0, vmax=max(tgt_obj)+1, cmap='jet')
+    ax[1,1].imshow(target["label"].squeeze(0).numpy(),vmin=0, vmax=max(tgt_obj)+1, cmap='jet')
+    plt.savefig('data/tless/label_img_test_' + str(img_nr) + '.png')
     plt.close()

@@ -22,10 +22,13 @@ import sys
  
 # setting path
 sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/')
+sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/')
 
 import glob
 import json
 import config
+
+import lib.AugSeg.augseg.dataset.augs_TIBA as img_trsform
 
 class TLESSDataModule(L.LightningDataModule):
     def __init__(self, batch_size, num_workers, root, train_split, val_split, test_split=None):
@@ -147,36 +150,40 @@ class TLESSDataset(torch.utils.data.Dataset):
         boxes = [gt['bbox_visib'] for gt in scene_gt_info]
         #print(boxes)
  
-        img = TF.to_tensor(img)
+        #img = TF.to_tensor(img)
         
 
         if self.step.startswith('train'):
             print('contains classes before: ', torch.unique(label).tolist())
             # Random Resize
             if config.K_INTENSITY > 0:
-                transforms_list = [v2.RandomAutocontrast(p=1), # normalize or maximize??
-                                v2.RandomEqualize(p=1),
-                                v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
-                                v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
-                                v2.RandomPosterize(p=1, bits=2),
-                                #v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
-                                v2.ColorJitter(hue=.3),
-                                v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
-                                v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
-                                v2.ColorJitter(saturation=.5), # in paper color balance???
-                                ]
-                transforms_list = random.sample(transforms_list,config.K_INTENSITY)
-                random.shuffle(transforms_list)
-                print(transforms_list)
-                transform_compose= v2.Compose(transforms_list)
-                #transform_compose=transforms_list[8]
-                #print("min", torch.min(img[1,:,:]))
-                #print("max", torch.max(img[1,:,:]))
-                if random.random() < 0.67:
-                    img = transform_compose(img)
+                strong_img_aug = img_trsform.strong_img_aug(config.K_INTENSITY)
+                img = strong_img_aug(img)
+                # transforms_list = [v2.RandomAutocontrast(p=1), # normalize or maximize??
+                #                 v2.RandomEqualize(p=1),
+                #                 v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
+                #                 v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
+                #                 v2.RandomPosterize(p=1, bits=2),
+                #                 #v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
+                #                 v2.ColorJitter(hue=.3),
+                #                 v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
+                #                 v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
+                #                 v2.ColorJitter(saturation=.5), # in paper color balance???
+                #                 ]
+                # transforms_list = random.sample(transforms_list,config.K_INTENSITY)
+                # random.shuffle(transforms_list)
+                # print(transforms_list)
+                # transform_compose= v2.Compose(transforms_list)
+                # #transform_compose=transforms_list[8]
+                # #print("min", torch.min(img[1,:,:]))
+                # #print("max", torch.max(img[1,:,:]))
+                # if random.random() < 0.67:
+                #     img = transform_compose(img)
                 #print("min", torch.min(img[1,:,:]))
                 #print("max", torch.max(img[1,:,:]))
             
+            img = TF.to_tensor(img)
+
             if True:
                 random_scaler = RandResize(scale=(0.5, 0.9))
                 

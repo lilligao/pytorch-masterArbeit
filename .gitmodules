@@ -16,3 +16,6 @@
 [submodule "lib/SegFormer"]
 	path = lib/SegFormer
 	url = git@github.com:NVlabs/SegFormer.git
+[submodule "lib/AugSeg"]
+	path = lib/AugSeg
+	url = git@github.com:ZhenZHAO/AugSeg.git
