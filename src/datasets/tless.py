@@ -102,8 +102,25 @@ class TLESSDataModule(L.LightningDataModule):
         return torch.stack(imgs), torch.stack(targets)
        
 
+# TLESS DataModule for Mask2Former
+class TLESSInstanceSegDataModule(TLESSDataModule):
+    def collate_fn(self, batch):
+        # Get the pixel values, pixel mask, mask labels, and class labels
+        pixel_values = torch.stack([batch_i[0] for batch_i in batch])
+        target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
+        pixel_mask = target_segmentation!=255
+        mask_labels = [batch_i[1]["mask_labels"] for batch_i in batch]
+        class_labels = [batch_i[1]["labels_detection"] for batch_i in batch]
+        # Return a dictionary of all the collated features
+        return {
+            "pixel_values": pixel_values,
+            "pixel_mask": torch.as_tensor(pixel_mask, dtype=torch.long),
+            "mask_labels": mask_labels,
+            "class_labels": class_labels,
+            "target_segmentation": target_segmentation
+        }
 
- 
+
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
     def __init__(self, root, split, step=None, ind=[]):
@@ -168,14 +185,17 @@ class TLESSDataset(torch.utils.data.Dataset):
             #print(id, np.sum(masks_visib[i].numpy()==255))
             label[masks_visib[i]==255] = id
         
+        labels_detection = torch.as_tensor(obj_ids, dtype=torch.int64)
 
         # Label Encoding
         # void_classes: map the values in label 0-> 255
-        # for void_class in self.void_classes:
-        #     label[label == void_class] = self.ignore_index
-        # # map 1-30 -> 0-29
-        # for valid_class in self.valid_classes:
-        #     label[label == valid_class] = self.class_map[valid_class]
+        if self.ignore_index is not None:
+            for void_class in self.void_classes:
+                label[label == void_class] = self.ignore_index
+            # map 1-30 -> 0-29
+            for valid_class in self.valid_classes:
+                label[label == valid_class] = self.class_map[valid_class]
+                labels_detection[labels_detection == valid_class] = self.class_map[valid_class]
         
         label = label.clone().detach().unsqueeze(0)     #torch.tensor(label, dtype=torch.long).unsqueeze(0)
  
@@ -253,8 +273,8 @@ class TLESSDataset(torch.utils.data.Dataset):
                 label = tf(label)
 
         elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
-            tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
-            tf = transforms.Resize((512, 512), interpolation=InterpolationMode.NEAREST)
+            tf_img = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.BILINEAR)
+            tf = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.NEAREST)
             img = tf_img(img)
             masks = tf(masks)
             masks_visib = tf(masks_visib)
@@ -262,12 +282,13 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
-        target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)
+        target["labels_detection"] = labels_detection
         target["masks"] = masks
         target["masks_visib"] = masks_visib
         target["scene_id"] = int(scene_id)
         target["image_id"] = int(im_id)
         target["label"] = label # masken Bild
+        target["mask_labels"] = torch.as_tensor(masks_visib==255, dtype=torch.float32)
         
         return img, target  #target["label"]
     
