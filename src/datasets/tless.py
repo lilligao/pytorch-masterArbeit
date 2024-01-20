@@ -91,7 +91,7 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=2, shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
+        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     
     def collate_fn(self, batch):
         targets = []

@@ -65,6 +65,8 @@ enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount
 # Before job completes save results on a workspace
 #rsync -av $TMPDIR/pytorch-masterArbeit/checkpoints $(ws_find data-ssd)/checkpoints-${SLURM_JOB_ID}/
 
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/
+
 # copy checkpoints from server
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
 python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json --ann_type='segm'
