@@ -122,7 +122,8 @@ if __name__ == '__main__':
         #loss, logits = self.model(images, labels.squeeze(dim=1))
         # method took to segment all objects in the image
         start_time = time.time()
-        preds = model(img)[0]
+        with torch.no_grad():
+            preds = model(img)[0]
         time_pred = time.time() - start_time
 
         # interpolate output of model

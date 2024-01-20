@@ -29,7 +29,7 @@ def collate_fn(batch):
     # Get the pixel values, pixel mask, mask labels, and class labels
     pixel_values = torch.stack([batch_i[0] for batch_i in batch])
     target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
-    pixel_mask = target_segmentation!=255
+    pixel_mask = target_segmentation!=config.IGNORE_INDEX
     mask_labels = [batch_i[1]["mask_labels"] for batch_i in batch]
     class_labels = [batch_i[1]["labels_detection"] for batch_i in batch]
     # Return a dictionary of all the collated features
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     segmentation_map = target["label"].squeeze(0)
     print("segmentation map unique values", torch.unique(segmentation_map))
      # Get unique ids (class or instance ids based on input)
-    ignore_index = 255
+    ignore_index = config.IGNORE_INDEX
     instance_id_to_semantic_id = dict(zip(range(1,31), range(1,31)))
     reduce_labels = True
     
@@ -145,10 +145,10 @@ if __name__ == '__main__':
         for idx, batch in enumerate(dataloader):
             print("pixel_values",batch["pixel_values"].shape)
             print("pixel_mask",torch.unique(batch["pixel_mask"]))
-            print("masks shape:",batch["mask_labels"][0].shape)
+            print("masks shape:",batch["mask_labels"][0][1].shape)
             print("labels shape:",batch["class_labels"][0].shape)
             print("mask values",torch.unique(batch["mask_labels"][0]).tolist())
-            print(batch["mask_labels"][0].dtype)
+            print(batch["mask_labels"][0].shape)
             print("class_labels",batch["class_labels"])
             # Reset the parameter gradients
             optimizer.zero_grad()

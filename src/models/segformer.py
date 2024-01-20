@@ -190,7 +190,7 @@ class SegFormer(L.LightningModule):
             mask_data = mask_data_tensor.numpy()
             mask_data_label_tensor =  labels.squeeze().cpu()
             mask_data_label = mask_data_label_tensor.numpy()
-            class_labels = dict(zip(range(30), [str(i) for i in range(1,31)]))
+            class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(1,config.NUM_CLASSES+1)]))
             mask_img = wandb.Image(
                     images,
                     masks={

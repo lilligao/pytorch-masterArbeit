@@ -91,7 +91,7 @@ class TLESSDataModule(L.LightningDataModule):
         return DataLoader(self.val_dataset, batch_size=int(self.batch_size / 2), shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=1, shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
+        return DataLoader(self.test_dataset, batch_size=2, shuffle=False, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     
     def collate_fn(self, batch):
         targets = []
@@ -103,12 +103,15 @@ class TLESSDataModule(L.LightningDataModule):
        
 
 # TLESS DataModule for Mask2Former
-class TLESSInstanceSegDataModule(TLESSDataModule):
+class TLESSMask2FormerDataModule(TLESSDataModule):
     def collate_fn(self, batch):
         # Get the pixel values, pixel mask, mask labels, and class labels
         pixel_values = torch.stack([batch_i[0] for batch_i in batch])
         target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
-        pixel_mask = target_segmentation!=255
+        if config.NUM_CLASSES==30:
+            pixel_mask = target_segmentation!=int(config.IGNORE_INDEX)
+        else:
+            pixel_mask = target_segmentation!=0
         mask_labels = [batch_i[1]["mask_labels"] for batch_i in batch]
         class_labels = [batch_i[1]["labels_detection"] for batch_i in batch]
         # Return a dictionary of all the collated features
@@ -189,9 +192,9 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         # Label Encoding
         # void_classes: map the values in label 0-> 255
-        if self.ignore_index is not None:
+        if self.ignore_index is not None and config.NUM_CLASSES==30:
             for void_class in self.void_classes:
-                label[label == void_class] = self.ignore_index
+                label[label == void_class] = int(self.ignore_index)
             # map 1-30 -> 0-29
             for valid_class in self.valid_classes:
                 label[label == valid_class] = self.class_map[valid_class]

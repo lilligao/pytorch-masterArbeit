@@ -98,5 +98,13 @@ Try DETR !!! 但是要注意把背景也做一个分类
 write the chapter about iou, ap & map
 bop challenge paper schauen, ideen klauen I(verdeckte, und texlos)
 wandb sweep
-
+-----------------------------------
+  File "/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/models/mask2former.py", line 298, in test_step
+    mask_img = wandb.Image(
+    raise TypeError("Mask data must be integers between 0 and 255")
+TypeError: Mask data must be integers between 0 and 255 +
+对test map 进行大改动，因为masks不止一个，而是一个列表 +
+mask2Former test step +
+mask2Former paoptic segmentation
+detr panoptic segmentation
 

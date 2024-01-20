@@ -7,11 +7,11 @@ parser = argparse.ArgumentParser(description='Masterarbeit Segformer Parser')
 
 parser.add_argument('--project', type=str, default='Masterarbeit Segformer')
 parser.add_argument('--run', type=str, default='Segformer_train')
-parser.add_argument('--backbone', type=str, default='b5') ## alle backbones ein mal probieren
+parser.add_argument('--backbone', type=str, default='b5') ## b1-b5 for segformer, instance or panoptic for mask2former
 parser.add_argument('--epochs', type=int, default=250)  # gpu: 250, local:1
 parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local:2e-1
 parser.add_argument('--lr_factor', type=int, default=1)
-parser.add_argument('--method', type=str, default='Mask2Former')
+parser.add_argument('--method', type=str, default='SegFormer') #Mask2Former or SegFormer
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr') # sensor daten und synthetic daten probieren ;train_primesense
 parser.add_argument('--val_split', type=str, default='train_pbr')
@@ -19,8 +19,8 @@ parser.add_argument('--test_split', type=str, default='test_primesense')
 parser.add_argument('--val_size', type=str, default=10000)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
-parser.add_argument('--plot_testimg', type=str, default='False')
-parser.add_argument('--mAP_proImg', type=str, default='False')
+parser.add_argument('--plot_testimg', type=str, default='True')
+parser.add_argument('--mAP_proImg', type=str, default='True')
 
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
@@ -88,6 +88,10 @@ if METHOD == 'SegFormer':
     IGNORE_INDEX = None
     TRAIN_SIZE = 512
 elif METHOD == 'Mask2Former':
-    NUM_CLASSES = 30
-    IGNORE_INDEX = 255
     TRAIN_SIZE = 384
+    if BACKBONE == 'instance':
+        NUM_CLASSES = 30
+        IGNORE_INDEX = 255
+    elif BACKBONE == 'panoptic':
+        NUM_CLASSES = 31
+        IGNORE_INDEX = None

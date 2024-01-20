@@ -4,7 +4,7 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 import config
 from models.mask2former import Mask2Former
-from datasets.tless import TLESSInstanceSegDataModule
+from datasets.tless import TLESSMask2FormerDataModule
 import os
 
 
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     else:
         model = Mask2Former()
 
-    data_module = TLESSInstanceSegDataModule(
+    data_module = TLESSMask2FormerDataModule(
         batch_size=config.BATCH_SIZE,
         num_workers=1, #config.NUM_WORKERS
         root=config.ROOT,

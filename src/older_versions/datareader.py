@@ -103,6 +103,8 @@ class TLESSDataset(torch.utils.data.Dataset):
 
         #print("img id:",im_id)
         #print("scene_id",scene_id)
+        ignore_index = int(config.IGNORE_INDEX) if config.IGNORE_INDEX is not None else None
+        print(ignore_index)
  
         # Load mmage
         img = Image.open(img_path).convert("RGB")
