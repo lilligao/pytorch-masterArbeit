@@ -88,7 +88,7 @@ if METHOD == 'SegFormer':
     IGNORE_INDEX = None
     TRAIN_SIZE = 512
 elif METHOD == 'Mask2Former':
-    TRAIN_SIZE = 384
+    TRAIN_SIZE = 512
     if BACKBONE == 'instance':
         NUM_CLASSES = 30
         IGNORE_INDEX = 255

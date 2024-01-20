@@ -75,9 +75,9 @@ class Mask2Former(L.LightningModule):
         target_shape = target.shape
         target_size = [list(target_shape)[1:]]*list(target_shape)[0]
 
-        print("train image shape",pixel_values.shape)
-        print("train pixel mask shape",pixel_mask.shape)
-        print("train targets shape",target.shape)
+        # print("train image shape",pixel_values.shape)
+        # print("train pixel mask shape",pixel_mask.shape)
+        # print("train targets shape",target.shape)
         #print('train: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
         # Forward pass
@@ -91,9 +91,9 @@ class Mask2Former(L.LightningModule):
         loss = outputs.loss
 
         preds = self.processor.post_process_semantic_segmentation(outputs,target_sizes=target_size)
-        print("train preds length",len(preds))
+        # print("train preds length",len(preds))
         preds = torch.stack(preds)
-        print("train preds shape",preds.shape)
+        # print("train preds shape",preds.shape)
         
 
         self.train_iou(preds, target)
@@ -118,9 +118,9 @@ class Mask2Former(L.LightningModule):
         target_shape = target.shape
         target_size = [list(target_shape)[1:]]*list(target_shape)[0]
 
-        print("val pixel_values shape",pixel_values.shape)
-        print("val pixel_mask shape",pixel_mask.shape)
-        print("val targets shape",target.shape)
+        # print("val pixel_values shape",pixel_values.shape)
+        # print("val pixel_mask shape",pixel_mask.shape)
+        # print("val targets shape",target.shape)
         #print('val: ', torch.unique(labels.squeeze(dim=1)).tolist())
 
         # Forward pass
@@ -133,9 +133,9 @@ class Mask2Former(L.LightningModule):
         
         loss = outputs.loss
         preds = self.processor.post_process_semantic_segmentation(outputs,target_sizes=target_size)
-        print("val preds length",len(preds))
+        # print("val preds length",len(preds))
         preds = torch.stack(preds)
-        print("val preds shape",preds.shape)
+        # print("val preds shape",preds.shape)
 
         self.val_iou(preds, target)
         #self.val_ap(preds, target)
