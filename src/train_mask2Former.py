@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     data_module = TLESSMask2FormerDataModule(
         batch_size=config.BATCH_SIZE,
-        num_workers=1, #config.NUM_WORKERS
+        num_workers=config.NUM_WORKERS, #config.NUM_WORKERS
         root=config.ROOT,
         train_split=config.TRAIN_SPLIT,
         val_split=config.VAL_SPLIT,
@@ -25,13 +25,13 @@ if __name__ == '__main__':
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='cpu',    # gpu
+        accelerator='gpu',    # gpu
         strategy='auto',
-        devices=1, #config.DEVICES
+        devices=config.DEVICES, #config.DEVICES
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
-        limit_train_batches=10, # or 0.25 for 25% # cpu:10
-        limit_val_batches=10, # cpu:10
+        limit_train_batches=1.0, # or 0.25 for 25% # cpu:10
+        limit_val_batches=1.0, # cpu:10
         max_steps=-1, # cpu:10
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),

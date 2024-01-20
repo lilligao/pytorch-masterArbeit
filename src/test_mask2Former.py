@@ -31,9 +31,9 @@ if __name__ == '__main__':
      # initialize the Trainer
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='cpu',    # cpu
+        accelerator='gpu',    # cpu
         strategy='auto',
-        devices=1,
+        devices=[0],
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         reload_dataloaders_every_n_epochs=1,

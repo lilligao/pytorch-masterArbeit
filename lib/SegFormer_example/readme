@@ -66,6 +66,7 @@ enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount
 #rsync -av $TMPDIR/pytorch-masterArbeit/checkpoints $(ws_find data-ssd)/checkpoints-${SLURM_JOB_ID}/
 
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/
+/usr/bin/python3.8 src/train_mask2Former.py --root=$HOME/data/tless/ --method=Mask2Former --backbone=instance
 
 # copy checkpoints from server
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
