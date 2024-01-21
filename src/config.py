@@ -12,6 +12,7 @@ parser.add_argument('--epochs', type=int, default=250)  # gpu: 250, local:1
 parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local:2e-1
 parser.add_argument('--lr_factor', type=int, default=1)
 parser.add_argument('--method', type=str, default='SegFormer') #Mask2Former or SegFormer
+parser.add_argument('--strategy', type=str, default='ddp') #ddp for 4 gpus and single for 1 gpu
 parser.add_argument('--root', type=str, default='./data/tless')
 parser.add_argument('--train_split', type=str, default='train_pbr') # sensor daten und synthetic daten probieren ;train_primesense
 parser.add_argument('--val_split', type=str, default='train_pbr')
@@ -41,7 +42,11 @@ PROJECT = args.project
 RUN_NAME = args.run
 
 ## Training & Hyperparameters
-DEVICES = [0, 1, 2, 3]      # use 4 GPUs on the HPC. For local training or ipf server, just use one GPU.
+STRATEGY = args.strategy
+if STRATEGY == "ddp":
+    DEVICES = [0, 1, 2, 3]      # use 4 GPUs on the HPC. For local training or ipf server, just use one GPU.
+else:
+    DEVICES = [0]
 #DEVICES = 1    #cpu
 NUM_EPOCHS = args.epochs
 BACKBONE = args.backbone
