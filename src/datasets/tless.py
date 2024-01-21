@@ -285,6 +285,7 @@ class TLESSDataset(torch.utils.data.Dataset):
             masks = tf(masks)
             masks_visib = tf(masks_visib)
             label = tf(label)
+            pixel_mask = tf(pixel_mask)
 
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)

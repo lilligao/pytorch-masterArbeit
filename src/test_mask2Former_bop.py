@@ -1,3 +1,6 @@
+import sys
+# setting path
+sys.path.append('./')
 from datasets.tless import TLESSDataset
 import numpy as np
 from models.mask2former import Mask2Former
@@ -8,27 +11,9 @@ import json
 from torchmetrics.classification import BinaryJaccardIndex
 import config
 from transformers import MaskFormerImageProcessor
+from lib.bop_toolkit.bop_toolkit_lib.pycoco_utils import rle_to_binary_mask
 
-def binary_mask_to_rle(binary_mask):
-    rle = {'counts': [], 'size': list(binary_mask.shape)}
-    counts = rle.get('counts')
-    for i, (value, elements) in enumerate(groupby(binary_mask.ravel(order='F'))):
-        if i == 0 and value == 1:
-            counts.append(0)
-        counts.append(len(list(elements)))
-    return rle
 
-def rleToMask(rleString,height,width):
-    rows,cols = height,width
-    rleNumbers = [int(numstring) for numstring in rleString.split(' ')]
-    rlePairs = np.array(rleNumbers).reshape(-1,2)
-    img = np.zeros(rows*cols,dtype=np.uint8)
-    for index,length in rlePairs:
-        index -= 1
-        img[index:index+length] = 255
-    img = img.reshape(cols,rows)
-    img = img.T
-    return img
 
 def get_bbox(binary_mask):
     binary_mask = binary_mask.numpy()
@@ -47,11 +32,11 @@ def get_bbox(binary_mask):
     return [x_min, y_min, x_max-x_min, y_max-y_min]
 
 if __name__ == '__main__':
-    assert(config.LOAD_CHECKPOINTS!=None)
-    path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
-    model = Mask2Former.load_from_checkpoint(path)
+    # assert(config.LOAD_CHECKPOINTS!=None)
+    # path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
+    # model = Mask2Former.load_from_checkpoint(path)
     # model = Mask2Former.load_from_checkpoint("./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=107-val_loss=0.14-val_iou=0.76.ckpt")
-
+    model = Mask2Former()
     model= model.model
     if torch.cuda.is_available():
         model.cuda()
@@ -96,7 +81,7 @@ if __name__ == '__main__':
             score_id = infos_preds[j]["score"]
 
             mask_visible_rle = mask_preds[j]
-            mask_visible = rleToMask(mask_visible_rle, height=img_size[0], width=img_size[0])
+            mask_visible = rle_to_binary_mask(mask_visible_rle)
             bbox = get_bbox(mask_visible)
             # plt.imshow(mask_visible)
             # plt.savefig('data/tless/label_img_test_'+str(i)+'_'+str(j)+'.png')

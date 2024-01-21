@@ -29,7 +29,7 @@ def collate_fn(batch):
     # Get the pixel values, pixel mask, mask labels, and class labels
     pixel_values = torch.stack([batch_i[0] for batch_i in batch])
     target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
-    pixel_mask = target_segmentation!=config.IGNORE_INDEX
+    pixel_mask =torch.stack([batch_i[1]["pixel_mask"] for batch_i in batch])
     mask_labels = [batch_i[1]["mask_labels"] for batch_i in batch]
     class_labels = [batch_i[1]["labels_detection"] for batch_i in batch]
     # Return a dictionary of all the collated features

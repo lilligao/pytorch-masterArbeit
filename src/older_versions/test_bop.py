@@ -1,6 +1,7 @@
 import sys
 # setting path
 sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/')
+sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/')
 from datasets.tless import TLESSDataset
 import numpy as np
 from models.segformer import SegFormer
@@ -11,16 +12,7 @@ import json
 from torchmetrics.classification import BinaryJaccardIndex
 import config
 import matplotlib.pyplot as plt
-
-def binary_mask_to_rle(binary_mask):
-    rle = {'counts': [], 'size': list(binary_mask.shape)}
-    counts = rle.get('counts')
-    for i, (value, elements) in enumerate(groupby(binary_mask.ravel(order='F'))):
-        if i == 0 and value == 1:
-            counts.append(0)
-        counts.append(len(list(elements)))
-    return rle
-
+from lib.bop_toolkit.bop_toolkit_lib.pycoco_utils import binary_mask_to_rle
 
 def get_bbox(binary_mask):
     binary_mask = binary_mask.numpy()

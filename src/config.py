@@ -93,10 +93,11 @@ if METHOD == 'SegFormer':
     IGNORE_INDEX = None
     TRAIN_SIZE = 512
 elif METHOD == 'Mask2Former':
-    TRAIN_SIZE = 512
     if BACKBONE == 'instance':
+        TRAIN_SIZE = 512
         NUM_CLASSES = 30
         IGNORE_INDEX = 255
     elif BACKBONE == 'panoptic':
+        TRAIN_SIZE = 640
         NUM_CLASSES = 31
         IGNORE_INDEX = None
