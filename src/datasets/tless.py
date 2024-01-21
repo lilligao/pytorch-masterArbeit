@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
 from torchvision.transforms import v2
 from torchvision.transforms import InterpolationMode
+from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import glob
 import json
@@ -108,16 +109,13 @@ class TLESSMask2FormerDataModule(TLESSDataModule):
         # Get the pixel values, pixel mask, mask labels, and class labels
         pixel_values = torch.stack([batch_i[0] for batch_i in batch])
         target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
-        if config.NUM_CLASSES==30:
-            pixel_mask = target_segmentation!=int(config.IGNORE_INDEX)
-        else:
-            pixel_mask = target_segmentation!=0
+        pixel_mask =torch.stack([batch_i[1]["pixel_mask"] for batch_i in batch])
         mask_labels = [batch_i[1]["mask_labels"] for batch_i in batch]
         class_labels = [batch_i[1]["labels_detection"] for batch_i in batch]
         # Return a dictionary of all the collated features
         return {
             "pixel_values": pixel_values,
-            "pixel_mask": torch.as_tensor(pixel_mask, dtype=torch.long),
+            "pixel_mask": pixel_mask,
             "mask_labels": mask_labels,
             "class_labels": class_labels,
             "target_segmentation": target_segmentation
@@ -211,6 +209,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         #print(boxes)
  
         img = TF.to_tensor(img)
+        pixel_mask = torch.ones_like(img[0],dtype=torch.long)
         
         if self.step.startswith('train'):
             if config.K_INTENSITY > 0:
@@ -246,6 +245,7 @@ class TLESSDataset(torch.utils.data.Dataset):
 
                     border = (pad_width_half, pad_width - pad_width_half, pad_height_half, pad_height - pad_height_half)
                     img = F.pad(img, border, 'constant', 0)
+                    pixel_mask = F.pad(pixel_mask, border, 'constant', 0)
                     masks = F.pad(masks, border, 'constant', 0)
                     masks_visib = F.pad(masks_visib, border, 'constant', 0)
                     label = F.pad(label, border, 'constant', 0)
@@ -257,6 +257,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     masks = TF.hflip(masks)
                     masks_visib = TF.hflip(masks_visib)
                     label = TF.hflip(label)
+                    pixel_mask = TF.hflip(pixel_mask)
 
             # Random Crop
             if str(config.USE_CROPPING).upper()==str('True').upper():
@@ -265,6 +266,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = TF.crop(masks, i, j, h, w)
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
+                pixel_mask = TF.crop(pixel_mask, i, j, h, w) 
                 
             # Normal resize
             if str(config.USE_NORMAL_RESIZE).upper()==str('True').upper():
@@ -274,6 +276,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = tf(masks)
                 masks_visib = tf(masks_visib)
                 label = tf(label)
+                pixel_mask = tf(pixel_mask)
 
         elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
             tf_img = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.BILINEAR)
@@ -292,6 +295,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["image_id"] = int(im_id)
         target["label"] = label # masken Bild
         target["mask_labels"] = torch.as_tensor(masks_visib==255, dtype=torch.float32)
+        target["pixel_mask"] = pixel_mask # masken Bild
         
         return img, target  #target["label"]
     

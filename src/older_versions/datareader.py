@@ -198,12 +198,18 @@ class TLESSDataset(torch.utils.data.Dataset):
                     pad_width = max(512 - width, 0)
                     pad_height_half = pad_height // 2
                     pad_width_half = pad_width // 2
+                    pixel_mask = torch.ones_like(img[0],dtype=torch.long)
+                    print("pixel mask shape",pixel_mask.shape)
 
                     border = (pad_width_half, pad_width - pad_width_half, pad_height_half, pad_height - pad_height_half)
                     img = F.pad(img, border, 'constant', 0)
+                    pixel_mask = F.pad(pixel_mask, border, 'constant', 0)
+                    print("pixel mask shape after padding",pixel_mask.shape)
+                    print("pixel mask sum",torch.sum(pixel_mask))
                     masks = F.pad(masks, border, 'constant', 0)
                     masks_visib = F.pad(masks_visib, border, 'constant', 0)
                     label = F.pad(label, border, 'constant', self.ignore_index)
+                    
             print('contains classes after padding: ', torch.unique(label).tolist())
             
             # Random Horizontal Flip
@@ -213,6 +219,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     masks = TF.hflip(masks)
                     masks_visib = TF.hflip(masks_visib)
                     label = TF.hflip(label)
+                    pixel_mask = TF.hflip(pixel_mask)
             print('contains classes after flipping: ', torch.unique(label).tolist())
             # Random Crop
             if str(config.USE_CROPPING).upper()==str('True').upper():
@@ -222,6 +229,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = TF.crop(masks, i, j, h, w)
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
+                pixel_mask = TF.crop(pixel_mask, i, j, h, w) 
             print('contains classes after random cropping: ', torch.unique(label).tolist())
         elif self.step.startswith('val'):
                 tf_img = transforms.Resize((512, 512), interpolation=InterpolationMode.BILINEAR)
@@ -230,10 +238,12 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = tf(masks)
                 masks_visib = tf(masks_visib)
                 label = tf(label)
+                pixel_mask = torch.ones_like(img[0],dtype=torch.long)
       
       
-
- 
+        print("pixel mask shape after padding",pixel_mask.shape)
+        print("pixel mask sum",torch.sum(pixel_mask))
+        print("img[0] shape", img[0].shape)
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
         target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)
@@ -242,6 +252,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["scene_id"] = torch.tensor([int(scene_id)])
         target["image_id"] = torch.tensor([int(im_id)])
         target["label"] = label # masken Bild
+        target["pixel_mask"] = pixel_mask # masken Bild
         
         return img, target  #target["label"]
     

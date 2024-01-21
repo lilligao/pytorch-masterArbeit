@@ -108,3 +108,9 @@ mask2Former test step +
 mask2Former paoptic segmentation
 detr panoptic segmentation
 
+---------------------------------
+mask2former: 
+crop size: 512/640 or 1024???
+learning rate
+swin-b, swin-l, swin-t, swin-s
+
