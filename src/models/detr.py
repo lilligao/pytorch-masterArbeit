@@ -116,6 +116,7 @@ class Detr(L.LightningModule):
         # print("val pixel_mask shape",pixel_mask.shape)
         # print("val targets shape",target.shape)
         #print('val: ', torch.unique(labels.squeeze(dim=1)).tolist())
+        print("label boxes",labels[0]["boxes"])
 
         # Forward pass
         outputs = self.model(
