@@ -27,10 +27,9 @@ class Detr(L.LightningModule):
         config_detr.label2id = label2id
         config_detr.return_dict = True
         
-
         # Use the config object to initialize a MaskFormer model with randomized weights
         self.model = DetrForSegmentation(config_detr)
-
+        print(self.model)
 
         self.optimizer = torch.optim.AdamW(params=[
             {'params': self.model.parameters(), 'lr': config.LEARNING_RATE_BACKBONE},
@@ -49,7 +48,6 @@ class Detr(L.LightningModule):
         self.test_map = MeanAveragePrecision(iou_type="segm")
         self.test_map.compute_with_cache = False
 
-        ignore_index = int(config.IGNORE_INDEX) if config.IGNORE_INDEX is not None else None
         self.processor = DetrImageProcessor(
             do_resize=False,
             do_rescale=False,
