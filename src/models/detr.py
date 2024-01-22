@@ -17,14 +17,14 @@ class Detr(L.LightningModule):
         model_name = "facebook/detr-resnet-50-panoptic"
         config_detr = DetrConfig.from_pretrained(model_name)
         if config.NUM_CLASSES==30:
-            id2label = dict(zip(range(30), range(30))) #1,31
+            id2label = dict(zip(range(30), range(1,31)))
         else:
             id2label = dict(zip(range(31), range(31)))
         label2id = {v: k for k, v in id2label.items()}
         # Edit MaskFormer config labels
-        config_detr.num_labels = int(config.NUM_CLASSES)
-        # config_detr.id2label = id2label
-        # config_detr.label2id = label2id
+        config_detr.num_labels = config.NUM_CLASSES
+        config_detr.id2label = id2label
+        config_detr.label2id = label2id
         config_detr.return_dict = True
         
 
