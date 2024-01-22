@@ -30,9 +30,15 @@ class Detr(L.LightningModule):
         # Use the config object to initialize a MaskFormer model with randomized weights
         self.model = DetrForSegmentation(config_detr)
 
-        self.optimizer = torch.optim.AdamW(params=[
-            {'params': self.model.parameters(), 'lr': config.LEARNING_RATE_BACKBONE},
-        ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
+        param_dicts = [
+              {"params": [p for n, p in self.named_parameters() if "backbone" not in n and p.requires_grad]},
+              {
+                  "params": [p for n, p in self.named_parameters() if "backbone" in n and p.requires_grad],
+                  "lr": config.LEARNING_RATE_BACKBONE,
+              },
+        ]
+        self.optimizer = torch.optim.AdamW(param_dicts, lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
+
         # lightning: config optimizers -> scheduler anlegen!!!
         # metrics for training
         if config.NUM_CLASSES==30 and config.IGNORE_INDEX is not None:

@@ -113,17 +113,22 @@ mask2former:
 crop size: 512/640 or 1024???
 learning rate
 swin-b, swin-l, swin-t, swin-s
-/home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
-
-if torch._six not found: pip install --upgrade timm==0.5.4
-Detr: 30 or 31 classes!! panoptic or object detection or instance segmentation
+what is learning rate multiplier?
+------
+detr: how much classes? 30 or 31 classes!! 
+which post_process funcion? panoptic or object detection or instance segmentation
+which base model?
 learning rate and learning rate backbone!!! & weight_decay
+------------------------------------------------
+/home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
+if torch._six not found: pip install --upgrade timm==0.5.4
+
 distributed learning for mask2former & detr: change libary!!! 
 
-hidden_states: torch.Tensor,
-        attention_mask: torch.Tensor,
-        object_queries: torch.Tensor = None,
-        output_attentions: bool = False,
+query_states = torch.as_tensor(query_states, dtype=torch.float64)
+key_states = torch.as_tensor(key_states, dtype=torch.float64)
+value_states = torch.as_tensor(value_states, dtype=torch.float64)
 
 /usr/bin/python3.8 src/train_mask2Former.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single
-/usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single
+/usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/
+/usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/ --project='Detr Train' --run=instance_test
