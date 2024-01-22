@@ -93,10 +93,10 @@ if __name__ == '__main__':
     model_name = "facebook/detr-resnet-50-panoptic"
     # Get the MaskFormer config and print it
     config_detr = DetrConfig.from_pretrained(model_name)
-    id2label = dict(zip(range(31), range(31)))
+    id2label = dict(zip(range(30), range(30)))
     label2id = {v: k for k, v in id2label.items()}
     # Edit MaskFormer config labels
-    config_detr.num_labels = 31
+    config_detr.num_labels = 30
     config_detr.id2label = id2label
     config_detr.label2id = label2id
 
