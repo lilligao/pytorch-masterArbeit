@@ -52,9 +52,9 @@ if __name__ == '__main__':
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='gpu',    # cpu
+        accelerator='cpu',    # cpu
         strategy='auto',
-        devices=config.DEVICES,
+        devices=1,
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         limit_train_batches=1.0, # or 0.25 for 25% # cpu:10
