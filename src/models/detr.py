@@ -97,10 +97,10 @@ class Detr(L.LightningModule):
 
         # gpu:  on_step = False, on_epoch = True, cpu: on_step=True, on_epoch=False
         # !!! Metriken!!!
-        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
         for k,v in loss_dict.items():
           self.log("train_" + k, v.item())
-        self.log('train_iou', self.train_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_iou', self.train_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
         return loss
     
 
@@ -135,10 +135,10 @@ class Detr(L.LightningModule):
         self.val_iou(preds, target)
 
         # on epoche = True
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
         for k,v in loss_dict.items():
           self.log("val_" + k, v.item())
-        self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
      
     
 
@@ -302,5 +302,6 @@ class Detr(L.LightningModule):
         iterations_per_epoch = math.ceil(number_train_images / (config.BATCH_SIZE * len(config.DEVICES))) # gpu
         #iterations_per_epoch = math.ceil(config.NUMBER_TRAIN_IMAGES / (config.BATCH_SIZE * config.DEVICES)) # cpu
         total_iterations = iterations_per_epoch * self.trainer.max_epochs # for server with gpu
-        scheduler = PolyLR(self.optimizer, max_iterations=total_iterations, power=1.0)
-        return [self.optimizer], [{'scheduler': scheduler, 'interval': 'step'}]
+        optimizer = self.optimizer
+        scheduler = PolyLR(optimizer, max_iterations=total_iterations, power=1.0)
+        return [optimizer], [{'scheduler': scheduler, 'interval': 'step'}]
