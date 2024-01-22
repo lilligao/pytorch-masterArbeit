@@ -120,6 +120,10 @@ Detr: 30 or 31 classes!! panoptic or object detection or instance segmentation
 learning rate and learning rate backbone!!! & weight_decay
 distributed learning for mask2former & detr: change libary!!! 
 
-
+hidden_states: torch.Tensor,
+        attention_mask: torch.Tensor,
+        object_queries: torch.Tensor = None,
+        output_attentions: bool = False,
 
 /usr/bin/python3.8 src/train_mask2Former.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single
+/usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single
