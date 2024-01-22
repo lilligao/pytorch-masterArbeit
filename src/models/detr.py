@@ -113,29 +113,30 @@ class Detr(L.LightningModule):
         #print("label boxes",labels[0]["boxes"])
 
         # Forward pass
-        outputs = self.model(
-            pixel_values=pixel_values,
-            pixel_mask=pixel_mask,
-            labels = labels
-        )
-    
-        loss = outputs.loss
-        loss_dict = outputs.loss_dict
+        if not self.trainer.sanity_checking:
+            outputs = self.model(
+                pixel_values=pixel_values,
+                pixel_mask=pixel_mask,
+                labels = labels
+            )
         
-        preds = self.processor.post_process_semantic_segmentation(outputs,target_sizes=target_size)
-        # print("val preds length",len(preds))
-        preds = torch.stack(preds)
-        # print("val preds shape",preds.shape)
+            loss = outputs.loss
+            loss_dict = outputs.loss_dict
+            
+            preds = self.processor.post_process_semantic_segmentation(outputs,target_sizes=target_size)
+            # print("val preds length",len(preds))
+            preds = torch.stack(preds)
+            # print("val preds shape",preds.shape)
 
-        self.val_iou(preds, target)
+            self.val_iou(preds, target)
 
-        # on epoche = True
-        self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
-        for k,v in loss_dict.items():
-          self.log("val_" + k, v.item())
-        self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
-     
-    
+            # on epoche = True
+            self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
+            for k,v in loss_dict.items():
+            self.log("val_" + k, v.item())
+            self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
+        
+        
 
     def test_step(self, batch, batch_idx):
         ua = str("true").upper()
