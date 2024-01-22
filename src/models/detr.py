@@ -29,7 +29,6 @@ class Detr(L.LightningModule):
         
         # Use the config object to initialize a MaskFormer model with randomized weights
         self.model = DetrForSegmentation(config_detr)
-        print(self.model)
 
         self.optimizer = torch.optim.AdamW(params=[
             {'params': self.model.parameters(), 'lr': config.LEARNING_RATE_BACKBONE},
