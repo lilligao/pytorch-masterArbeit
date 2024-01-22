@@ -123,12 +123,15 @@ if __name__ == '__main__':
             
             # Reset the parameter gradients
             optimizer.zero_grad()
-    
-            # Forward pass
+
+            pixel_values = batch["pixel_values"].to(device)
+            pixel_mask = batch["pixel_mask"].to(device)
+            labels = [{k: v.to(device) for k, v in t.items()} for t in batch["labels"]] # these are in DETR format, resized + normalized
+                    # Forward pass
             outputs = model(
-                pixel_values=batch["pixel_values"],
-                pixel_mask=batch["pixel_mask"],
-                labels = batch["labels"]
+                pixel_values=pixel_values,
+                pixel_mask=pixel_mask,
+                labels = labels
             )
             # Backward propagation
             loss = outputs.loss
@@ -141,5 +144,5 @@ if __name__ == '__main__':
             # Optimization
             optimizer.step()
         # Average train epoch loss
-        train_loss = sum(train_loss)/len(train_loss)
+        #train_loss = sum(train_loss)/len(train_loss)
 
