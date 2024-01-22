@@ -113,4 +113,5 @@ mask2former:
 crop size: 512/640 or 1024???
 learning rate
 swin-b, swin-l, swin-t, swin-s
+/home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
 

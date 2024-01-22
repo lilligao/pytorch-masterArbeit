@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
 from torchvision.transforms import v2
 from torchvision.transforms import InterpolationMode
-from typing import Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
+from transformers.image_transforms import corners_to_center_format
 
 import glob
 import json
@@ -205,9 +205,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         scene_gt_infos_item = self.scene_gt_infos[int(scene_id)] if self.split == 'train_pbr' else self.scene_gt_infos[int(scene_id)-1]
         with open(scene_gt_infos_item) as f:
             scene_gt_info = json.load(f)[str(int(im_id))]
-        boxes = [gt['bbox_visib'] for gt in scene_gt_info]
-        #print(boxes)
- 
+        boxes = np.asarray([gt['bbox_visib'] for gt in scene_gt_info])
         img = TF.to_tensor(img)
         pixel_mask = torch.ones_like(img[0],dtype=torch.long)
         
@@ -233,7 +231,7 @@ class TLESSDataset(torch.utils.data.Dataset):
             # Random Resize
             if str(config.USE_SCALING).upper()==str('True').upper():
                 random_scaler = RandResize(scale=(0.5, 2.0))
-                img, masks, masks_visib, label = random_scaler(img.unsqueeze(0).float(), masks.unsqueeze(0).float(), masks_visib.unsqueeze(0).float(), label.unsqueeze(0).float())
+                img, masks, masks_visib, label, boxes = random_scaler(img.unsqueeze(0).float(), masks.unsqueeze(0).float(), masks_visib.unsqueeze(0).float(), label.unsqueeze(0).float(), boxes)
 
                 # Pad image if it's too small after the random resize
                 if img.shape[1] < config.TRAIN_SIZE or img.shape[2] < config.TRAIN_SIZE:
@@ -249,6 +247,8 @@ class TLESSDataset(torch.utils.data.Dataset):
                     masks = F.pad(masks, border, 'constant', 0)
                     masks_visib = F.pad(masks_visib, border, 'constant', 0)
                     label = F.pad(label, border, 'constant', 0)
+                    boxes[:, 0] += pad_width_half # add hegiht to top-left corner
+                    boxes[:, 1] += pad_height_half
 
             # Random Horizontal Flip
             if str(config.USE_FLIPPING).upper()==str('True').upper():
@@ -258,6 +258,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                     masks_visib = TF.hflip(masks_visib)
                     label = TF.hflip(label)
                     pixel_mask = TF.hflip(pixel_mask)
+                    boxes[:, 0] = img.size(dim=2) - boxes[:, 0] -  boxes[:, 2] # img_width - x_topleft - width_bbox
 
             # Random Crop
             if str(config.USE_CROPPING).upper()==str('True').upper():
@@ -267,6 +268,8 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks_visib = TF.crop(masks_visib, i, j, h, w)
                 label = TF.crop(label, i, j, h, w) 
                 pixel_mask = TF.crop(pixel_mask, i, j, h, w) 
+                boxes[:, 0] = boxes[:, 0]- j
+                boxes[:, 1] = boxes[:, 1]- i
                 
             # Normal resize
             if str(config.USE_NORMAL_RESIZE).upper()==str('True').upper():
@@ -277,6 +280,9 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks_visib = tf(masks_visib)
                 label = tf(label)
                 pixel_mask = tf(pixel_mask)
+                scale_factor_w = config.TRAIN_SIZE / img.size(dim=2)
+                scale_factor_h = config.TRAIN_SIZE/ img.size(dim=1)
+                boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
 
         elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
             tf_img = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.BILINEAR)
@@ -286,9 +292,27 @@ class TLESSDataset(torch.utils.data.Dataset):
             masks_visib = tf(masks_visib)
             label = tf(label)
             pixel_mask = tf(pixel_mask)
+            boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
+
+        # guard against no boxes via resizing
+        image_height = img.size(dim=1)
+        image_width =  img.size(dim=2)
+        boxes = torch.as_tensor(boxes, dtype=torch.float32).reshape(-1, 4)
+        boxes[:, 2:] += boxes[:, :2] # add hegiht to top-left corner
+        boxes[:, 0::2].clamp_(min=0, max=image_width) # column 0 and 2
+        boxes[:, 1::2].clamp_(min=0, max=image_height) # column 1 and 3
+        keep = (boxes[:, 3] > boxes[:, 1]) & (boxes[:, 2] > boxes[:, 0])
+
+        boxes = boxes[keep]
+        labels_detection = labels_detection[keep]
+        masks = masks[keep]
+        masks_visib = masks_visib[keep]
+
+        boxes = corners_to_center_format(boxes) # top left bottom  to center of the box and its the width
+        boxes /= torch.as_tensor([config.TRAIN_SIZE, config.TRAIN_SIZE, config.TRAIN_SIZE, config.TRAIN_SIZE], dtype=torch.float32)
 
         target = {}
-        target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
+        target["boxes"] = boxes
         target["labels_detection"] = labels_detection
         target["masks"] = masks
         target["masks_visib"] = masks_visib
@@ -310,7 +334,7 @@ class RandResize(object):
         self.scale = scale
         self.aspect_ratio = aspect_ratio
 
-    def __call__(self, image, masks, masks_visib, label):
+    def __call__(self, image, masks, masks_visib, label, boxes):
         if random.random() < 0.5:
             temp_scale = self.scale[0] + (1.0 - self.scale[0]) * random.random()
         else:
@@ -335,8 +359,9 @@ class RandResize(object):
         masks = F.interpolate(masks, size=(new_h, new_w),mode="nearest")
         masks_visib = F.interpolate(masks_visib, size=(new_h, new_w), mode="nearest")
         label = F.interpolate(label, size=(new_h, new_w), mode="nearest")
+        scaled_boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
 
-        return image.squeeze(), masks.squeeze(0), masks_visib.squeeze(0), label.squeeze(0).to(dtype=torch.int64)
+        return image.squeeze(), masks.squeeze(0), masks_visib.squeeze(0), label.squeeze(0).to(dtype=torch.int64), scaled_boxes
 
 
 def decode_segmentation_map(segmentation_map):
@@ -356,30 +381,3 @@ def decode_segmentation_map(segmentation_map):
     rgb = TF.to_tensor(rgb)
 
     return rgb
-
-
-# if __name__ == '__main__':
-#     dataset = TLESSDataset(root='./data/tless', split='train_pbr')
-#     num_imgs = len(dataset)
-#     img, target = dataset[12]
-#     unique_values = set()
-#     for mask in target['masks']:
-#         unique_values.update(torch.unique(mask).tolist())
-    
-#     image = TF.to_tensor(img)
-#     print("iimage:", type(img))
-#     print("label:", type(target["label"]))
-#     print("mask:", type(target["masks"]))
-#     print("mask_visib:", type(target["masks_visib"]))
-#     print('num_imgs:',num_imgs)
-#     print('labels: ', unique_values)
-#     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
-#     print('test: ', torch.unique(target["label"]).tolist())
-#     print('image:', img.shape)
-#     print('label:', target["label"].shape)
-    
-#     label_array = target["label"].numpy()
-#     img_array = np.array(img)
-#     print(label_array)
-#     print('label array:', label_array.shape)
-    
