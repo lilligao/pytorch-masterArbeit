@@ -67,7 +67,7 @@ enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount
 
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/
 /usr/bin/python3.8 src/train_mask2Former.py --root=$HOME/data/tless/ --method=Mask2Former --backbone=instance --project='Mask2Former Train' --run=instanceSeg --lr=1e-4 --weight_decay=0.05
-/usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single --project='Detr Train' --run=panoptic --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 
+/usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4  --strategy=single  --project='Detr Train' --run=panoptic 
 cd $HOME/pytorch-masterArbeit/
 /usr/bin/python3.8 src/train.py --root=$TMPDIR/data/tless/ --project='SegFormer_b5' --run=b5_pbrPrimesense_k_intenstiy_1 --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b5 --k_intensity=3 --gradient_clip=0.5
 --project='SegFormer_b5' --run=b4_pbrPrimesense_lr_6e-5_lr_factor_1 --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b4 --lr_factor=1

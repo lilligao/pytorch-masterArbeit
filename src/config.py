@@ -108,7 +108,7 @@ elif METHOD == 'Detr':
     TRAIN_SIZE = 512
     if BACKBONE == 'instance':
         NUM_CLASSES = 30
-        IGNORE_INDEX = None
+        IGNORE_INDEX = 255
     elif BACKBONE == 'panoptic':
         NUM_CLASSES = 31
         IGNORE_INDEX = None

@@ -17,7 +17,7 @@ class Detr(L.LightningModule):
         model_name = "facebook/detr-resnet-50-panoptic"
         config_detr = DetrConfig.from_pretrained(model_name)
         if config.NUM_CLASSES==30:
-            id2label = dict(zip(range(1,31), range(1,31)))
+            id2label = dict(zip(range(30), range(1,31)))
         else:
             id2label = dict(zip(range(31), range(31)))
         label2id = {v: k for k, v in id2label.items()}
