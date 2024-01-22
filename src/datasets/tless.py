@@ -122,6 +122,42 @@ class TLESSMask2FormerDataModule(TLESSDataModule):
         }
 
 
+# TLESS DataModule for Detr
+class TLESSDetrDataModule(TLESSDataModule):
+    def collate_fn(self, batch):
+         # Get the pixel values, pixel mask, mask labels, and class labels
+        pixel_values = torch.stack([batch_i[0] for batch_i in batch])
+        pixel_mask =torch.stack([batch_i[1]["pixel_mask"] for batch_i in batch])
+        target_segmentation = torch.stack([batch_i[1]["label"].squeeze(0) for batch_i in batch])
+        labels = []
+        for batch_i in batch:
+            new_target = {}
+            mask_labels = batch_i[1]["mask_labels"]
+            area_list = []
+            for j in range(mask_labels.size(0)):
+                area = mask_labels[j].sum()
+                area_list.append(area)
+
+            areas = torch.as_tensor(area_list,dtype=torch.float32)
+            keep = areas>1
+            new_target["image_id"] = batch_i[1]["scene_id"]*1000+batch_i[1]["image_id"]      
+            new_target["class_labels"] = batch_i[1]["labels_detection"][keep] # delete masks that are not there after resize
+            new_target["boxes"] = batch_i[1]["boxes"][keep] # resize / crop bounding box!
+            new_target["area"] = areas[keep]
+            new_target["iscrowd"] = torch.zeros_like(new_target["area"])
+            new_target["masks"] = mask_labels[keep]
+            labels.append(new_target)
+        
+        # Return a dictionary of all the collated features
+        return {
+            "pixel_values": pixel_values,
+            "pixel_mask": torch.as_tensor(pixel_mask, dtype=torch.long),
+            "labels": labels,
+            "target_segmentation": target_segmentation
+        }
+
+
+
 # TLESS dataset class for detector training
 class TLESSDataset(torch.utils.data.Dataset):
     def __init__(self, root, split, step=None, ind=[]):

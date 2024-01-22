@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, random_split, ConcatDataset
 from torchvision import transforms
 from torchvision.transforms import v2
 from torchvision.transforms import InterpolationMode
-from transformers import Mask2FormerConfig, Mask2FormerForUniversalSegmentation, Mask2FormerModel
+from transformers import DetrConfig, DetrForSegmentation, DetrModel
 from matplotlib.patches import Rectangle
 import glob
 import json
@@ -85,6 +85,61 @@ if __name__ == '__main__':
     #     ax.add_patch(rect)
     #plt.show()
     dataloader =DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=1, drop_last=False, collate_fn=collate_fn)
-    for data in dataloader:
-        break
+
+    model = DetrForSegmentation.from_pretrained("facebook/detr-resnet-50-panoptic")
+       
+
+     # Define the name of the model
+    model_name = "facebook/detr-resnet-50-panoptic"
+    # Get the MaskFormer config and print it
+    config_detr = DetrConfig.from_pretrained(model_name)
+    id2label = dict(zip(range(31), range(31)))
+    label2id = {v: k for k, v in id2label.items()}
+    # Edit MaskFormer config labels
+    config_detr.num_labels = 31
+    config_detr.id2label = id2label
+    config_detr.label2id = label2id
+
+    # Use the config object to initialize a MaskFormer model with randomized weights
+    model = DetrForSegmentation(config_detr)
+
+    # Use GPU if available
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    # Initialize Adam optimizer
+    optimizer = torch.optim.Adam(model.parameters(), lr=5e-5)
+    # Set number of epochs and batch size
+    num_epochs = 2
+    for epoch in range(num_epochs):
+        print(f"Epoch {epoch} | Training")
+        # Set model in training mode 
+        model.train()
+        train_loss, val_loss = [], []
+        # Training loop
+        for idx, batch in enumerate(dataloader):
+            print("pixel_values",batch["pixel_values"].shape)
+            print("pixel_mask",batch["pixel_mask"].shape)
+            print("labels shape:",len(batch["labels"]))          
+            
+            # Reset the parameter gradients
+            optimizer.zero_grad()
+    
+            # Forward pass
+            outputs = model(
+                pixel_values=batch["pixel_values"],
+                pixel_mask=batch["pixel_mask"],
+                labels = batch["labels"]
+            )
+            # Backward propagation
+            loss = outputs.loss
+            loss_dict = outputs.loss_dict
+            print(loss_dict)
+            train_loss.append(loss.item())
+            loss.backward()
+
+            print("  Training loss: ", round(sum(train_loss)/len(train_loss), 6))
+            # Optimization
+            optimizer.step()
+        # Average train epoch loss
+        train_loss = sum(train_loss)/len(train_loss)
 

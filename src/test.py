@@ -4,10 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import config
 from models.segformer import SegFormer
+from models.mask2former import Mask2Former
+from models.detr import Detr
 from torch.utils.data import DataLoader
 import train
 import torch
-from datasets.tless import TLESSDataModule
+from datasets.tless import TLESSDataModule, TLESSMask2FormerDataModule, TLESSDetrDataModule
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 import os
@@ -19,15 +21,30 @@ if __name__ == '__main__':
     path = config.LOAD_CHECKPOINTS # path to the root dir from where you want to start searching
     chkpt = list(glob.glob(path))
 
-    data_module = TLESSDataModule(
-        batch_size=1,
-        num_workers=config.NUM_WORKERS,
-        root=config.ROOT,
-        train_split=config.TRAIN_SPLIT,
-        val_split=config.VAL_SPLIT,
-        test_split=config.TEST_SPLIT
-    )
-
+    if config.METHOD == "SegFormer":
+        data_module = TLESSDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS,
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
+    elif config.METHOD == "Mask2Former":
+        data_module = TLESSMask2FormerDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS, #config.NUM_WORKERS
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
+    elif config.METHOD == "Detr":
+        data_module = TLESSDetrDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS, #config.NUM_WORKERS
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
      # initialize the Trainer
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
@@ -49,7 +66,13 @@ if __name__ == '__main__':
     )
     for i in range(len(chkpt)):
         print("checkpoint: ", chkpt[i])
-        model = SegFormer.load_from_checkpoint(chkpt[i])
+        if config.METHOD == "SegFormer":
+            model = SegFormer.load_from_checkpoint(chkpt[i])
+        elif config.METHOD == "Mask2Former":
+            model = Mask2Former.load_from_checkpoint(chkpt[i])
+        elif config.METHOD == "Detr":
+            model = Detr.load_from_checkpoint(chkpt[i])
+        
         #test the model
         trainer.test(model, datamodule=data_module,verbose=True) 
 

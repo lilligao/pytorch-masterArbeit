@@ -4,24 +4,51 @@ from lightning.pytorch.callbacks import ModelCheckpoint, LearningRateMonitor
 
 import config
 from models.segformer import SegFormer
-from datasets.tless import TLESSDataModule
+from models.mask2former import Mask2Former
+from models.detr import Detr
+from datasets.tless import TLESSDataModule, TLESSMask2FormerDataModule, TLESSDetrDataModule
 import os
 
 
 if __name__ == '__main__':
     L.seed_everything(42)   # for reproducibility for training, aus welchen Seed, Zufaelligkeit raus, wichtig fuer data augmentation (random gewichte)
-    if config.LOAD_CHECKPOINTS is not None:
-        model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
-    else:
-        model = SegFormer()
-
-    data_module = TLESSDataModule(
-        batch_size=config.BATCH_SIZE,
-        num_workers=config.NUM_WORKERS,
-        root=config.ROOT,
-        train_split=config.TRAIN_SPLIT,
-        val_split=config.VAL_SPLIT,
-    )
+    if config.METHOD == "SegFormer":
+        if config.LOAD_CHECKPOINTS is not None:
+            model = SegFormer.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+        else:
+            model = SegFormer()
+        data_module = TLESSDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS,
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
+    elif config.METHOD == "Mask2Former":
+        if config.LOAD_CHECKPOINTS is not None:
+            model = Mask2Former.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+        else:
+            model = Mask2Former()
+        data_module = TLESSMask2FormerDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS, #config.NUM_WORKERS
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
+    elif config.METHOD == "Detr":
+        if config.LOAD_CHECKPOINTS is not None:
+            model = Detr.load_from_checkpoint(config.LOAD_CHECKPOINTS)
+        else:
+            model = Detr()
+        data_module = TLESSDetrDataModule(
+            batch_size=config.BATCH_SIZE,
+            num_workers=config.NUM_WORKERS, #config.NUM_WORKERS
+            root=config.ROOT,
+            train_split=config.TRAIN_SPLIT,
+            val_split=config.VAL_SPLIT,
+        )
+    
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
