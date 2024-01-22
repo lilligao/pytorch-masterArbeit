@@ -140,7 +140,7 @@ class TLESSDetrDataModule(TLESSDataModule):
 
             areas = torch.as_tensor(area_list,dtype=torch.float32)
             keep = areas>1
-            new_target["image_id"] = batch_i[1]["scene_id"]*1000+batch_i[1]["image_id"]      
+            #new_target["image_id"] = batch_i[1]["scene_id"]*1000+batch_i[1]["image_id"]      
             new_target["class_labels"] = batch_i[1]["labels_detection"][keep] # delete masks that are not there after resize
             new_target["boxes"] = batch_i[1]["boxes"][keep] # resize / crop bounding box!
             new_target["area"] = areas[keep]
