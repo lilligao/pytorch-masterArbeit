@@ -22,9 +22,9 @@ class Detr(L.LightningModule):
             id2label = dict(zip(range(31), range(31)))
         label2id = {v: k for k, v in id2label.items()}
         # Edit MaskFormer config labels
-        config_detr.num_labels = config.NUM_CLASSES
-        config_detr.id2label = id2label
-        config_detr.label2id = label2id
+        config_detr.num_labels = int(config.NUM_CLASSES)
+        # config_detr.id2label = id2label
+        # config_detr.label2id = label2id
         config_detr.return_dict = True
         
 
