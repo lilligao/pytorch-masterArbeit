@@ -36,7 +36,7 @@ class Detr(L.LightningModule):
 
 
         self.optimizer = torch.optim.AdamW(params=[
-            {'params': self.model.parameters(), 'lr': config.LEARNING_RATE},
+            {'params': self.model.parameters(), 'lr': config.LEARNING_RATE_BACKBONE},
         ], lr=config.LEARNING_RATE, weight_decay=config.WEIGHT_DECAY)
         # lightning: config optimizers -> scheduler anlegen!!!
         # metrics for training

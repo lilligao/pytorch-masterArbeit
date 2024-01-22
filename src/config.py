@@ -11,6 +11,7 @@ parser.add_argument('--backbone', type=str, default='b5') ## b1-b5 for segformer
 parser.add_argument('--epochs', type=int, default=250)  # gpu: 250, local:1
 parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local:2e-1
 parser.add_argument('--lr_factor', type=int, default=1)
+parser.add_argument('--lr_backbone', type=float, default=6e-5)
 parser.add_argument('--weight_decay', type=float, default=0.01)
 parser.add_argument('--method', type=str, default='SegFormer') #Mask2Former or SegFormer or Detr
 parser.add_argument('--strategy', type=str, default='ddp') #ddp for 4 gpus and single for 1 gpu
@@ -56,6 +57,7 @@ WEIGHT_DECAY = args.weight_decay
 PRECISION = '16-mixed'   #gpu: '16-mixed', cpu: bf16-mixed
 LEARNING_RATE = args.lr
 LEARNING_RATE_FACTOR = args.lr_factor
+LEARNING_RATE_BACKBONE = args.lr_backbone
 
 ## Data Augmentation
 USE_SCALING = args.use_scaling
