@@ -1,6 +1,6 @@
 import sys
 # setting path
-sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/')
+sys.path.append('./src/')
 import math
 import os
 import random
