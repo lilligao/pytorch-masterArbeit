@@ -64,7 +64,7 @@ class Detr(L.LightningModule):
     def training_step(self, batch, batch_index):
         pixel_values=batch["pixel_values"]
         pixel_mask=batch["pixel_mask"]
-        labels=batch["labels"]
+        labels = [{k: v.to(self.device) for k, v in t.items()} for t in batch["labels"]]
         target = batch["target_segmentation"]
         target_shape = target.shape
         target_size = [list(target_shape)[1:]]*list(target_shape)[0]
@@ -107,7 +107,7 @@ class Detr(L.LightningModule):
     def validation_step(self, batch, batch_index):
         pixel_values=batch["pixel_values"]
         pixel_mask=batch["pixel_mask"]
-        labels=batch["labels"]
+        labels = [{k: v.to(self.device) for k, v in t.items()} for t in batch["labels"]]
         target = batch["target_segmentation"]
         target_shape = target.shape
         target_size = [list(target_shape)[1:]]*list(target_shape)[0]
@@ -147,7 +147,7 @@ class Detr(L.LightningModule):
         #images, _, labels = batch
         pixel_values=batch["pixel_values"]
         pixel_mask=batch["pixel_mask"]
-        labels=batch["labels"]
+        labels = [{k: v.to(self.device) for k, v in t.items()} for t in batch["labels"]]
         target = batch["target_segmentation"]
         target_shape = target.shape
         target_size = [list(target_shape)[1:]]*list(target_shape)[0]
