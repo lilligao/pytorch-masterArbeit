@@ -133,9 +133,9 @@ class Detr(L.LightningModule):
             # on epoche = True
             self.log('val_loss', loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
             for k,v in loss_dict.items():
-            self.log("val_" + k, v.item())
-            self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
-        
+                self.log("val_" + k, v.item())
+                self.log('val_iou', self.val_iou, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True, batch_size=list(target_shape)[0])
+            
         
 
     def test_step(self, batch, batch_idx):
