@@ -230,6 +230,8 @@ class Mask2Former(L.LightningModule):
             if len(masks) >0:
                 masks = torch.stack(masks)
                 masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
+            else:
+                masks = torch.zeros_like(mask_tgt)
 
                 print("preds masks", masks.shape)
                 print("preds masks", masks.dtype)
