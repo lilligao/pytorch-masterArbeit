@@ -195,6 +195,7 @@ class Mask2Former(L.LightningModule):
 
         # plot the instance segmentation
         for i in range(batch_size):
+            print("mask_labels", mask_labels.shape)
             # masks and labels of target
             mask_tgt = mask_labels[i]
             label_tgt = class_labels[i]
