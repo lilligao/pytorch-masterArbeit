@@ -231,7 +231,7 @@ class Mask2Former(L.LightningModule):
                 masks = torch.stack(masks)
                 masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
             else:
-                masks = torch.zeros_like(mask_tgt)
+                masks = scores
 
                 print("preds masks", masks.shape)
                 print("preds masks", masks.dtype)
