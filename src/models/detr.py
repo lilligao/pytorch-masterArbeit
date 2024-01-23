@@ -217,14 +217,16 @@ class Detr(L.LightningModule):
                     masks.append(mask_id)
             scores =  torch.as_tensor(scores, dtype=torch.float)
             labels = torch.as_tensor(labels, dtype=torch.int)
-            masks = torch.stack(masks)
-            masks = torch.as_tensor(masks, dtype=torch.uint8)
+            if len(masks) >0:
+                masks = torch.stack(masks)
+                masks = torch.as_tensor(masks, dtype=torch.uint8)
+                print("preds masks", masks.shape)
+                print("preds masks", masks.dtype)
+                print("preds masks",torch.unique(masks))
 
             print("preds score", scores.shape)
             print("preds labels", labels.shape)
-            print("preds masks", masks.shape)
-            print("preds masks", masks.dtype)
-            print("preds masks",torch.unique(masks))
+            
             print("preds masks",torch.unique(seg_preds))
             
             preds_map.append(
