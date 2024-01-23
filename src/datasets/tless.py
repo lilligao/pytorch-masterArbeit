@@ -245,7 +245,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         with open(scene_gt_infos_item) as f:
             scene_gt_info = json.load(f)[str(int(im_id))]
         boxes = np.asarray([gt['bbox_visib'] for gt in scene_gt_info])
-        img = TF.to_tensor(img)
+        
         pixel_mask = torch.ones_like(img[0],dtype=torch.long)
         
         if self.step.startswith('train'):
@@ -270,7 +270,8 @@ class TLESSDataset(torch.utils.data.Dataset):
             elif config.K_INTENSITY < 0:
                 strong_img_aug = img_trsform.strong_img_aug(abs(config.K_INTENSITY))
                 img = strong_img_aug(img)
-                
+            
+            img = TF.to_tensor(img)
             # Random Resize
             if str(config.USE_SCALING).upper()==str('True').upper():
                 random_scaler = RandResize(scale=(0.5, 2.0))
@@ -328,6 +329,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
 
         elif self.step.startswith('val') and str(config.SCALE_VAL).upper()==str('True').upper():
+            img = TF.to_tensor(img)
             tf_img = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.BILINEAR)
             tf = transforms.Resize((config.TRAIN_SIZE, config.TRAIN_SIZE), interpolation=InterpolationMode.NEAREST)
             img = tf_img(img)
