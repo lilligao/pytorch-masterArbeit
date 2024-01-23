@@ -103,10 +103,16 @@ class TLESSDataset(torch.utils.data.Dataset):
         model = SegformerForSemanticSegmentation(model_config)
         #print(model_config)
         #print(model)
-        print("------------------------------------------")
-        model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+        
+        model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
+                                      hidden_dropout_prob=0.2,
+                                                attention_probs_dropout_prob=0.2,
+                                                classifier_dropout_prob=0.2, # default is 0.1
+                                                drop_path_rate=0.2,)
         for m in model.modules():
             print(m)
+            print("------------------------------------------")
+
                                                 
 
         img_path = self.imgs[idx]

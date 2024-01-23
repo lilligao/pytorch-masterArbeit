@@ -28,6 +28,7 @@ if __name__ == '__main__':
             root=config.ROOT,
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
+            test_split=config.TEST_SPLIT
         )
     elif config.METHOD == "Mask2Former":
         data_module = TLESSMask2FormerDataModule(
@@ -36,6 +37,7 @@ if __name__ == '__main__':
             root=config.ROOT,
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
+            test_split=config.TEST_SPLIT
         )
     elif config.METHOD == "Detr":
         data_module = TLESSDetrDataModule(
@@ -44,6 +46,7 @@ if __name__ == '__main__':
             root=config.ROOT,
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
+            test_split=config.TEST_SPLIT
         )
      # initialize the Trainer
     trainer = L.Trainer(
