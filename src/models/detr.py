@@ -188,8 +188,8 @@ class Detr(L.LightningModule):
         # plot the instance segmentation
         for i in range(batch_size):
             # masks and labels of target
-            mask_tgt = labels[i]["masks"]
-            label_tgt = labels[i]["class_labels"]
+            mask_tgt = labels[i]["masks"].to(self.device)
+            label_tgt = labels[i]["class_labels"].to(self.device)
             mask_tgt = torch.as_tensor(mask_tgt, dtype=torch.uint8)
             print("label_tgt",label_tgt)
             print("target labels", label_tgt.shape)
@@ -215,11 +215,11 @@ class Detr(L.LightningModule):
                     scores.append(score_id)
                     labels.append(label_id)
                     masks.append(mask_id)
-            scores =  torch.as_tensor(scores, dtype=torch.float)
-            labels = torch.as_tensor(labels, dtype=torch.int)
+            scores =  torch.as_tensor(scores, dtype=torch.float).to(self.device)
+            labels = torch.as_tensor(labels, dtype=torch.int).to(self.device)
             if len(masks) >0:
                 masks = torch.stack(masks)
-                masks = torch.as_tensor(masks, dtype=torch.uint8)
+                masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
                 print("preds masks", masks.shape)
                 print("preds masks", masks.dtype)
                 print("preds masks",torch.unique(masks))
