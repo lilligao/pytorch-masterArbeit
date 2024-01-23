@@ -9,6 +9,7 @@ import json
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as TF
 from torch.utils.data import DataLoader, random_split
+from transformers import SegformerForSemanticSegmentation, SegformerConfig
 
 import math
 import os
@@ -97,6 +98,17 @@ class TLESSDataset(torch.utils.data.Dataset):
         return len(self.imgs)
 
     def __getitem__(self, idx):
+
+        model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+        model = SegformerForSemanticSegmentation(model_config)
+        #print(model_config)
+        #print(model)
+        print("------------------------------------------")
+        model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+        for m in model.modules():
+            print(m)
+                                                
+
         img_path = self.imgs[idx]
         im_id = img_path.split('/')[-1].split('.')[0]
         scene_id = img_path.split('/')[-3]

@@ -13,6 +13,7 @@ parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local
 parser.add_argument('--lr_factor', type=int, default=1)
 parser.add_argument('--lr_backbone', type=float, default=6e-5)
 parser.add_argument('--weight_decay', type=float, default=0.01)
+parser.add_argument('--dropout_rate', type=float, default=0.0)
 parser.add_argument('--method', type=str, default='SegFormer') #Mask2Former or SegFormer or Detr
 parser.add_argument('--strategy', type=str, default='ddp') #ddp for 4 gpus and single for 1 gpu
 parser.add_argument('--root', type=str, default='./data/tless')
@@ -58,6 +59,7 @@ PRECISION = '16-mixed'   #gpu: '16-mixed', cpu: bf16-mixed
 LEARNING_RATE = args.lr
 LEARNING_RATE_FACTOR = args.lr_factor
 LEARNING_RATE_BACKBONE = args.lr_backbone
+DROPOUT_RATE = args.dropout_rate
 
 ## Data Augmentation
 USE_SCALING = args.use_scaling
