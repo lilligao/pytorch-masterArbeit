@@ -276,12 +276,6 @@ class Mask2Former(L.LightningModule):
                     # log images to W&B
                     wandb.log({"predictions" : mask_img})
 
-
-                            
-        print("preds list", len(preds_map))
-        print("target list", len(targets_map))
-        print("preds mask", preds_map[0]["masks"].shape)
-        print("target mask", targets_map[0]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
 
         
