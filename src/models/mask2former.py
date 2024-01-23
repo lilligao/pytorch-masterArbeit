@@ -197,8 +197,8 @@ class Mask2Former(L.LightningModule):
         for i in range(batch_size):
             # masks and labels of target
             mask_tgt = mask_labels[i]
-            label_tgt = class_labels[i]
-            mask_tgt = torch.as_tensor(mask_tgt, dtype=torch.uint8)
+            label_tgt = class_labels[i].to(self.device)
+            mask_tgt = torch.as_tensor(mask_tgt, dtype=torch.uint8).to(self.device)
             print("label_tgt",label_tgt)
             print("target labels", label_tgt.shape)
             print("target masks", mask_tgt.shape)
@@ -223,10 +223,10 @@ class Mask2Former(L.LightningModule):
                     scores.append(score_id)
                     labels.append(label_id)
                     masks.append(mask_id)
-            scores =  torch.as_tensor(scores, dtype=torch.float)
-            labels = torch.as_tensor(labels, dtype=torch.int)
+            scores =  torch.as_tensor(scores, dtype=torch.float).to(self.device)
+            labels = torch.as_tensor(labels, dtype=torch.int).to(self.device)
             masks = torch.stack(masks)
-            masks = torch.as_tensor(masks, dtype=torch.uint8)
+            masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
 
             print("preds score", scores.shape)
             print("preds labels", labels.shape)
