@@ -92,6 +92,7 @@ intensity 1 & 3 -
 job_b4_samelr.sh
 JobName=job_b5_samelr_primesense.sh: primesense training vollständig laufen lassen -
 job_test.sh: map for stabile version nochmal laufen lassen und vergleichen ?算法全错的
+wandb sweep
 ----------------------------------
 Try DETR !!! 但是要注意把背景也做一个分类
 不行的话试一试mask2Former

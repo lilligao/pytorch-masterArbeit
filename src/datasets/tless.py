@@ -20,6 +20,7 @@ import glob
 import json
 
 import config
+import lib.AugSeg.augseg.dataset.augs_TIBA as img_trsform
 
 NUMBER_TRAIN_IMAGES = 0
 class TLESSDataModule(L.LightningDataModule):
@@ -264,6 +265,10 @@ class TLESSDataset(torch.utils.data.Dataset):
                 transform_compose= transforms.Compose(transforms_list)
                 if random.random() < 0.67:
                     img = transform_compose(img)
+            elif config.K_INTENSITY < 0:
+                strong_img_aug = img_trsform.strong_img_aug(abs(config.K_INTENSITY))
+                img = strong_img_aug(img)
+                
             # Random Resize
             if str(config.USE_SCALING).upper()==str('True').upper():
                 random_scaler = RandResize(scale=(0.5, 2.0))
