@@ -22,7 +22,7 @@ import json
 import config
 import sys
 sys.path.append('./')
-import lib.AugSeg.augseg.dataset.augs_TIBA as img_trsform
+import lib.augs_TIBA as img_trsform
 
 NUMBER_TRAIN_IMAGES = 0
 class TLESSDataModule(L.LightningDataModule):
