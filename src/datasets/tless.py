@@ -338,6 +338,9 @@ class TLESSDataset(torch.utils.data.Dataset):
             label = tf(label)
             pixel_mask = tf(pixel_mask)
             boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
+        else:
+            img = TF.to_tensor(img)
+            pixel_mask = torch.ones_like(img[0],dtype=torch.long)
 
         # guard against no boxes via resizing
         image_height = img.size(dim=1)
