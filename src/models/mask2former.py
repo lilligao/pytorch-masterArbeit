@@ -231,13 +231,13 @@ class Mask2Former(L.LightningModule):
                 masks = torch.stack(masks)
                 masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
 
+                print("preds masks", masks.shape)
+                print("preds masks", masks.dtype)
+                print("preds masks",torch.unique(masks))
+                print("preds masks",torch.unique(seg_preds))
+            
             print("preds score", scores.shape)
             print("preds labels", labels.shape)
-            print("preds masks", masks.shape)
-            print("preds masks", masks.dtype)
-            print("preds masks",torch.unique(masks))
-            print("preds masks",torch.unique(seg_preds))
-            
 
             preds_map.append(
                         dict(
