@@ -217,16 +217,19 @@ class Mask2Former(L.LightningModule):
                 segment_id =infos_preds[j]["id"]
                 label_id = infos_preds[j]["label_id"]
                 score_id = infos_preds[j]["score"]
+                seg_preds[seg_preds==segment_id] = label_id
+                print("Segment_id", segment_id)
+                print("label_id", label_id)
                 if config.NUM_CLASSES!=31 or label_id!=0:
                     mask_id =  mask_preds==segment_id
-                    seg_preds[seg_preds==segment_id] = label_id
                     scores.append(score_id)
                     labels.append(label_id)
                     masks.append(mask_id)
             scores =  torch.as_tensor(scores, dtype=torch.float).to(self.device)
             labels = torch.as_tensor(labels, dtype=torch.int).to(self.device)
-            masks = torch.stack(masks)
-            masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
+            if len(masks) >0:
+                masks = torch.stack(masks)
+                masks = torch.as_tensor(masks, dtype=torch.uint8).to(self.device)
 
             print("preds score", scores.shape)
             print("preds labels", labels.shape)
