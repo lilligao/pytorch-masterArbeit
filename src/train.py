@@ -24,6 +24,7 @@ if __name__ == '__main__':
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
         )
+        accel = 'gpu'
     elif config.METHOD == "Mask2Former":
         if config.LOAD_CHECKPOINTS is not None:
             model = Mask2Former.load_from_checkpoint(config.LOAD_CHECKPOINTS)
@@ -36,6 +37,7 @@ if __name__ == '__main__':
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
         )
+        accel = 'gpu'
     elif config.METHOD == "Detr":
         if config.LOAD_CHECKPOINTS is not None:
             model = Detr.load_from_checkpoint(config.LOAD_CHECKPOINTS)
@@ -48,11 +50,12 @@ if __name__ == '__main__':
             train_split=config.TRAIN_SPLIT,
             val_split=config.VAL_SPLIT,
         )
+        accel = 'cpu'
     
 
     trainer = L.Trainer(
         max_epochs=config.NUM_EPOCHS,
-        accelerator='gpu',    # cpu
+        accelerator=accel,    # cpu
         strategy='auto',
         devices=config.DEVICES,
         precision=config.PRECISION,

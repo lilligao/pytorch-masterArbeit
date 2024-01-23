@@ -223,6 +223,8 @@ class Detr(L.LightningModule):
                 print("preds masks", masks.shape)
                 print("preds masks", masks.dtype)
                 print("preds masks",torch.unique(masks))
+            else:
+                masks = scores
 
             print("preds score", scores.shape)
             print("preds labels", labels.shape)
@@ -266,12 +268,6 @@ class Detr(L.LightningModule):
                     # log images to W&B
                     wandb.log({"predictions" : mask_img})
 
-
-                            
-        print("preds list", len(preds_map))
-        print("target list", len(targets_map))
-        print("preds mask", preds_map[0]["masks"].shape)
-        print("target mask", targets_map[0]["masks"].shape)
         self.test_map.update(preds=preds_map, target=targets_map)
 
         
