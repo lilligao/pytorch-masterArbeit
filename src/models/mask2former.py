@@ -187,7 +187,7 @@ class Mask2Former(L.LightningModule):
         #  # mean Average precision
         # scores, preds = torch.max(preds, dim=1)# delete the first dimension
         preds_dicts = self.processor.post_process_instance_segmentation(outputs,target_sizes=target_size) # !!! Threshold still to be determined
-        batch_size = 2
+        batch_size = list(target_shape)[0]
 
 
         preds_map=[]
@@ -195,7 +195,6 @@ class Mask2Former(L.LightningModule):
 
         # plot the instance segmentation
         for i in range(batch_size):
-            print(mask_labels[0])
             # masks and labels of target
             mask_tgt = mask_labels[i]
             label_tgt = class_labels[i]

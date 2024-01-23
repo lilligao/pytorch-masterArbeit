@@ -179,7 +179,7 @@ class Detr(L.LightningModule):
         #  # mean Average precision
         # scores, preds = torch.max(preds, dim=1)# delete the first dimension
         preds_dicts = self.processor.post_process_panoptic_segmentation(outputs,target_sizes=target_size) # !!! Threshold still to be determined
-        batch_size = 2
+        batch_size = list(target_shape)[0]
 
 
         preds_map=[]
