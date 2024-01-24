@@ -52,6 +52,10 @@ if __name__ == '__main__':
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         images = images.to(device)
         labels = labels.to(device)
+        sample_outputs = torch.empty(size=[config.NUM_SAMPLES, images.shape[0], config.NUM_CLASSES, images.shape[-2], images.shape[-1]], device=device)
+        print("images shape", images.shape)
+        #print("sample outputs", sample_outputs)
+        print("sample outputs shape", sample_outputs.shape)
 
         target = labels.squeeze(dim=1)
         loss, logits = model(images, target)
@@ -59,9 +63,11 @@ if __name__ == '__main__':
         upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
         preds = torch.softmax(upsampled_logits, dim=1)
 
+        prediction_map = torch.argmax(preds, dim=1, keepdim=True)
+        print("prediction_map shape", prediction_map.shape)
         # mean Average precision
         scores, preds = torch.max(preds, dim=1)# delete the first dimension
-
+        print("prediction shape", preds.shape)
         batch_size = preds.shape[0]
 
         preds_map = []

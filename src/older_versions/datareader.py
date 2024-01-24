@@ -98,23 +98,6 @@ class TLESSDataset(torch.utils.data.Dataset):
         return len(self.imgs)
 
     def __getitem__(self, idx):
-
-        model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
-        model = SegformerForSemanticSegmentation(model_config)
-        #print(model_config)
-        #print(model)
-        
-        model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-                                      hidden_dropout_prob=0.2,
-                                                attention_probs_dropout_prob=0.2,
-                                                classifier_dropout_prob=0.2, # default is 0.1
-                                                drop_path_rate=0.2,)
-        for m in model.modules():
-            print(m)
-            print("------------------------------------------")
-
-                                                
-
         img_path = self.imgs[idx]
         im_id = img_path.split('/')[-1].split('.')[0]
         scene_id = img_path.split('/')[-3]
@@ -176,8 +159,9 @@ class TLESSDataset(torch.utils.data.Dataset):
         if self.step.startswith('train'):
             print('contains classes before: ', torch.unique(label).tolist())
             # Random Resize
-            if config.K_INTENSITY > 0:
-                strong_img_aug = img_trsform.strong_img_aug(config.K_INTENSITY)
+            if config.K_INTENSITY < 0:
+                print("config k intensity", abs(config.K_INTENSITY))
+                strong_img_aug = img_trsform.strong_img_aug(abs(config.K_INTENSITY))
                 img = strong_img_aug(img)
                 # transforms_list = [v2.RandomAutocontrast(p=1), # normalize or maximize??
                 #                 v2.RandomEqualize(p=1),
@@ -203,6 +187,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 #print("max", torch.max(img[1,:,:]))
             
             img = TF.to_tensor(img)
+            pixel_mask = torch.ones_like(img[0],dtype=torch.long)
 
             if True:
                 random_scaler = RandResize(scale=(0.5, 0.9))
@@ -314,6 +299,44 @@ class RandResize(object):
         
  
 if __name__ == '__main__':
+    model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+    model = SegformerForSemanticSegmentation(model_config)
+    #print(model_config)
+    #print(model)
+    
+    model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
+                                    hidden_dropout_prob=0.1, # SegformerSelfOutput & SegformerMixFFN
+                                            attention_probs_dropout_prob=0.2, # SegformerEfficientSelfAttention
+                                            classifier_dropout_prob=0.3, # Dropout layer
+                                            drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
+    for m in model.modules():
+            if m.__class__.__name__.startswith('Dropout'):
+                m.train()
+    for m in model.modules():
+        print(m)
+        class_name = m.__class__.__name__
+        if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
+            print("-----------")
+            print(m.dropout.training)
+            m.dropout.train()
+            print(m.dropout.training)
+
+        elif class_name.startswith('SegformerAttention'):
+            print("..........")
+            print(m.training)
+            print(m.self.dropout.training)
+            print(m.output.dropout.training)
+            m.self.dropout.train()
+            m.output.dropout.train()
+            print(m.training)
+            print(m.self.dropout.training)
+            print(m.output.dropout.training)
+            #print(m.dropout.training)
+        # elif class_name.startswith('SegformerAttention'):
+        #     print("..........")
+        print("----------------------------------------------------")
+
+                                    
 
     n_valid = 200
     indexes = range(50000)
