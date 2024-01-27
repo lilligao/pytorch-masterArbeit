@@ -99,9 +99,10 @@ class SegFormer(L.LightningModule):
      
     def on_validation_epoch_end(self):
         #self.val_iou.reset()
-        self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.val_ece.reset()
-        # self.val_ap.reset()
+        if not self.running_sanity_check:
+            self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.val_ece.reset()
+            # self.val_ap.reset()
 
     def test_step(self, batch, batch_idx):
          #images, _, labels = batch
