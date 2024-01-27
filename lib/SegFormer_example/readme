@@ -21,7 +21,7 @@ enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.0
 enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.04 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt1
 # 4. Queue batch job on gpu_4_a100 node on bwUniCluster:
 sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job.sh # example for training on 4 gpus for 8 hours (you can also choose a different gpu node - use "sinfo_t_idle" to check available nodes).
-
+sbatch -p gpu_8 -N 1 -t 48:00:00 --mem=510000 --gres=gpu:4 job.sh 
 ## other useful commands:
 # 1. check status of job:
 squeue

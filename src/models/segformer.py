@@ -82,31 +82,6 @@ class SegFormer(L.LightningModule):
         #images, _, labels = batch
         images, labels = batch
 
-        # ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
-        # # Activate dropout layers
-        # for m in self.model.modules():
-        #     if m.__class__.__name__.startswith('Dropout'):
-        #         m.train()
-
-        # # For 5 samples
-        # sample_outputs = torch.empty(size=[config.NUM_SAMPLES, images.shape[0], config.NUM_CLASSES, images.shape[-2], images.shape[-1]], device=self.device)
-        # for i in range(config.NUM_SAMPLES):
-        #     loss, logits = self.model(images, labels.squeeze(dim=1))
-        #     upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-
-        #     sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
-        
-        # probability_map = torch.mean(sample_outputs, dim=0)
-        # prediction_map = torch.argmax(probability_map, dim=1, keepdim=True)
-        # standard_deviation_map = torch.std(sample_outputs, dim=0)
-        # entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True)
-
-        # # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
-        # p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
-        # self.log('pAccCer_entropy', p_accurate_certain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        # self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        # self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
         target = labels.squeeze(dim=1)
         loss, logits = self.model(images, target) # squeeze dim = 1 because labels size [4, 1, 540, 720]
     
@@ -131,76 +106,156 @@ class SegFormer(L.LightningModule):
         self.val_ap.reset()
 
     def test_step(self, batch, batch_idx):
-        #images, _, labels = batch
-        images, labels = batch
+        if config.TEST_MODE=="MCDropout":
+            ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
+            # Activate dropout layers
+            for m in self.model.modules():
+                if m.__class__.__name__.startswith('Dropout'):
+                    m.train()
 
-        # print("test image shape",images.shape)
-        # print("test label shape",labels.shape)
+            # For 5 samples
+            sample_outputs = torch.empty(size=[config.NUM_SAMPLES, images.shape[0], config.NUM_CLASSES, images.shape[-2], images.shape[-1]], device=self.device)
+            for i in range(config.NUM_SAMPLES):
+                loss, logits = self.model(images, labels.squeeze(dim=1))
+                upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
-        target = labels.squeeze(dim=1)
-        loss, logits = self.model(images, target)
-    
-        upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
-        preds = torch.softmax(upsampled_logits, dim=1)
+                sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
+            
+            probability_map = torch.mean(sample_outputs, dim=0)
+            prediction_map = torch.argmax(probability_map, dim=1, keepdim=True)
+            standard_deviation_map = torch.std(sample_outputs, dim=0)
+            entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True)
 
-        self.test_iou(preds, target)
-        self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.test_ap(preds, target)
-        self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        #self.test_map.update(preds, target)
+            # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
+            p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
+            self.log('pAccCer_entropy', p_accurate_certain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        else:
+            #images, _, labels = batch
+            images, labels = batch
 
-        self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            # print("test image shape",images.shape)
+            # print("test label shape",labels.shape)
+
+            target = labels.squeeze(dim=1)
+            loss, logits = self.model(images, target)
         
-         # mean Average precision
-        scores, preds = torch.max(preds, dim=1)# delete the first dimension
+            upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
+            preds = torch.softmax(upsampled_logits, dim=1)
 
-        batch_size = preds.shape[0]
+            self.test_iou(preds, target)
+            self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.test_ap(preds, target)
+            self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            #self.test_map.update(preds, target)
 
-        preds_map = []
-        targets_map = []
-
-        for i in range(batch_size):
-            scores_i = scores[i,:,:]
-            # predictions ???? consider 0 in map oder niche????
-            detected_obj = torch.unique(preds[i,:,:]).tolist()
-            detected_obj.remove(0)
+            self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             
-            # targets
-            target_obj = torch.unique(target[i,:,:]).tolist()
-            target_obj.remove(0)
+            # mean Average precision
+            scores, preds = torch.max(preds, dim=1)# delete the first dimension
 
-            scores_preds = []
-            labels_preds = []
-            masks_preds = []
-            for j in detected_obj:
+            batch_size = preds.shape[0]
+
+            preds_map = []
+            targets_map = []
+
+            for i in range(batch_size):
+                scores_i = scores[i,:,:]
+                # predictions ???? consider 0 in map oder niche????
+                detected_obj = torch.unique(preds[i,:,:]).tolist()
+                detected_obj.remove(0)
                 
-                mask_preds = preds[i,:,:]==j
-                mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
-                score = torch.mean(scores_i[mask_preds]).item()
+                # targets
+                target_obj = torch.unique(target[i,:,:]).tolist()
+                target_obj.remove(0)
 
-                scores_preds.append(score)
-                labels_preds.append(j)
-                masks_preds.append(mask_preds)
+                scores_preds = []
+                labels_preds = []
+                masks_preds = []
+                for j in detected_obj:
+                    
+                    mask_preds = preds[i,:,:]==j
+                    mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
+                    score = torch.mean(scores_i[mask_preds]).item()
 
-            labels_tgt = []
-            masks_tgt = []
-            for j in target_obj:
-                mask_tgt = target[i,:,:]==j
-                labels_tgt.append(j)
-                masks_tgt.append(mask_tgt)
+                    scores_preds.append(score)
+                    labels_preds.append(j)
+                    masks_preds.append(mask_preds)
+
+                labels_tgt = []
+                masks_tgt = []
+                for j in target_obj:
+                    mask_tgt = target[i,:,:]==j
+                    labels_tgt.append(j)
+                    masks_tgt.append(mask_tgt)
+                
+                scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
+                labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
+                masks_preds = torch.stack(masks_preds)
+                masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
+                labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
+                masks_tgt = torch.stack(masks_tgt)
+                masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
+
+                if config.PLOT_TESTIMG.upper().startswith(ua):
+                    mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
+                    mask_data = mask_data_tensor.numpy()
+                    mask_data_label_tensor =  labels[i].squeeze().cpu()
+                    mask_data_label = mask_data_label_tensor.numpy()
+                    class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(config.NUM_CLASSES)]))
+                    mask_img = wandb.Image(
+                            images,
+                            masks={
+                                "predictions": {"mask_data": mask_data, "class_labels": class_labels},
+                                "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
+                            },
+                        )
+                    if wandb.run is not None:
+                        # log images to W&B
+                        wandb.log({"predictions" : mask_img})
+
+
+
+                        score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
+                        preds_map.append(
+                            dict(
+                                masks=mask_preds.unsqueeze(0),
+                                scores=torch.tensor([score]),
+                                labels=torch.tensor([j]), # the object j has mask of False
+                            )
+                        )
+                    
+                        score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
+                        preds_map.append(
+                            dict(
+                                masks=mask_preds.unsqueeze(0),
+                                scores=torch.tensor([score]),
+                                labels=torch.tensor([j]), # the object j has mask of False
+                            )
+                        )
+            # print("preds list", len(preds_map))
+            # print("target list", len(targets_map))
+            # print("preds mask", preds_map[1]["masks"].shape)
+            # print("target mask", targets_map[1]["masks"].shape)
+            self.test_map.update(preds=preds_map, target=targets_map)
+
+            ua = str("true").upper()
+            if config.MAP_PROIMG.upper().startswith(ua):
+                # map
+                mAPs = self.test_map.compute() #.to(self.device)
+                mAPs.pop("classes")
+                mAPs.pop("map_per_class")
+                mAPs.pop("mar_100_per_class")
+                self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+                self.test_map.reset()
+                torch.cuda.empty_cache()
+
             
-            scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
-            labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
-            masks_preds = torch.stack(masks_preds)
-            masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
-            labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
-            masks_tgt = torch.stack(masks_tgt)
-            masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
-
             if config.PLOT_TESTIMG.upper().startswith(ua):
                 mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
                 mask_data = mask_data_tensor.numpy()
-                mask_data_label_tensor =  labels[i].squeeze().cpu()
+                mask_data_label_tensor =  labels.squeeze().cpu()
                 mask_data_label = mask_data_label_tensor.numpy()
                 class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(config.NUM_CLASSES)]))
                 mask_img = wandb.Image(
@@ -213,74 +268,21 @@ class SegFormer(L.LightningModule):
                 if wandb.run is not None:
                     # log images to W&B
                     wandb.log({"predictions" : mask_img})
-
-
-
-                    score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
-                    preds_map.append(
-                        dict(
-                            masks=mask_preds.unsqueeze(0),
-                            scores=torch.tensor([score]),
-                            labels=torch.tensor([j]), # the object j has mask of False
-                        )
-                    )
-                
-                    score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
-                    preds_map.append(
-                        dict(
-                            masks=mask_preds.unsqueeze(0),
-                            scores=torch.tensor([score]),
-                            labels=torch.tensor([j]), # the object j has mask of False
-                        )
-                    )
-        # print("preds list", len(preds_map))
-        # print("target list", len(targets_map))
-        # print("preds mask", preds_map[1]["masks"].shape)
-        # print("target mask", targets_map[1]["masks"].shape)
-        self.test_map.update(preds=preds_map, target=targets_map)
-
-        ua = str("true").upper()
-        if config.MAP_PROIMG.upper().startswith(ua):
-            # map
-            mAPs = self.test_map.compute() #.to(self.device)
-            mAPs.pop("classes")
-            mAPs.pop("map_per_class")
-            mAPs.pop("mar_100_per_class")
-            self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-            self.test_map.reset()
-            torch.cuda.empty_cache()
-
-        
-        if config.PLOT_TESTIMG.upper().startswith(ua):
-            mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
-            mask_data = mask_data_tensor.numpy()
-            mask_data_label_tensor =  labels.squeeze().cpu()
-            mask_data_label = mask_data_label_tensor.numpy()
-            class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(config.NUM_CLASSES)]))
-            mask_img = wandb.Image(
-                    images,
-                    masks={
-                        "predictions": {"mask_data": mask_data, "class_labels": class_labels},
-                        "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
-                    },
-                )
-            if wandb.run is not None:
-                # log images to W&B
-                wandb.log({"predictions" : mask_img})
         
             
     def on_test_epoch_end(self):
-        ua = str("true").upper()
-        self.test_iou.reset()
-        self.test_ap.reset()
-        if not config.MAP_PROIMG.upper().startswith(ua):       
-            mAPs = self.test_map.compute() #.to(self.device)
-            mAPs.pop("classes")
-            mAPs.pop("map_per_class")
-            mAPs.pop("mar_100_per_class")
-            self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.test_map.reset()
-            torch.cuda.empty_cache()
+        if config.TEST_MODE!="MCDropout":
+            ua = str("true").upper()
+            self.test_iou.reset()
+            self.test_ap.reset()
+            if not config.MAP_PROIMG.upper().startswith(ua):       
+                mAPs = self.test_map.compute() #.to(self.device)
+                mAPs.pop("classes")
+                mAPs.pop("map_per_class")
+                mAPs.pop("mar_100_per_class")
+                self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.test_map.reset()
+                torch.cuda.empty_cache()
     
     
     def configure_optimizers(self):

@@ -120,6 +120,12 @@ detr: how much classes? 30 or 31 classes!!
 which post_process funcion? panoptic or object detection or instance segmentation
 which base model?
 learning rate and learning rate backbone!!! & weight_decay
+---------------------------------
+segformer:
+- tatsächlich mit Dropout werden alle Dropoutlayer aktiviert werden
+- Genau, du nimmst dann den finalen Checkpoint von einem Modell, was beispielsweise mit 20% Dropout Rate trainiert wurde, und evaluierst deine ganzen Metriken für unterschiedliche Mengen an Samples. -> eher Test schritt anstatt Validation?
+- for paper: welche dataset für Train, Validation und Test
+
 ------------------------------------------------
 /home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
 if torch._six not found: pip install --upgrade timm==0.5.4

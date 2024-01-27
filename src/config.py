@@ -26,6 +26,7 @@ parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
 parser.add_argument('--plot_testimg', type=str, default='True')
 parser.add_argument('--mAP_proImg', type=str, default='True')
+parser.add_argument('--test_mode', type=str, default='normal') # normal or MCDropout
 
 parser.add_argument('--use_scaling', type=str, default='True') #probieren verschiedene data augmentation
 parser.add_argument('--use_cropping', type=str, default='True') # vertikales flipping, rotation, farb sachen!!!
@@ -85,6 +86,7 @@ CHECKPOINTS_DIR = args.checkpoints
 LOAD_CHECKPOINTS = args.load_checkpoints
 PLOT_TESTIMG = args.plot_testimg
 MAP_PROIMG = args.mAP_proImg
+TEST_MODE = args.test_mode
 
 
 GRADIENT_CLIP =args.gradient_clip
