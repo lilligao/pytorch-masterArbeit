@@ -123,6 +123,7 @@ learning rate and learning rate backbone!!! & weight_decay
 ---------------------------------
 segformer:
 - tatsächlich mit Dropout werden alle Dropoutlayer aktiviert werden
+- ECE Logging problem???
 - Genau, du nimmst dann den finalen Checkpoint von einem Modell, was beispielsweise mit 20% Dropout Rate trainiert wurde, und evaluierst deine ganzen Metriken für unterschiedliche Mengen an Samples. -> eher Test schritt anstatt Validation?
 und welche Dataset? 
 miou und ece for jede sample separat oder alle samples zusammen iou? wie kann ich loggen?
