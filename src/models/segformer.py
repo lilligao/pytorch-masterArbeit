@@ -103,6 +103,8 @@ class SegFormer(L.LightningModule):
         # self.val_ap.reset()
 
     def test_step(self, batch, batch_idx):
+         #images, _, labels = batch
+        images, labels = batch
         if config.TEST_MODE=="MCDropout":
             ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
             # Activate dropout layers
@@ -129,8 +131,7 @@ class SegFormer(L.LightningModule):
             self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         else:
-            #images, _, labels = batch
-            images, labels = batch
+           
 
             # print("test image shape",images.shape)
             # print("test label shape",labels.shape)

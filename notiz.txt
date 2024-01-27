@@ -124,6 +124,7 @@ learning rate and learning rate backbone!!! & weight_decay
 segformer:
 - tatsächlich mit Dropout werden alle Dropoutlayer aktiviert werden
 - Genau, du nimmst dann den finalen Checkpoint von einem Modell, was beispielsweise mit 20% Dropout Rate trainiert wurde, und evaluierst deine ganzen Metriken für unterschiedliche Mengen an Samples. -> eher Test schritt anstatt Validation?
+und welche Dataset? 
 - for paper: welche dataset für Train, Validation und Test
 
 ------------------------------------------------
