@@ -99,7 +99,7 @@ class SegFormer(L.LightningModule):
      
     def on_validation_epoch_end(self):
         #self.val_iou.reset()
-        if not self.running_sanity_check():
+        if not self.trainer.sanity_checking:
             self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.val_ece.reset()
             # self.val_ap.reset()
