@@ -83,4 +83,4 @@ cd $HOME/pytorch-masterArbeit/
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
 python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json --ann_type='segm'
 
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_b5-dropout_10_old/epoch=27-val_loss=20.82-val_iou=0.40.ckpt' --test_mode='MCDropout'
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_b5-dropout_10_old/epoch=19-val_loss=0.11-val_iou=0.77.ckpt' --test_mode='MCDropout'
