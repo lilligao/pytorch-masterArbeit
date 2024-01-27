@@ -78,7 +78,7 @@ cd $HOME/pytorch-masterArbeit/
 /usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b5 --k_intensity=-3  --dropout_rate=0.2 --gradient_clip=0.5  --project='SegFormer_b5' --run=b5_pbrPrimesense_k_intenstiy_1 
 --project='SegFormer_b5' --run=b4_pbrPrimesense_lr_6e-5_lr_factor_1 --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b4 --lr_factor=1
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/Detr Train-instance_1gpu/epoch=7-val_loss=nan-val_iou=0.00.ckpt' --project='Detr Test' --run=instance --method=Detr --backbone=instance
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/panopticSeg/epoch=13-val_loss=24.60-val_iou=0.36.ckpt' --project='Mask2Former Test' --run=panoptic --method=Mask2Former --backbone=panoptic
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/panopticSeg/epoch=27-val_loss=20.82-val_iou=0.40.ckpt' --project='Mask2Former Test' --run=panoptic --method=Mask2Former --backbone=panoptic
 # copy checkpoints from server
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
 python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json --ann_type='segm'
