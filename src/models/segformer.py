@@ -97,9 +97,9 @@ class SegFormer(L.LightningModule):
         #self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
      
-    def on_validation_epoch_end(self):
+    def on_validation_epoch_end(self, trainer):
         #self.val_iou.reset()
-        if not self.running_sanity_check:
+        if not trainer.running_sanity_check:
             self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.val_ece.reset()
             # self.val_ap.reset()
