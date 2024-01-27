@@ -121,7 +121,6 @@ class SegFormer(L.LightningModule):
 
                 sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
                 self.test_iou(sample_outputs[i], labels.squeeze(dim=1))
-                self.test_ap(sample_outputs[i],  labels.squeeze(dim=1))
                 self.test_ece(sample_outputs[i],  labels.squeeze(dim=1))
             
             probability_map = torch.mean(sample_outputs, dim=0)
@@ -139,6 +138,9 @@ class SegFormer(L.LightningModule):
             self.log('pAccCer_std', p_accurate_certain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+            self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         else:
            
 
