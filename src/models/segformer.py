@@ -42,6 +42,7 @@ class SegFormer(L.LightningModule):
         # metrics for testing
 
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_ece = torchmetrics.CalibrationError(task='multiclass', n_bins=10, num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
         self.test_map = MeanAveragePrecision(iou_type="segm")
         self.test_map.compute_with_cache = False
@@ -119,6 +120,9 @@ class SegFormer(L.LightningModule):
                 upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
                 sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
+                self.test_iou(sample_outputs[i], labels.squeeze(dim=1))
+                self.test_ap(sample_outputs[i],  labels.squeeze(dim=1))
+                self.test_ece(sample_outputs[i],  labels.squeeze(dim=1))
             
             probability_map = torch.mean(sample_outputs, dim=0)
             prediction_map = torch.argmax(probability_map, dim=1, keepdim=True)

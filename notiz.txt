@@ -128,7 +128,10 @@ und welche Dataset?
 miou und ece for jede sample separat oder alle samples zusammen iou? wie kann ich loggen?
 was heißt  2-20x Samples?
 - for paper: welche dataset für Train, Validation und Test
-
+Verschiedene Uncertainty Thresholds vergleichen für die Unsicherheitsmetriken
+-Mittelwert eines Bildes???
+-Mittelwert des Datensatzes
+-Verschiedene Schwellwerte
 ------------------------------------------------
 /home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
 if torch._six not found: pip install --upgrade timm==0.5.4
