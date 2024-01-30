@@ -11,4 +11,9 @@ class PolyLR(_LRScheduler):
 
     def get_lr(self):
         self.current_iteration += 1
-        return [base_lr * (1 - self.current_iteration / self.max_iterations) ** self.power for base_lr in self.base_lrs]
+        lr = [base_lr * (1 - self.current_iteration / self.max_iterations) ** self.power for base_lr in self.base_lrs]
+
+        # Numerical stability for FP16 training
+        if type(lr[0]) == complex:
+            lr = [1e-7]
+        return lr if lr[0] >= 1e-7 else [1e-7]
