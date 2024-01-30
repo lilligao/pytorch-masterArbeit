@@ -322,7 +322,7 @@ class TLESSDataset(torch.utils.data.Dataset):
                 masks = tf(masks)
                 masks_visib = tf(masks_visib)
                 label = tf(label)
-                pixel_mask = tf(pixel_mask)
+                #pixel_mask = tf(pixel_mask)
                 scale_factor_w = config.TRAIN_SIZE / img.size(dim=2)
                 scale_factor_h = config.TRAIN_SIZE/ img.size(dim=1)
                 boxes = boxes * np.asarray([scale_factor_w, scale_factor_h, scale_factor_w, scale_factor_h], dtype=np.float32)
