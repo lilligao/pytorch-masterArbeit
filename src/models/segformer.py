@@ -38,11 +38,11 @@ class SegFormer(L.LightningModule):
         # metrics for validation
         self.val_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         #self.val_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
-        self.val_ece = torchmetrics.CalibrationError(task='multiclass', n_bins=10, num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        #self.val_ece = torchmetrics.CalibrationError(task='multiclass', n_bins=10, num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         # metrics for testing
 
         self.test_iou = torchmetrics.JaccardIndex(task='multiclass', num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
-        #self.test_ece = torchmetrics.CalibrationError(task='multiclass', n_bins=10, num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
+        self.test_ece = torchmetrics.CalibrationError(task='multiclass', n_bins=10, num_classes=config.NUM_CLASSES, ignore_index=config.IGNORE_INDEX)
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
         self.test_map = MeanAveragePrecision(iou_type="segm")
         self.test_map.compute_with_cache = False
@@ -88,13 +88,13 @@ class SegFormer(L.LightningModule):
 
         self.val_iou(preds, target)
         #self.val_ap(preds, target)
-        self.val_ece(preds, target)
+        #self.val_ece(preds, target)
         #self.val_map.update(preds, target)
 
         # on epoche = True
         self.log('val_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('val_iou', self.val_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        #self.log('val_ece', self.val_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_ap', self.val_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('val_mAP', self.val_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
@@ -116,13 +116,14 @@ class SegFormer(L.LightningModule):
                 upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
                 sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
-                self.test_iou(sample_outputs[i], labels.squeeze(dim=1))
-                #self.test_ece(sample_outputs[i],  labels.squeeze(dim=1))
+                
             
             probability_map = torch.mean(sample_outputs, dim=0)
             prediction_map = torch.argmax(probability_map, dim=1, keepdim=True)
             standard_deviation_map = torch.std(sample_outputs, dim=0)
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True)
+            self.test_iou(probability_map, labels.squeeze(dim=1))
+            self.test_ece(probability_map,  labels.squeeze(dim=1))
 
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
@@ -136,7 +137,7 @@ class SegFormer(L.LightningModule):
             self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
             self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            #self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         else:
            
 

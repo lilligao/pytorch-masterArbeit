@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(description='Masterarbeit Segformer Parser')
 parser.add_argument('--project', type=str, default='Masterarbeit Segformer')
 parser.add_argument('--run', type=str, default='Segformer_train')
 parser.add_argument('--backbone', type=str, default='b5') ## b1-b5 for segformer, instance or panoptic for mask2former
-parser.add_argument('--epochs', type=int, default=250)  # gpu: 250, local:1
+parser.add_argument('--epochs', type=int, default=100)  # gpu: 250, local:1
 parser.add_argument('--lr', type=float, default=6e-5) # gpu: default=6e-5, local:2e-1
 parser.add_argument('--lr_factor', type=int, default=1)
 parser.add_argument('--lr_backbone', type=float, default=6e-5)
