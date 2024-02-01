@@ -109,6 +109,11 @@ class SegFormer(L.LightningModule):
                 if m.__class__.__name__.startswith('Dropout'):
                     m.train()
 
+            # record time
+            torch.cuda.synchronize()  # wait for move to complete
+            start = torch.cuda.Event(enable_timing=True)
+            end = torch.cuda.Event(enable_timing=True)
+            start.record()
             # For 5 samples
             sample_outputs = torch.empty(size=[config.NUM_SAMPLES, images.shape[0], config.NUM_CLASSES, images.shape[-2], images.shape[-1]], device=self.device)
             for i in range(config.NUM_SAMPLES):
@@ -116,7 +121,9 @@ class SegFormer(L.LightningModule):
                 upsampled_logits = torch.nn.functional.interpolate(logits, size=images.shape[-2:], mode="bilinear", align_corners=False)
 
                 sample_outputs[i] = torch.softmax(upsampled_logits, dim=1)
-                
+            
+            end.record()
+            torch.cuda.synchronize()  # need to wait once more for op to finish
             
             probability_map = torch.mean(sample_outputs, dim=0)
             prediction_map = torch.argmax(probability_map, dim=1, keepdim=True)
@@ -138,6 +145,7 @@ class SegFormer(L.LightningModule):
 
             self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('sampling_time', start.elapsed_time(end), on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
         else:
            
 
