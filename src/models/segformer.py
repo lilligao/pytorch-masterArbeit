@@ -173,61 +173,61 @@ class SegFormer(L.LightningModule):
 
             batch_size = preds.shape[0]
 
-            preds_map = []
-            targets_map = []
+            # preds_map = []
+            # targets_map = []
 
             for i in range(batch_size):
-                scores_i = scores[i,:,:]
-                # predictions ???? consider 0 in map oder niche????
-                detected_obj = torch.unique(preds[i,:,:]).tolist()
-                detected_obj.remove(0)
+            #     scores_i = scores[i,:,:]
+            #     # predictions ???? consider 0 in map oder niche????
+            #     detected_obj = torch.unique(preds[i,:,:]).tolist()
+            #     detected_obj.remove(0)
                 
-                # targets
-                target_obj = torch.unique(target[i,:,:]).tolist()
-                target_obj.remove(0)
+            #     # targets
+            #     target_obj = torch.unique(target[i,:,:]).tolist()
+            #     target_obj.remove(0)
 
-                scores_preds = []
-                labels_preds = []
-                masks_preds = []
-                for j in detected_obj:
+            #     scores_preds = []
+            #     labels_preds = []
+            #     masks_preds = []
+            #     for j in detected_obj:
                     
-                    mask_preds = preds[i,:,:]==j
-                    mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
-                    score = torch.mean(scores_i[mask_preds]).item()
+            #         mask_preds = preds[i,:,:]==j
+            #         mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
+            #         score = torch.mean(scores_i[mask_preds]).item()
 
-                    scores_preds.append(score)
-                    labels_preds.append(j)
-                    masks_preds.append(mask_preds)
+            #         scores_preds.append(score)
+            #         labels_preds.append(j)
+            #         masks_preds.append(mask_preds)
 
-                labels_tgt = []
-                masks_tgt = []
-                for j in target_obj:
-                    mask_tgt = target[i,:,:]==j
-                    labels_tgt.append(j)
-                    masks_tgt.append(mask_tgt)
+            #     labels_tgt = []
+            #     masks_tgt = []
+            #     for j in target_obj:
+            #         mask_tgt = target[i,:,:]==j
+            #         labels_tgt.append(j)
+            #         masks_tgt.append(mask_tgt)
                 
-                scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
-                labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
-                masks_preds = torch.stack(masks_preds)
-                masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
-                labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
-                masks_tgt = torch.stack(masks_tgt)
-                masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
+            #     scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
+            #     labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
+            #     masks_preds = torch.stack(masks_preds)
+            #     masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
+            #     labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
+            #     masks_tgt = torch.stack(masks_tgt)
+            #     masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
 
-                preds_map.append(
-                    dict(
-                        masks=mask_preds,
-                        scores=scores_preds,
-                        labels=labels_preds, # the object j has mask of False
-                    )
-                )
+            #     preds_map.append(
+            #         dict(
+            #             masks=mask_preds,
+            #             scores=scores_preds,
+            #             labels=labels_preds, # the object j has mask of False
+            #         )
+            #     )
             
-                targets_map.append(
-                    dict(
-                        masks=masks_tgt,
-                        labels=labels_tgt, # the object j has mask of False
-                    )
-                )
+            #     targets_map.append(
+            #         dict(
+            #             masks=masks_tgt,
+            #             labels=labels_tgt, # the object j has mask of False
+            #         )
+            #     )
 
                 if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
