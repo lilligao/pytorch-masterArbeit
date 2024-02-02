@@ -172,6 +172,7 @@ class SegFormer(L.LightningModule):
             scores, preds = torch.max(preds, dim=1)# delete the first dimension
 
             batch_size = preds.shape[0]
+            print("preds shape", preds.shape)
 
             # preds_map = []
             # targets_map = []
@@ -234,7 +235,7 @@ class SegFormer(L.LightningModule):
                     mask_data = mask_data_tensor.numpy()
                     mask_data_label_tensor =  labels[i].squeeze().cpu()
                     mask_data_label = mask_data_label_tensor.numpy()
-                    class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(config.NUM_CLASSES)]))
+                    class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                     mask_img = wandb.Image(
                             images,
                             masks={
