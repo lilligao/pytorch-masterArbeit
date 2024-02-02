@@ -250,17 +250,17 @@ class SegFormer(L.LightningModule):
             # print("target list", len(targets_map))
             # print("preds mask", preds_map[1]["masks"].shape)
             # print("target mask", targets_map[1]["masks"].shape)
-            self.test_map.update(preds=preds_map, target=targets_map)
+            #self.test_map.update(preds=preds_map, target=targets_map)
 
-            if config.MAP_PROIMG.upper().startswith(ua):
-                # map
-                mAPs = self.test_map.compute() #.to(self.device)
-                mAPs.pop("classes")
-                mAPs.pop("map_per_class")
-                mAPs.pop("mar_100_per_class")
-                self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-                self.test_map.reset()
-                torch.cuda.empty_cache()
+            # if config.MAP_PROIMG.upper().startswith(ua):
+            #     # map
+            #     mAPs = self.test_map.compute() #.to(self.device)
+            #     mAPs.pop("classes")
+            #     mAPs.pop("map_per_class")
+            #     mAPs.pop("mar_100_per_class")
+            #     self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+            #     self.test_map.reset()
+            #     torch.cuda.empty_cache()
 
             
             if config.PLOT_TESTIMG.upper().startswith(ua):
@@ -281,19 +281,19 @@ class SegFormer(L.LightningModule):
                     wandb.log({"predictions" : mask_img})
         
             
-    def on_test_epoch_end(self):
-        if config.TEST_MODE!="MCDropout":
-            ua = str("true").upper()
-            self.test_iou.reset()
-            self.test_ap.reset()
-            if not config.MAP_PROIMG.upper().startswith(ua):       
-                mAPs = self.test_map.compute() #.to(self.device)
-                mAPs.pop("classes")
-                mAPs.pop("map_per_class")
-                mAPs.pop("mar_100_per_class")
-                self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-                self.test_map.reset()
-                torch.cuda.empty_cache()
+    # def on_test_epoch_end(self):
+    #     if config.TEST_MODE!="MCDropout":
+    #         ua = str("true").upper()
+    #         self.test_iou.reset()
+    #         self.test_ap.reset()
+    #         if not config.MAP_PROIMG.upper().startswith(ua):       
+    #             mAPs = self.test_map.compute() #.to(self.device)
+    #             mAPs.pop("classes")
+    #             mAPs.pop("map_per_class")
+    #             mAPs.pop("mar_100_per_class")
+    #             self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+    #             self.test_map.reset()
+    #             torch.cuda.empty_cache()
     
     
     def configure_optimizers(self):
