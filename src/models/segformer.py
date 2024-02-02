@@ -71,7 +71,7 @@ class SegFormer(L.LightningModule):
         self.log('train_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         self.log('train_iou', self.train_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
         #self.log('train_ap', self.train_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        #self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log('train_mAP', self.train_map, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
         return loss
 
@@ -172,63 +172,68 @@ class SegFormer(L.LightningModule):
             scores, preds = torch.max(preds, dim=1)# delete the first dimension
 
             batch_size = preds.shape[0]
-            print("preds shape", preds.shape)
 
-            # preds_map = []
-            # targets_map = []
+            preds_map = []
+            targets_map = []
 
             for i in range(batch_size):
-            #     scores_i = scores[i,:,:]
-            #     # predictions ???? consider 0 in map oder niche????
-            #     detected_obj = torch.unique(preds[i,:,:]).tolist()
-            #     detected_obj.remove(0)
+                scores_i = scores[i,:,:]
+                # predictions ???? consider 0 in map oder niche????
+                detected_obj = torch.unique(preds[i,:,:]).tolist()
+                detected_obj.remove(0)
                 
-            #     # targets
-            #     target_obj = torch.unique(target[i,:,:]).tolist()
-            #     target_obj.remove(0)
+                # targets
+                target_obj = torch.unique(target[i,:,:]).tolist()
+                target_obj.remove(0)
 
-            #     scores_preds = []
-            #     labels_preds = []
-            #     masks_preds = []
-            #     for j in detected_obj:
+                scores_preds = []
+                labels_preds = []
+                masks_preds = []
+                for j in detected_obj:
                     
-            #         mask_preds = preds[i,:,:]==j
-            #         mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
-            #         score = torch.mean(scores_i[mask_preds]).item()
+                    mask_preds = preds[i,:,:]==j
+                    mask_tgt = target[i,:,:]==j if j in target_obj else target[i,:,:]==999 # if something detected which is not in target, create a mask with all False
+                    score = torch.mean(scores_i[mask_preds]).item()
 
-            #         scores_preds.append(score)
-            #         labels_preds.append(j)
-            #         masks_preds.append(mask_preds)
+                    scores_preds.append(score)
+                    labels_preds.append(j)
+                    masks_preds.append(mask_preds)
 
-            #     labels_tgt = []
-            #     masks_tgt = []
-            #     for j in target_obj:
-            #         mask_tgt = target[i,:,:]==j
-            #         labels_tgt.append(j)
-            #         masks_tgt.append(mask_tgt)
+                labels_tgt = []
+                masks_tgt = []
+                for j in target_obj:
+                    mask_tgt = target[i,:,:]==j
+                    labels_tgt.append(j)
+                    masks_tgt.append(mask_tgt)
                 
-            #     scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
-            #     labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
-            #     masks_preds = torch.stack(masks_preds)
-            #     masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
-            #     labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
-            #     masks_tgt = torch.stack(masks_tgt)
-            #     masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
+                scores_preds =  torch.as_tensor(scores_preds, dtype=torch.float)
+                labels_preds = torch.as_tensor(labels_preds, dtype=torch.int)
+                masks_preds = torch.stack(masks_preds)
+                masks_preds = torch.as_tensor(masks_preds, dtype=torch.uint8)
+                labels_tgt = torch.as_tensor(labels_tgt, dtype=torch.int)
+                masks_tgt = torch.stack(masks_tgt)
+                masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
 
-            #     preds_map.append(
-            #         dict(
-            #             masks=mask_preds,
-            #             scores=scores_preds,
-            #             labels=labels_preds, # the object j has mask of False
-            #         )
-            #     )
+                print("masks_preds",masks_preds.shape)
+                print("labels_preds",labels_preds.shape)
+
+                print("masks_tgt",masks_tgt.shape)
+                print("labels_tgt",labels_tgt.shape)
+
+                preds_map.append(
+                    dict(
+                        masks=mask_preds,
+                        scores=scores_preds,
+                        labels=labels_preds, # the object j has mask of False
+                    )
+                )
             
-            #     targets_map.append(
-            #         dict(
-            #             masks=masks_tgt,
-            #             labels=labels_tgt, # the object j has mask of False
-            #         )
-            #     )
+                targets_map.append(
+                    dict(
+                        masks=masks_tgt,
+                        labels=labels_tgt, # the object j has mask of False
+                    )
+                )
 
                 if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
@@ -251,50 +256,33 @@ class SegFormer(L.LightningModule):
             # print("target list", len(targets_map))
             # print("preds mask", preds_map[1]["masks"].shape)
             # print("target mask", targets_map[1]["masks"].shape)
-            #self.test_map.update(preds=preds_map, target=targets_map)
+            self.test_map.update(preds=preds_map, target=targets_map)
 
-            # if config.MAP_PROIMG.upper().startswith(ua):
-            #     # map
-            #     mAPs = self.test_map.compute() #.to(self.device)
-            #     mAPs.pop("classes")
-            #     mAPs.pop("map_per_class")
-            #     mAPs.pop("mar_100_per_class")
-            #     self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
-            #     self.test_map.reset()
-            #     torch.cuda.empty_cache()
+            if config.MAP_PROIMG.upper().startswith(ua):
+                # map
+                mAPs = self.test_map.compute() #.to(self.device)
+                mAPs.pop("classes")
+                mAPs.pop("map_per_class")
+                mAPs.pop("mar_100_per_class")
+                self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+                self.test_map.reset()
+                torch.cuda.empty_cache()
 
-            
-            if config.PLOT_TESTIMG.upper().startswith(ua):
-                mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
-                mask_data = mask_data_tensor.numpy()
-                mask_data_label_tensor =  labels.squeeze().cpu()
-                mask_data_label = mask_data_label_tensor.numpy()
-                class_labels = dict(zip(range(config.NUM_CLASSES), [str(i) for i in range(config.NUM_CLASSES)]))
-                mask_img = wandb.Image(
-                        images,
-                        masks={
-                            "predictions": {"mask_data": mask_data, "class_labels": class_labels},
-                            "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
-                        },
-                    )
-                if wandb.run is not None:
-                    # log images to W&B
-                    wandb.log({"predictions" : mask_img})
         
             
-    # def on_test_epoch_end(self):
-    #     if config.TEST_MODE!="MCDropout":
-    #         ua = str("true").upper()
-    #         self.test_iou.reset()
-    #         self.test_ap.reset()
-    #         if not config.MAP_PROIMG.upper().startswith(ua):       
-    #             mAPs = self.test_map.compute() #.to(self.device)
-    #             mAPs.pop("classes")
-    #             mAPs.pop("map_per_class")
-    #             mAPs.pop("mar_100_per_class")
-    #             self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-    #             self.test_map.reset()
-    #             torch.cuda.empty_cache()
+    def on_test_epoch_end(self):
+        if config.TEST_MODE!="MCDropout":
+            ua = str("true").upper()
+            self.test_iou.reset()
+            self.test_ap.reset()
+            if not config.MAP_PROIMG.upper().startswith(ua):       
+                mAPs = self.test_map.compute() #.to(self.device)
+                mAPs.pop("classes")
+                mAPs.pop("map_per_class")
+                mAPs.pop("mar_100_per_class")
+                self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.test_map.reset()
+                torch.cuda.empty_cache()
     
     
     def configure_optimizers(self):
