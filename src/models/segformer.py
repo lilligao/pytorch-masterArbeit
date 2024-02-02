@@ -214,6 +214,21 @@ class SegFormer(L.LightningModule):
                 masks_tgt = torch.stack(masks_tgt)
                 masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
 
+                preds_map.append(
+                    dict(
+                        masks=mask_preds,
+                        scores=scores_preds,
+                        labels=labels_preds, # the object j has mask of False
+                    )
+                )
+            
+                targets_map.append(
+                    dict(
+                        masks=masks_tgt,
+                        labels=labels_tgt, # the object j has mask of False
+                    )
+                )
+
                 if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = preds.squeeze(0).cpu() # the maximum element
                     mask_data = mask_data_tensor.numpy()
@@ -231,25 +246,6 @@ class SegFormer(L.LightningModule):
                         # log images to W&B
                         wandb.log({"predictions" : mask_img})
 
-
-
-                        score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
-                        preds_map.append(
-                            dict(
-                                masks=mask_preds.unsqueeze(0),
-                                scores=torch.tensor([score]),
-                                labels=torch.tensor([j]), # the object j has mask of False
-                            )
-                        )
-                    
-                        score = torch.mean(scores_i[mask_tgt]).item() # score of areas that exists obj in target
-                        preds_map.append(
-                            dict(
-                                masks=mask_preds.unsqueeze(0),
-                                scores=torch.tensor([score]),
-                                labels=torch.tensor([j]), # the object j has mask of False
-                            )
-                        )
             # print("preds list", len(preds_map))
             # print("target list", len(targets_map))
             # print("preds mask", preds_map[1]["masks"].shape)
