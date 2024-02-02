@@ -163,7 +163,8 @@ class SegFormer(L.LightningModule):
             self.test_ap(preds, target)
             self.log('test_ap', self.test_ap, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             #self.test_map.update(preds, target)
-
+            self.test_ece(preds, target)
+            self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('test_loss', loss, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             
             # mean Average precision
