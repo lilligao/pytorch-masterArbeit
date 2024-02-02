@@ -102,6 +102,7 @@ class SegFormer(L.LightningModule):
     def test_step(self, batch, batch_idx):
          #images, _, labels = batch
         images, labels = batch
+        ua = str("true").upper()
         if config.TEST_MODE=="MCDropout":
             ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
             # Activate dropout layers
@@ -255,7 +256,6 @@ class SegFormer(L.LightningModule):
             # print("target mask", targets_map[1]["masks"].shape)
             self.test_map.update(preds=preds_map, target=targets_map)
 
-            ua = str("true").upper()
             if config.MAP_PROIMG.upper().startswith(ua):
                 # map
                 mAPs = self.test_map.compute() #.to(self.device)
