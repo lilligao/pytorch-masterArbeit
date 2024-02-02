@@ -214,11 +214,11 @@ class SegFormer(L.LightningModule):
                 masks_tgt = torch.stack(masks_tgt)
                 masks_tgt = torch.as_tensor(masks_tgt, dtype=torch.uint8)
 
-                print("masks_preds",masks_preds.shape)
-                print("labels_preds",labels_preds.shape)
+                # print("masks_preds",masks_preds.shape)
+                # print("labels_preds",labels_preds.shape)
 
-                print("masks_tgt",masks_tgt.shape)
-                print("labels_tgt",labels_tgt.shape)
+                # print("masks_tgt",masks_tgt.shape)
+                # print("labels_tgt",labels_tgt.shape)
 
                 preds_map.append(
                     dict(
@@ -264,7 +264,7 @@ class SegFormer(L.LightningModule):
                 mAPs.pop("classes")
                 mAPs.pop("map_per_class")
                 mAPs.pop("mar_100_per_class")
-                self.log_dict(mAPs, on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+                self.log_dict(mAPs, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
                 self.test_map.reset()
                 torch.cuda.empty_cache()
 
