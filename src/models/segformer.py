@@ -222,7 +222,7 @@ class SegFormer(L.LightningModule):
 
                 preds_map.append(
                     dict(
-                        masks=mask_preds,
+                        masks=masks_preds,
                         scores=scores_preds,
                         labels=labels_preds, # the object j has mask of False
                     )
