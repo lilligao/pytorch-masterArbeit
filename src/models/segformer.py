@@ -16,13 +16,14 @@ class SegFormer(L.LightningModule):
 
         model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
         self.model = SegformerForSemanticSegmentation(model_config)
-        if config.DROPOUT_RATE!=0.0:
-            print("drop out rate:", config.DROPOUT_RATE)
+        if config.DROPOUT_RATE!=None:
+            dropout_rate= float(config.DROPOUT_RATE)
+            print("drop out rate:",dropout_rate)
             self.model = self.model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-                                                hidden_dropout_prob=config.DROPOUT_RATE,
-                                                attention_probs_dropout_prob=config.DROPOUT_RATE,
-                                                classifier_dropout_prob=config.DROPOUT_RATE, # default is 0.1
-                                                drop_path_rate=config.DROPOUT_RATE,)  # default is 0.1
+                                                hidden_dropout_prob=dropout_rate,
+                                                attention_probs_dropout_prob=dropout_rate,
+                                                classifier_dropout_prob=dropout_rate, # default is 0.1
+                                                drop_path_rate=dropout_rate,)  # default is 0.1
         else:
             print("Default dropout rate.")
             self.model = self.model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)  # this loads imagenet weights
