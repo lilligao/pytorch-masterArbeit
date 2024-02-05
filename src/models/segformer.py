@@ -148,6 +148,31 @@ class SegFormer(L.LightningModule):
             self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('sampling_time', start.elapsed_time(end), on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
+
+            if config.PLOT_TESTIMG.upper().startswith(ua):
+                    mask_data_tensor = prediction_map.squeeze(0).cpu() # the maximum element
+                    mask_data = mask_data_tensor.numpy()
+                    mask_data_label_tensor =  labels[i].squeeze().cpu()
+                    mask_data_label = mask_data_label_tensor.numpy()
+
+                    mask_std = standard_deviation_map.squeeze(0).cpu() 
+                    mask_std = mask_std.numpy()
+                    mask_entropy = entropy_map.squeeze(0).cpu() 
+                    mask_entropy = mask_entropy.numpy()
+
+                    class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
+                    mask_img = wandb.Image(
+                            images,
+                            masks={
+                                "predictions": {"mask_data": mask_data, "class_labels": class_labels},
+                                "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
+                                "std": {"mask_data": mask_std},
+                                "entropy":{"mask_data": mask_entropy},
+                            },
+                        )
+                    if wandb.run is not None:
+                        # log images to W&B
+                        wandb.log({"predictions" : mask_img})
         else:
            
 
