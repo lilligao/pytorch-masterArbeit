@@ -133,6 +133,9 @@ class SegFormer(L.LightningModule):
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True)
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
+            print("standard_deviation_map",standard_deviation_map.shape)
+            print("entropy_map",entropy_map.shape)
+            print("prediction_map", prediction_map.shape)
 
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
