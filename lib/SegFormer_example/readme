@@ -78,14 +78,19 @@ cd $HOME/pytorch-masterArbeit/
 /usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b5 --k_intensity=-3  --dropout_rate=0.2 --gradient_clip=0.5  --project='SegFormer_b5' --run=b5_pbrPrimesense_k_intenstiy_1 
 --project='SegFormer_b5' --run=b4_pbrPrimesense_lr_6e-5_lr_factor_1 --epochs=151 --train_split='train_pbr;train_primesense' --val_split='test_primesense' --backbone=b4 --lr_factor=1
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/Detr Train-instance_1gpu/epoch=7-val_loss=nan-val_iou=0.00.ckpt' --project='Detr Test' --run=instance --method=Detr --backbone=instance
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/panopticSeg/epoch=27-val_loss=20.82-val_iou=0.40.ckpt' --project='Mask2Former Test' --run=panoptic --method=Mask2Former --backbone=panoptic
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/instanceSeg/epoch=12-val_loss=22.57-val_iou=0.82.ckpt' --project='Mask2Former Test' --run=instance --method=Mask2Former --backbone=instance
 # copy checkpoints from server
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
 python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json --ann_type='segm'
 
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99-val_loss=0.20-val_iou=0.71.ckpt' --test_mode='MCDropout' --project=SegFormer_results --run=dropout_50_5samples --num_samples=5
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b2_pbr/epoch=99-val_loss=0.84-val_iou=0.33.ckpt' --project=SegFormer_setups --run=b2_pbr --backbone=b2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99-val_loss=0.12-val_iou=0.78.ckpt' --test_mode='MCDropout' --project=SegFormer_results --run=dropout_10_5samples --num_samples=5
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b2_primesense/epoch=99-val_loss=3.68-val_iou=0.04.ckpt' --project=SegFormer_setups --run=b2_primesense --backbone=b2
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_1_augSeg/epoch=99-val_loss=0.14-val_iou=0.76.ckpt' --project=SegFormer_setups --run=b5_k_intenstiy_1_augSeg
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_3/epoch=99-val_loss=0.11-val_iou=0.79.ckpt' --project=SegFormer_setups --run=b5_k_intenstiy_3
 
 /usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --backbone=b5 --use_scaling=False --use_cropping=False --use_flipping=False --use_normal_resize=True
 
-
+# delete all other model checkpoints 
+ls -1 | grep -v 'epoch=99' | xargs rm -f
+sbatch -p dev_gpu_4_a100 -N 1 -t 30 --gres=gpu:1 job_test_setups.sh
