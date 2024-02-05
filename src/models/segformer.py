@@ -149,10 +149,11 @@ class SegFormer(L.LightningModule):
             self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('sampling_time', start.elapsed_time(end), on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
 
+            #here didn't consider the situation when batch_size>0!
             if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = prediction_map.squeeze(0).cpu() # the maximum element
                     mask_data = mask_data_tensor.numpy()
-                    mask_data_label_tensor =  labels[i].squeeze().cpu()
+                    mask_data_label_tensor =  labels.squeeze().cpu()
                     mask_data_label = mask_data_label_tensor.numpy()
 
                     mask_std = standard_deviation_map.squeeze(0).cpu() 
