@@ -133,9 +133,6 @@ class SegFormer(L.LightningModule):
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True)
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
-            print("standard_deviation_map",standard_deviation_map.shape)
-            print("entropy_map",entropy_map.shape)
-            print("prediction_map", prediction_map.shape)
 
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
@@ -154,14 +151,14 @@ class SegFormer(L.LightningModule):
 
             #here didn't consider the situation when batch_size>0!
             if config.PLOT_TESTIMG.upper().startswith(ua):
-                    mask_data_tensor = prediction_map.squeeze(0).cpu() # the maximum element
+                    mask_data_tensor = prediction_map.squeeze().cpu() # the maximum element
                     mask_data = mask_data_tensor.numpy()
                     mask_data_label_tensor =  labels.squeeze().cpu()
                     mask_data_label = mask_data_label_tensor.numpy()
 
-                    mask_std = standard_deviation_map.squeeze(0).cpu() 
+                    mask_std = standard_deviation_map.squeeze().cpu() 
                     mask_std = mask_std.numpy()
-                    mask_entropy = entropy_map.squeeze(0).cpu() 
+                    mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 
                     class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
