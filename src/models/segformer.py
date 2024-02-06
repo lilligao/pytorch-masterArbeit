@@ -168,8 +168,7 @@ class SegFormer(L.LightningModule):
 
                     mask_std = predictive_uncertainty.squeeze().cpu() 
                     mask_std = mask_std.numpy()
-                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std))
-                    print("mask_std", mask_std)
+                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std)) # normalize?
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 
@@ -183,11 +182,13 @@ class SegFormer(L.LightningModule):
                         )
                     entropy_img = wandb.Image(mask_entropy)
                     std_img = wandb.Image(mask_std)
+                    list_outputs = [mask_img, entropy_img, std_img]
                     if wandb.run is not None:
                         # log images to W&B
-                        wandb.log({"predictions" : mask_img,
-                                   "std_img" : std_img,
-                                   "entropy_img" : entropy_img})
+                        wandb.log({"predictions" : list_outputs})
+                        # wandb.log({"predictions" : mask_img,
+                        #            "std_img" : std_img,
+                        #            "entropy_img" : entropy_img})
         else:
 
             # print("test image shape",images.shape)
