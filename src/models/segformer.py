@@ -146,8 +146,6 @@ class SegFormer(L.LightningModule):
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
             p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
-            print("pavpu", pavpu)
-            print("pAccCer_entropy", p_accurate_certain)
 
             self.log('pAccCer_entropy', p_accurate_certain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
