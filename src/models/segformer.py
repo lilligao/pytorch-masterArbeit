@@ -135,8 +135,11 @@ class SegFormer(L.LightningModule):
             predictive_uncertainty = torch.zeros(size=[images.shape[0], images.shape[2], images.shape[3]], device=self.device) # 1*540*720
             
             for i in range(config.NUM_CLASSES):
+                print("std", standard_deviation_map[:, i, :, :])
+                print("std shape", standard_deviation_map[:, i, :, :].shape)
                 predictive_uncertainty = torch.where(prediction_map.squeeze() == i, standard_deviation_map[:, i, :, :], predictive_uncertainty)
 
+            print(torch.sum(predictive_uncertainty))
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True) #1*1*540*720
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
