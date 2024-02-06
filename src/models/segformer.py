@@ -130,6 +130,7 @@ class SegFormer(L.LightningModule):
             probability_map = torch.mean(sample_outputs, dim=0)
             prediction_map = torch.argmax(probability_map, dim=1, keepdim=True) #1*1*540*720
             standard_deviation_map = torch.std(sample_outputs, dim=0) #1*31*540*720
+            print("standard_deviation_map", standard_deviation_map.shape)
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True) #1*1*540*720
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
@@ -159,7 +160,7 @@ class SegFormer(L.LightningModule):
                     print("mask_data_label_tensor",mask_data_label_tensor.shape)
                     mask_data_label = mask_data_label_tensor.numpy()
 
-                    print("prediction_map.squeeze(0)", prediction_map.squeeze(0))
+                    print("prediction_map.squeeze(0)", prediction_map.squeeze(0).shape)
                     mask_std =torch.index_select(standard_deviation_map, dim=1, index= prediction_map.squeeze(0))
                     print("mask_std",mask_std.shape)
                     mask_std = mask_std.squeeze().cpu() 
