@@ -132,9 +132,7 @@ class SegFormer(L.LightningModule):
 
             # Compute the predictive uncertainty
             standard_deviation_map = torch.std(sample_outputs, dim=0) #1*31*540*720
-            print("image shape",images.shape)
-            predictive_uncertainty = torch.zeros(size=[images.shape[0], images.shape[2], images.shape[3]], device=self.device)
-            print("predictive_uncertainty",predictive_uncertainty)
+            predictive_uncertainty = torch.zeros(size=[images.shape[0], images.shape[2], images.shape[3]], device=self.device) # 1*540*720
             
             for i in range(config.NUM_CLASSES):
                 predictive_uncertainty = torch.where(prediction_map == i, standard_deviation_map[:, i, :, :], predictive_uncertainty)
@@ -145,7 +143,7 @@ class SegFormer(L.LightningModule):
 
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
-            p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, standard_deviation_map)
+            p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
             self.log('pAccCer_entropy', p_accurate_certain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
@@ -165,11 +163,8 @@ class SegFormer(L.LightningModule):
                     mask_data_label_tensor =  labels.squeeze().cpu()
                     mask_data_label = mask_data_label_tensor.numpy()
 
-                    # mask_std =torch.index_select(standard_deviation_map, dim=1, index= prediction_map.squeeze(0))
-                    # print("mask_std",mask_std.shape)
-                    # mask_std = mask_std.squeeze().cpu() 
-                    # print("mask_std",mask_std.shape)
-                    # mask_std = mask_std.numpy()
+                    mask_std = predictive_uncertainty.squeeze().cpu() 
+                    mask_std = mask_std.numpy()
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 
@@ -183,12 +178,13 @@ class SegFormer(L.LightningModule):
                             },
                         )
                     entropy_img = wandb.Image(mask_entropy)
+                    std_img = wandb.Image(mask_std)
                     if wandb.run is not None:
                         # log images to W&B
-                        wandb.log({"predictions" : mask_img})
-                        wandb.log({"entropy_img" : entropy_img})
+                        wandb.log({"predictions" : mask_img,
+                                   "std_img" : std_img,
+                                   "entropy_img" : entropy_img})
         else:
-           
 
             # print("test image shape",images.shape)
             # print("test label shape",labels.shape)
