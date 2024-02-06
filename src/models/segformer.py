@@ -102,7 +102,7 @@ class SegFormer(L.LightningModule):
 
     def test_step(self, batch, batch_idx):
          #images, _, labels = batch
-        images, labels = batch
+        images, labels = batch #image: 1*3*540*720
         ua = str("true").upper()
         if config.TEST_MODE=="MCDropout":
             ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
@@ -133,7 +133,7 @@ class SegFormer(L.LightningModule):
             # Compute the predictive uncertainty
             standard_deviation_map = torch.std(sample_outputs, dim=0) #1*31*540*720
             print("image shape",images.shape)
-            predictive_uncertainty = torch.empty(size=[images.shape[0], images.shape[2], images.shape[3]], device=self.device)
+            predictive_uncertainty = torch.zeros(size=[images.shape[0], images.shape[2], images.shape[3]], device=self.device)
             print("predictive_uncertainty",predictive_uncertainty)
             
             for i in range(config.NUM_CLASSES):

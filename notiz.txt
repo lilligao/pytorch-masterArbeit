@@ -148,11 +148,16 @@ value_states = torch.as_tensor(value_states, dtype=torch.float64)
 /usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/ --project='Detr Train' --run=instance_test
 
 --------------------------------------------------------
+std plotten
 entropy 10 oder 20 samples
 zusammen plotten wandb
 matplotlib lokal lib
 Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
 irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen
-
 danach
 Untertainty thresholds
+
+
+intensity 3_augSeg
+intensity 5
+b3_pbrPRimesense
