@@ -10,6 +10,7 @@ import config
 from utils.lr_schedulers import PolyLR
 import wandb
 import datasets.tless as tless
+import numpy as np
 class SegFormer(L.LightningModule):
     def __init__(self):
         super().__init__()
@@ -136,9 +137,6 @@ class SegFormer(L.LightningModule):
             
             for i in range(config.NUM_CLASSES):
                 #standard_deviation_map[:, i, :, :] 1*540*720
-                print("std shape", standard_deviation_map[:, i, :, :].shape)
-                print("predict map shape",(prediction_map.squeeze(0) == i).shape)
-                print("predictive_uncertainty shape",predictive_uncertainty.shape)
                 predictive_uncertainty = torch.where(prediction_map.squeeze(0) == i, standard_deviation_map[:, i, :, :], predictive_uncertainty)
 
             print(torch.sum(predictive_uncertainty))
@@ -170,7 +168,7 @@ class SegFormer(L.LightningModule):
 
                     mask_std = predictive_uncertainty.squeeze().cpu() 
                     mask_std = mask_std.numpy()
-                    mask_std = (mask_std - min(mask_std))/(max(mask_std)-min(mask_std))
+                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std))
                     print("mask_std", mask_std)
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
@@ -181,7 +179,6 @@ class SegFormer(L.LightningModule):
                             masks={
                                 "predictions": {"mask_data": mask_data, "class_labels": class_labels},
                                 "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
-                                #"std": {"mask_data": mask_std},
                             },
                         )
                     entropy_img = wandb.Image(mask_entropy)
