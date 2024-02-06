@@ -139,7 +139,6 @@ class SegFormer(L.LightningModule):
                 #standard_deviation_map[:, i, :, :] 1*540*720
                 predictive_uncertainty = torch.where(prediction_map.squeeze(0) == i, standard_deviation_map[:, i, :, :], predictive_uncertainty)
 
-            print(torch.sum(predictive_uncertainty))
             entropy_map = torch.sum(-probability_map * torch.log(probability_map + 1e-6), dim=1, keepdim=True) #1*1*540*720
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
@@ -147,13 +146,16 @@ class SegFormer(L.LightningModule):
             # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
             p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
-            self.log('pAccCer_entropy', p_accurate_certain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            print("pavpu", pavpu)
+            print("pAccCer_entropy", p_accurate_certain)
+            
+            self.log('pAccCer_entropy', p_accurate_certain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pavpu_entropy', pavpu, on_steWp=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-            self.log('pAccCer_std', p_accurate_certain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pAccCer_std', p_accurate_certain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pavpu_std', pavpu_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
             self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)

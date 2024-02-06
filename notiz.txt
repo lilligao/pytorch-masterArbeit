@@ -149,8 +149,8 @@ value_states = torch.as_tensor(value_states, dtype=torch.float64)
 
 --------------------------------------------------------
 std plotten - normalizieren sonst alles schwarz???
-entropy 10 oder 20 samples
-zusammen plotten wandb
+entropy 10 oder 20 samples with every thing again but for 10 samples and 20 samples
+zusammen plotten wandb +
 matplotlib lokal lib
 Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
 irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen
