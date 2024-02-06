@@ -158,7 +158,9 @@ class SegFormer(L.LightningModule):
                     print("mask_data_label_tensor",mask_data_label_tensor.shape)
                     mask_data_label = mask_data_label_tensor.numpy()
 
-                    mask_std = standard_deviation_map.squeeze().cpu() 
+                    mask_std = standard_deviation_map[prediction_map]
+                    print("mask_std",mask_std.shape)
+                    mask_std = mask_std.squeeze().cpu() 
                     print("mask_std",mask_std.shape)
                     mask_std = mask_std.numpy()
                     mask_entropy = entropy_map.squeeze().cpu() 
