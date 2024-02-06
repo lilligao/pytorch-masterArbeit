@@ -152,11 +152,8 @@ class SegFormer(L.LightningModule):
             #here didn't consider the situation when batch_size>0!
             if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = prediction_map.squeeze().cpu() # the maximum element
-                    print("prediction_map", prediction_map)
-                    print("mask_data_tensor",mask_data_tensor.shape)
                     mask_data = mask_data_tensor.numpy()
                     mask_data_label_tensor =  labels.squeeze().cpu()
-                    print("mask_data_label_tensor",mask_data_label_tensor.shape)
                     mask_data_label = mask_data_label_tensor.numpy()
 
                     # mask_std =torch.index_select(standard_deviation_map, dim=1, index= prediction_map.squeeze(0))
@@ -165,7 +162,6 @@ class SegFormer(L.LightningModule):
                     # print("mask_std",mask_std.shape)
                     # mask_std = mask_std.numpy()
                     mask_entropy = entropy_map.squeeze().cpu() 
-                    print("mask_entropy",mask_entropy.shape)
                     mask_entropy = mask_entropy.numpy()
 
                     class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
@@ -175,12 +171,13 @@ class SegFormer(L.LightningModule):
                                 "predictions": {"mask_data": mask_data, "class_labels": class_labels},
                                 "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
                                 #"std": {"mask_data": mask_std},
-                                "entropy":{"mask_data": mask_entropy},
                             },
                         )
+                    entropy_img = wandb.Image(mask_entropy)
                     if wandb.run is not None:
                         # log images to W&B
                         wandb.log({"predictions" : mask_img})
+                        wandb.log({"entropy_img" : entropy_img})
         else:
            
 
