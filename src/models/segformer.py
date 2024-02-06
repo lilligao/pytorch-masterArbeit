@@ -148,10 +148,10 @@ class SegFormer(L.LightningModule):
             p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
             print("pavpu", pavpu)
             print("pAccCer_entropy", p_accurate_certain)
-            
+
             self.log('pAccCer_entropy', p_accurate_certain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pavpu_entropy', pavpu, on_steWp=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('pavpu_entropy', pavpu, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
             self.log('pAccCer_std', p_accurate_certain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
