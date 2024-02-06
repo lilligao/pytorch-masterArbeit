@@ -152,13 +152,17 @@ class SegFormer(L.LightningModule):
             #here didn't consider the situation when batch_size>0!
             if config.PLOT_TESTIMG.upper().startswith(ua):
                     mask_data_tensor = prediction_map.squeeze().cpu() # the maximum element
+                    print("mask_data_tensor",mask_data_tensor.shape)
                     mask_data = mask_data_tensor.numpy()
                     mask_data_label_tensor =  labels.squeeze().cpu()
+                    print("mask_data_label_tensor",mask_data_label_tensor.shape)
                     mask_data_label = mask_data_label_tensor.numpy()
 
                     mask_std = standard_deviation_map.squeeze().cpu() 
+                    print("mask_std",mask_std.shape)
                     mask_std = mask_std.numpy()
                     mask_entropy = entropy_map.squeeze().cpu() 
+                    print("mask_entropy",mask_entropy.shape)
                     mask_entropy = mask_entropy.numpy()
 
                     class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
