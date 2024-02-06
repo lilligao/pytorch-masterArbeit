@@ -161,7 +161,7 @@ class SegFormer(L.LightningModule):
                     mask_data_label = mask_data_label_tensor.numpy()
 
                     print("prediction_map.squeeze(0)", prediction_map.squeeze(0).shape)
-                    mask_std =torch.index_select(standard_deviation_map, dim=1, index= prediction_map.squeeze(0))
+                    mask_std =torch.index_select(standard_deviation_map.squeeze((0)), dim=0, index= prediction_map.squeeze())
                     print("mask_std",mask_std.shape)
                     mask_std = mask_std.squeeze().cpu() 
                     print("mask_std",mask_std.shape)
