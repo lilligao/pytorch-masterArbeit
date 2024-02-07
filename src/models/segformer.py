@@ -11,6 +11,7 @@ from utils.lr_schedulers import PolyLR
 import wandb
 import datasets.tless as tless
 import numpy as np
+import matplotlib.pyplot as plt
 class SegFormer(L.LightningModule):
     def __init__(self):
         super().__init__()
@@ -193,6 +194,57 @@ class SegFormer(L.LightningModule):
                         # wandb.log({"predictions" : mask_img,
                         #            "std_img" : std_img,
                         #            "entropy_img" : entropy_img})
+                    if config.PLOT_TESTIMG=='True_local':
+                        # plot predicted segmentation mask
+                        fig,ax = plt.subplots()
+                        #print("img_array.shape",img_array.shape)
+                        fig.frameon = False
+                        ax = plt.Axes(fig, [0., 0., 1., 1.])
+                        ax.set_axis_off()
+                        fig.add_axes(ax)
+                        ax.imshow(mask_data, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
+                        fig.savefig('./outputs/'+ config.RUN_NAME +'/' + str(batch_idx)+'_'+ 'predicted_label.png')
+                        plt.close()
+
+                        # plot target segmentation mask
+                        fig,ax = plt.subplots()
+                        fig.frameon = False
+                        ax = plt.Axes(fig, [0., 0., 1., 1.])
+                        ax.set_axis_off()
+                        fig.add_axes(ax)
+                        ax.imshow(mask_data_label, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
+                        fig.savefig('./outputs/'+ config.RUN_NAME +'/' + str(batch_idx)+'_'+ 'target_label.png')
+                        plt.close()
+
+                        # plot std 
+                        fig,ax = plt.subplots()
+                        fig.frameon = False
+                        ax = plt.Axes(fig, [0., 0., 1., 1.])
+                        ax.set_axis_off()
+                        fig.add_axes(ax)
+                        ax.imshow(mask_std) # so for feste Klasse feste Farbe
+                        fig.savefig('./outputs/'+ config.RUN_NAME +'/' + str(batch_idx)+'_'+ 'std.png')
+                        plt.close()
+
+                        # plot entropy 
+                        fig,ax = plt.subplots()
+                        fig.frameon = False
+                        ax = plt.Axes(fig, [0., 0., 1., 1.])
+                        ax.set_axis_off()
+                        fig.add_axes(ax)
+                        ax.imshow(mask_entropy) # so for feste Klasse feste Farbe
+                        fig.savefig('./outputs/'+ config.RUN_NAME +'/' + str(batch_idx)+'_'+ 'entropy.png')
+                        plt.close()
+
+                        # plot binary map 
+                        fig,ax = plt.subplots()
+                        fig.frameon = False
+                        ax = plt.Axes(fig, [0., 0., 1., 1.])
+                        ax.set_axis_off()
+                        fig.add_axes(ax)
+                        ax.imshow(binary_accuracy_map) # so for feste Klasse feste Farbe
+                        fig.savefig('./outputs/'+ config.RUN_NAME +'/' + str(batch_idx)+'_'+ 'binary_map.png')
+                        plt.close()
         else:
 
             # print("test image shape",images.shape)

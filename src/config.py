@@ -24,7 +24,7 @@ parser.add_argument('--test_split', type=str, default='test_primesense')
 parser.add_argument('--val_size', type=str, default=10000)
 parser.add_argument('--checkpoints', type=str, default='./checkpoints')
 parser.add_argument('--load_checkpoints', type=str, default=None)
-parser.add_argument('--plot_testimg', type=str, default='True')
+parser.add_argument('--plot_testimg', type=str, default='True') # True_local
 parser.add_argument('--mAP_proImg', type=str, default='False')
 parser.add_argument('--test_mode', type=str, default='normal') # normal or MCDropout
 

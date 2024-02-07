@@ -20,7 +20,7 @@ pip install -r requirements.txt
 enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.04 python src/train.py --run=Train_Server --epochs 200 --backbone "b2"   # example for training 100 epochs with the b2 backbone
 enroot start --root --rw -m pytorch-masterArbeit/:/workspace nvidia_pytorch_23.04 python src/train.py --project='Masterarbeit Segformer Train' --run=Attempt1
 # 4. Queue batch job on gpu_4_a100 node on bwUniCluster:
-sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job.sh # example for training on 4 gpus for 8 hours (you can also choose a different gpu node - use "sinfo_t_idle" to check available nodes).
+sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job.sh # example for training on 4 gpus for 8 hours (you can also choose a different gpu node - use "sinfo_t_idle" to check available nodes).
 sbatch -p gpu_8 -N 1 -t 48:00:00 --mem=510000 --gres=gpu:4 job.sh 
 ## other useful commands:
 # 1. check status of job:
@@ -83,11 +83,13 @@ cd $HOME/pytorch-masterArbeit/
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints ./checkpoints
 python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json --ann_type='segm'
 
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99-val_loss=0.12-val_iou=0.78.ckpt' --test_mode='MCDropout' --project=SegFormer_results --run=dropout_10_5samples --num_samples=5
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b2_primesense/epoch=99-val_loss=3.68-val_iou=0.04.ckpt' --project=SegFormer_setups --run=b2_primesense --backbone=b2
-
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_1_augSeg/epoch=99-val_loss=0.14-val_iou=0.76.ckpt' --project=SegFormer_setups --run=b5_k_intenstiy_1_augSeg
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_3/epoch=99-val_loss=0.11-val_iou=0.79.ckpt' --project=SegFormer_setups --run=b5_k_intenstiy_3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=MCDropout --run=dropout_10
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=20 --project=MCDropout --run=dropout_20
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=MCDropout --run=dropout_30
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=MCDropout --run=dropout_50
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b3_pbrPrimesense/epoch=99*' --project=SegFormer_setups --run=b3_pbrPrimesense --backbone=b3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_5_augSeg/epoch=64*' --project=SegFormer_setups --run=b5_k_intenstiy_5_augSeg
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_3_augSeg/epoch=96*' --project=SegFormer_setups --run=b5_k_intenstiy_3_augSeg
 
 /usr/bin/python3.8 src/train.py --root=$HOME/data/tless/ --backbone=b5 --use_scaling=False --use_cropping=False --use_flipping=False --use_normal_resize=True
 

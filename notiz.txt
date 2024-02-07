@@ -154,10 +154,15 @@ zusammen plotten wandb +
 draw binay map!!!
 also dropout 30 epoch 98 check!!
 matplotlib lokal lib !!
+color always stay same!!!!
 Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
 irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen
 danach
 Untertainty thresholds
+------------------------------
+[uenhk@uc2n994 ~]$ sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_setups.sh
+Submitted batch job 23128099
+
 
 --------------------------------------------
 [uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_1e-4.sh 
