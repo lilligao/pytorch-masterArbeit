@@ -177,6 +177,8 @@ class SegFormer(L.LightningModule):
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 
+                    mask_binary = binary_accuracy_map.cpu().numpy()
+
                     class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                     mask_img = wandb.Image(
                             images,
@@ -208,7 +210,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.add_axes(ax)
                         ax.imshow(mask_data, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx)+'_'+ 'predicted_label.png')
+                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'predicted_label.png')
                         plt.close()
 
                         # plot target segmentation mask
@@ -218,7 +220,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.add_axes(ax)
                         ax.imshow(mask_data_label, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx)+'_'+ 'target_label.png')
+                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'target_label.png')
                         plt.close()
 
                         # plot std 
@@ -228,7 +230,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.add_axes(ax)
                         ax.imshow(mask_std) # so for feste Klasse feste Farbe
-                        fig.savefig(directory+ str(batch_idx)+'_'+ 'std.png')
+                        fig.savefig(directory+ str(batch_idx+1)+'_'+ 'std.png')
                         plt.close()
 
                         # plot entropy 
@@ -238,7 +240,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.add_axes(ax)
                         ax.imshow(mask_entropy) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx)+'_'+ 'entropy.png')
+                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'entropy.png')
                         plt.close()
 
                         # plot binary map 
@@ -247,8 +249,8 @@ class SegFormer(L.LightningModule):
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
                         fig.add_axes(ax)
-                        ax.imshow(binary_accuracy_map) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx)+'_'+ 'binary_map.png')
+                        ax.imshow(mask_binary) # so for feste Klasse feste Farbe
+                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'binary_map.png')
                         plt.close()
         else:
 
