@@ -177,7 +177,7 @@ class SegFormer(L.LightningModule):
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 
-                    mask_binary = binary_accuracy_map.cpu().numpy()
+                    mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
 
                     class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                     mask_img = wandb.Image(
