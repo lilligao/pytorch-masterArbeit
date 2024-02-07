@@ -148,16 +148,38 @@ value_states = torch.as_tensor(value_states, dtype=torch.float64)
 /usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/ --project='Detr Train' --run=instance_test
 
 --------------------------------------------------------
-std plotten - normalizieren sonst alles schwarz???
+std plotten - normalizieren sonst alles schwarz??? +
 entropy 10 oder 20 samples with every thing again but for 10 samples and 20 samples
 zusammen plotten wandb +
-matplotlib lokal lib
+draw binay map!!!
+also dropout 30 epoch 98 check!!
+matplotlib lokal lib !!
 Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
 irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen
 danach
 Untertainty thresholds
 
+--------------------------------------------
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_1e-4.sh 
+Submitted batch job 23122095
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_2e-5.sh 
+Submitted batch job 23122096
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_4e-5.sh 
+Submitted batch job 23122097
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_8e-5.sh 
+Submitted batch job 23122098
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_5e-2.sh 
+Submitted batch job 23122102
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_5e-3.sh 
+Submitted batch job 23122103
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_a100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_e-1.sh 
+Submitted batch job 23122108
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_a100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_e-3.sh 
+Submitted batch job 23122109
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_3.sh 
+Submitted batch job 23122111
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_5.sh 
+Submitted batch job 23122114
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_10.sh 
+Submitted batch job 23122115
 
-intensity 3_augSeg
-intensity 5
-b3_pbrPRimesense

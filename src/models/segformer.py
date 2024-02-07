@@ -147,6 +147,9 @@ class SegFormer(L.LightningModule):
             p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
             p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
 
+            # binary map output
+            binary_accuracy_map = (prediction_map == labels.squeeze(dim=1)).float()
+
             self.log('pAccCer_entropy', p_accurate_certain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('pavpu_entropy', pavpu, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
@@ -182,7 +185,8 @@ class SegFormer(L.LightningModule):
                         )
                     entropy_img = wandb.Image(mask_entropy)
                     std_img = wandb.Image(mask_std)
-                    list_outputs = [mask_img, entropy_img, std_img]
+                    binary_img = wandb.Image(binary_accuracy_map)
+                    list_outputs = [mask_img, entropy_img, std_img, binary_img]
                     if wandb.run is not None:
                         # log images to W&B
                         wandb.log({"predictions" : list_outputs})
