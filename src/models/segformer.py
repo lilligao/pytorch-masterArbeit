@@ -208,9 +208,10 @@ class SegFormer(L.LightningModule):
                         fig.frameon = False
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
+                        fig.set_size_inches(mask_data.shape[1]/100,mask_data.shape[0]/100)
                         fig.add_axes(ax)
                         ax.imshow(mask_data, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'predicted_label.png')
+                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'predicted_label.png', dpi=100)
                         plt.close()
 
                         # plot target segmentation mask
@@ -218,9 +219,10 @@ class SegFormer(L.LightningModule):
                         fig.frameon = False
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
+                        fig.set_size_inches(mask_data_label.shape[1]/100,mask_data_label.shape[0]/100)
                         fig.add_axes(ax)
                         ax.imshow(mask_data_label, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'target_label.png')
+                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'target_label.png', dpi=100)
                         plt.close()
 
                         # plot std 
@@ -228,9 +230,10 @@ class SegFormer(L.LightningModule):
                         fig.frameon = False
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
+                        fig.set_size_inches(mask_std.shape[1]/100,mask_std.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_std) # so for feste Klasse feste Farbe
-                        fig.savefig(directory+ str(batch_idx+1)+'_'+ 'std.png')
+                        ax.imshow(mask_std,cmap='binary') # so for feste Klasse feste Farbe
+                        fig.savefig(directory+ str(batch_idx+1).zfill(4)+'_'+ 'std.png', dpi=100)
                         plt.close()
 
                         # plot entropy 
@@ -238,9 +241,10 @@ class SegFormer(L.LightningModule):
                         fig.frameon = False
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
+                        fig.set_size_inches(mask_entropy.shape[1]/100,mask_entropy.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_entropy) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'entropy.png')
+                        ax.imshow(mask_entropy,cmap='binary') # so for feste Klasse feste Farbe
+                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'entropy.png', dpi=100)
                         plt.close()
 
                         # plot binary map 
@@ -248,9 +252,10 @@ class SegFormer(L.LightningModule):
                         fig.frameon = False
                         ax = plt.Axes(fig, [0., 0., 1., 1.])
                         ax.set_axis_off()
+                        fig.set_size_inches(mask_binary.shape[1]/100,mask_binary.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_binary) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1)+'_'+ 'binary_map.png')
+                        ax.imshow(mask_binary,cmap='binary') # so for feste Klasse feste Farbe
+                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'binary_map.png', dpi=100)
                         plt.close()
         else:
 

@@ -67,8 +67,9 @@ if __name__ == '__main__':
     ax = plt.Axes(fig, [0., 0., 1., 1.])
     ax.set_axis_off()
     fig.add_axes(ax)
-    ax.imshow(prediction_array, cmap='gist_ncar', vmin=0, vmax=31) # so for feste Klasse feste Farbe
-    fig.savefig('data/tless/predict_img'+str(scene_id)+'_'+str(image_id)+'.png')
+    fig.set_size_inches(prediction_array.shape[1]/100,prediction_array.shape[0]/100)
+    ax.imshow(prediction_array, cmap='gist_ncar', vmin=0, vmax=30) # so for feste Klasse feste Farbe
+    fig.savefig('data/tless/predict_img'+str(scene_id)+'_'+str(image_id)+'.png',dpi=100)
     plt.close()
 
 
