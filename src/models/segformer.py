@@ -232,7 +232,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.set_size_inches(mask_std.shape[1]/100,mask_std.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_std,cmap='binary') # so for feste Klasse feste Farbe
+                        ax.imshow(mask_std,cmap='gray') # so for feste Klasse feste Farbe
                         fig.savefig(directory+ str(batch_idx+1).zfill(4)+'_'+ 'std.png', dpi=100)
                         plt.close()
 
@@ -243,7 +243,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.set_size_inches(mask_entropy.shape[1]/100,mask_entropy.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_entropy,cmap='binary') # so for feste Klasse feste Farbe
+                        ax.imshow(mask_entropy,cmap='gray') # so for feste Klasse feste Farbe
                         fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'entropy.png', dpi=100)
                         plt.close()
 
@@ -254,7 +254,7 @@ class SegFormer(L.LightningModule):
                         ax.set_axis_off()
                         fig.set_size_inches(mask_binary.shape[1]/100,mask_binary.shape[0]/100)
                         fig.add_axes(ax)
-                        ax.imshow(mask_binary,cmap='binary') # so for feste Klasse feste Farbe
+                        ax.imshow(mask_binary,cmap='gray') # so for feste Klasse feste Farbe
                         fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'binary_map.png', dpi=100)
                         plt.close()
         else:
