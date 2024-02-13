@@ -161,6 +161,20 @@ Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wi
 
 danach
 Untertainty thresholds
+
+----------------------------------------------------
+min max Werte bereich plotten
+Threshold aus ganzen datensatz!!
+min max Werte auch aus ganzen datensatz
+oder 2 Bilder nehmen: 1 gute und 1 schlechte, mit einheitliche min und max Std
+Uncertainty in evaluation packen!
+BOP CHallenge in TLESS, und kürzer beschreiben!
+general approach: zuerst training, danach testen. Warum die Experimente?
+Optimizer usw. in implementation details!
+
+
+
+
 ------------------------------
 sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_dropout_100.sh 
 Submitted batch job 23129872
