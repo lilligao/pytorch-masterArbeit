@@ -8,10 +8,11 @@ die Anmeldung erst ab November?
 
 
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbr_crop_only/epoch=* ./b5_pbr_crop_only
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_default ./outputs/dropout_default
 
 scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
 
-scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/Segformer_train_tless-test.json ./
+scp -r ./test_ps uenhk@bwunicluster.scc.kit.edu:~/data/tless/test_ps
 
 welche ausgewählte ViT?
 mit Python-> Pytorch
@@ -149,19 +150,21 @@ value_states = torch.as_tensor(value_states, dtype=torch.float64)
 
 --------------------------------------------------------
 std plotten - normalizieren sonst alles schwarz??? +
-entropy 10 oder 20 samples with every thing again but for 10 samples and 20 samples
+entropy 10 oder 20 samples with every thing again but for 10 samples and 20 samples +
 zusammen plotten wandb +
-draw binay map!!!
-also dropout 30 epoch 98 check!!
-matplotlib lokal lib !!
-color always stay same!!!!
+draw binay map!!! +
+also dropout 30 epoch 98 check!! +
+matplotlib lokal lib !! +
+color always stay same!!!! +
+irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen +
 Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
-irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen
+
 danach
 Untertainty thresholds
 ------------------------------
-[uenhk@uc2n994 ~]$ sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_setups.sh
-Submitted batch job 23128099
+sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_dropout_100.sh 
+Submitted batch job 23129872
+
 
 
 --------------------------------------------

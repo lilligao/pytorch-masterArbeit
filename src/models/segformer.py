@@ -173,7 +173,7 @@ class SegFormer(L.LightningModule):
 
                     mask_std = predictive_uncertainty.squeeze().cpu() 
                     mask_std = mask_std.numpy()
-                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std)) # normalize?
+                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std)) # min und max werte ein loggen!!
                     mask_entropy = entropy_map.squeeze().cpu() 
                     mask_entropy = mask_entropy.numpy()
 

@@ -244,9 +244,9 @@ class TLESSDataset(torch.utils.data.Dataset):
                 pixel_mask = torch.ones_like(img[0],dtype=torch.long)
       
       
-        print("pixel mask shape after padding",pixel_mask.shape)
-        print("pixel mask sum",torch.sum(pixel_mask))
-        print("img[0] shape", img[0].shape)
+        #print("pixel mask shape after padding",pixel_mask.shape)
+        #print("pixel mask sum",torch.sum(pixel_mask))
+        #print("img[0] shape", img[0].shape)
         target = {}
         target["boxes"] = torch.as_tensor(boxes, dtype=torch.float32)
         target["labels_detection"] = torch.as_tensor(obj_ids, dtype=torch.int64)
@@ -357,7 +357,7 @@ if __name__ == '__main__':
     num_imgs_train = len(train_dataset)
     num_imgs = len(val_dataset)
     num_imgs_test = len(test_dataset)
-    img, target = train_dataset[1]
+    img, target = test_dataset[534]
     # for i in range(0,num_imgs_train,200):
     #     img, target = train_dataset[i]
     #     a = torch.unique(target["label"]).tolist()
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     print('label array:', label_array.shape)
     fig,ax = plt.subplots(1,2)
     ax[0].imshow(img_array)
-    ax[1].imshow(label_array)
+    ax[1].imshow(label_array,cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1)
     plt.savefig('data/tless/label_img.png')
     plt.close()
 
