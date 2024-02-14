@@ -374,9 +374,6 @@ class SegFormer(L.LightningModule):
 
                         mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
 
-                        img = image_i.permute(1, 2, 0)
-                        img_array = np.array(img)
-
                         class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                         mask_img = wandb.Image(
                                 image_i,
@@ -407,18 +404,6 @@ class SegFormer(L.LightningModule):
                                 f.write(','.join(str(v) for v in target_obj) + '\n')
                                 f.write('obects in prediction: ')
                                 f.write(','.join(str(v) for v in detected_obj) + '\n')
-
-                            # plot original image
-                            fig,ax = plt.subplots()
-                            #print("img_array.shape",img_array.shape)
-                            fig.frameon = False
-                            ax = plt.Axes(fig, [0., 0., 1., 1.])
-                            ax.set_axis_off()
-                            fig.set_size_inches(img_array.shape[1]/100,img_array.shape[0]/100)
-                            fig.add_axes(ax)
-                            ax.imshow(img_array) # so for feste Klasse feste Farbe
-                            fig.savefig(directory + str(i+1).zfill(4)+'_image.png', dpi=100)
-                            plt.close()
 
                             # plot predicted segmentation mask
                             fig,ax = plt.subplots()
