@@ -163,9 +163,7 @@ danach
 Untertainty thresholds
 
 ----------------------------------------------------
-min max Werte bereich plotten
-Threshold aus ganzen datensatz!!
-min max Werte auch aus ganzen datensatz
+min max Werte bereich plotten & Threshold aus ganzen datensatz & min max Werte auch aus ganzen datensatz
 oder 2 Bilder nehmen: 1 gute und 1 schlechte, mit einheitliche min und max Std
 Uncertainty in evaluation packen!
 BOP CHallenge in TLESS, und kürzer beschreiben!
