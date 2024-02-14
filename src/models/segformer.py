@@ -347,14 +347,14 @@ class SegFormer(L.LightningModule):
                 self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
                 self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
+                self.log('std_min', min_std_dataset, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('std_max', max_std_dataset, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('std_mean', mean_std_dataset, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('entropy_mean', mean_entropy_dataset, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
                 if wandb.run is not None:
                     wandb.log({'step': i, "std_min_proImg": std_min_proImg}) 
                     wandb.log({'step': i, "std_max_proImg": std_max_proImg}) 
-
-                print("std_min_proImg",std_min_proImg)
-                print("std_max_proImg",std_max_proImg)
-                print("pavpu_entropy",pavpu)
-                print("pavpu_std",pavpu_std)
 
                 #here didn't consider the situation when batch_size>0!
                 if config.PLOT_TESTIMG.upper().startswith(ua):
@@ -365,7 +365,7 @@ class SegFormer(L.LightningModule):
 
                         mask_std = uncertainty_std_i.squeeze().cpu() 
                         mask_std = mask_std.numpy()
-                        mask_std = (mask_std - min_std_dataset)/(max_std_dataset-min_std_dataset) # min und max werte ein loggen!!
+                        mask_std = (mask_std - min_std_dataset.cpu().numpy())/(max_std_dataset.cpu().numpy()-min_std_dataset.cpu().numpy()) # min und max werte ein loggen!!
                         mask_entropy = uncertainty_entropy_i.squeeze().cpu() 
                         mask_entropy = mask_entropy.numpy()
 
