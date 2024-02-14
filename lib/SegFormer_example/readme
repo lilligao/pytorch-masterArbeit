@@ -91,9 +91,9 @@ python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json
 
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=94*' --test_mode='MCDropout' --num_samples=10 --project=SegFormer_results --run=dropout_20_try2
 
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_geom/epoch=97*' --project=SegFormer_setups --run=b5_geom
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_factor_5/epoch=99*' --project=SegFormer_setups --run=b5_lr_factor_5_99
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_factor_5/epoch=72*' --project=SegFormer_setups --run=b5_lr_factor_5_72
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_1e-4/epoch=99*' --project=SegFormer_setups --run=b5_lr_1e-4
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_2e-5/epoch=99*' --project=SegFormer_setups --run=b5_lr_2e-5
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_4e-5/epoch=99*' --project=SegFormer_setups --run=b5_lr_4e-5
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=True --load_checkpoints='./checkpoints/SegFormer_experiments-b5_lr_8e-5/epoch=99*' --project=SegFormer_setups --run=b5_lr_8e-5  #--backbone=b4
 
 

@@ -50,6 +50,11 @@ class SegFormer(L.LightningModule):
         self.test_ap = torchmetrics.AveragePrecision(task="multiclass", num_classes=config.NUM_CLASSES, average="macro",thresholds=100)
         self.test_map = MeanAveragePrecision(iou_type="segm")
         self.test_map.compute_with_cache = False
+        self.images = []
+        self.labels = []
+        self.predictions = []
+        self.dataset_entropy = []
+        self.dataset_std = []
          
 
 
@@ -145,118 +150,17 @@ class SegFormer(L.LightningModule):
             self.test_iou(probability_map, labels.squeeze(dim=1))
             self.test_ece(probability_map,  labels.squeeze(dim=1))
 
-            # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
-            p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, entropy_map)
-            p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(images, labels.squeeze(dim=1), prediction_map, predictive_uncertainty)
-
-            # binary map output
-            binary_accuracy_map = (prediction_map == labels.squeeze(dim=1)).float()
-
-            self.log('pAccCer_entropy', p_accurate_certain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pavpu_entropy', pavpu, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
-            self.log('pAccCer_std', p_accurate_certain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log('pavpu_std', pavpu_std, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-
             self.log('test_iou', self.test_iou, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('test_ece', self.test_ece, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
             self.log('sampling_time', start.elapsed_time(end), on_step=True, on_epoch=False, prog_bar=True, logger=True, sync_dist=True)
 
-            #here didn't consider the situation when batch_size>0!
-            if config.PLOT_TESTIMG.upper().startswith(ua):
-                    mask_data_tensor = prediction_map.squeeze().cpu() # the maximum element
-                    mask_data = mask_data_tensor.numpy()
-                    mask_data_label_tensor =  labels.squeeze().cpu()
-                    mask_data_label = mask_data_label_tensor.numpy()
+            self.images.append(images)
+            self.labels.append(labels.squeeze(dim=1))
+            self.predictions.append(prediction_map)
+            self.dataset_std.append(predictive_uncertainty)
+            self.dataset_entropy.append(entropy_map)
 
-                    mask_std = predictive_uncertainty.squeeze().cpu() 
-                    mask_std = mask_std.numpy()
-                    mask_std = (mask_std - np.amin(mask_std))/(np.amax(mask_std)-np.amin(mask_std)) # min und max werte ein loggen!!
-                    mask_entropy = entropy_map.squeeze().cpu() 
-                    mask_entropy = mask_entropy.numpy()
-
-                    mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
-
-                    class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
-                    mask_img = wandb.Image(
-                            images,
-                            masks={
-                                "predictions": {"mask_data": mask_data, "class_labels": class_labels},
-                                "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
-                            },
-                        )
-                    entropy_img = wandb.Image(mask_entropy)
-                    std_img = wandb.Image(mask_std)
-                    binary_img = wandb.Image(binary_accuracy_map)
-                    list_outputs = [mask_img, entropy_img, std_img, binary_img]
-                    if wandb.run is not None:
-                        # log images to W&B
-                        wandb.log({"predictions" : list_outputs})
-                        # wandb.log({"predictions" : mask_img,
-                        #            "std_img" : std_img,
-                        #            "entropy_img" : entropy_img})
-                    if config.PLOT_TESTIMG=='True_local':
-
-                        directory = './outputs/'+ config.RUN_NAME +'/'
-                        if not os.path.exists(directory):
-                            os.makedirs(directory)
-                        # plot predicted segmentation mask
-                        fig,ax = plt.subplots()
-                        #print("img_array.shape",img_array.shape)
-                        fig.frameon = False
-                        ax = plt.Axes(fig, [0., 0., 1., 1.])
-                        ax.set_axis_off()
-                        fig.set_size_inches(mask_data.shape[1]/100,mask_data.shape[0]/100)
-                        fig.add_axes(ax)
-                        ax.imshow(mask_data, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'predicted_label.png', dpi=100)
-                        plt.close()
-
-                        # plot target segmentation mask
-                        fig,ax = plt.subplots()
-                        fig.frameon = False
-                        ax = plt.Axes(fig, [0., 0., 1., 1.])
-                        ax.set_axis_off()
-                        fig.set_size_inches(mask_data_label.shape[1]/100,mask_data_label.shape[0]/100)
-                        fig.add_axes(ax)
-                        ax.imshow(mask_data_label, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'target_label.png', dpi=100)
-                        plt.close()
-
-                        # plot std 
-                        fig,ax = plt.subplots()
-                        fig.frameon = False
-                        ax = plt.Axes(fig, [0., 0., 1., 1.])
-                        ax.set_axis_off()
-                        fig.set_size_inches(mask_std.shape[1]/100,mask_std.shape[0]/100)
-                        fig.add_axes(ax)
-                        ax.imshow(mask_std,cmap='gray') # so for feste Klasse feste Farbe
-                        fig.savefig(directory+ str(batch_idx+1).zfill(4)+'_'+ 'std.png', dpi=100)
-                        plt.close()
-
-                        # plot entropy 
-                        fig,ax = plt.subplots()
-                        fig.frameon = False
-                        ax = plt.Axes(fig, [0., 0., 1., 1.])
-                        ax.set_axis_off()
-                        fig.set_size_inches(mask_entropy.shape[1]/100,mask_entropy.shape[0]/100)
-                        fig.add_axes(ax)
-                        ax.imshow(mask_entropy,cmap='gray') # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'entropy.png', dpi=100)
-                        plt.close()
-
-                        # plot binary map 
-                        fig,ax = plt.subplots()
-                        fig.frameon = False
-                        ax = plt.Axes(fig, [0., 0., 1., 1.])
-                        ax.set_axis_off()
-                        fig.set_size_inches(mask_binary.shape[1]/100,mask_binary.shape[0]/100)
-                        fig.add_axes(ax)
-                        ax.imshow(mask_binary,cmap='gray') # so for feste Klasse feste Farbe
-                        fig.savefig(directory + str(batch_idx+1).zfill(4)+'_'+ 'binary_map.png', dpi=100)
-                        plt.close()
+            
         else:
 
             # print("test image shape",images.shape)
@@ -392,6 +296,153 @@ class SegFormer(L.LightningModule):
                 self.log_dict(mAPs, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
                 self.test_map.reset()
                 torch.cuda.empty_cache()
+        else:
+            entropy_dataset = []
+            std_dataset = []
+            mins_std_dataset = []
+            maxs_std_dataset = []
+            for i in range(self.images):
+                entropy_i = torch.mean(self.dataset_entropy[i])
+                std_i = torch.mean(self.dataset_std[i])
+                entropy_dataset.append(entropy_i)
+                std_dataset.append(std_i)
+                mins_std_dataset.append(torch.min(self.dataset_std[i]))
+                maxs_std_dataset.append(torch.max(self.dataset_std[i]))
+
+            mean_entropy_dataset = np.mean(entropy_dataset)
+            mean_std_dataset = np.mean(std_dataset)
+            min_std_dataset = min(mins_std_dataset)
+            max_std_dataset = max(maxs_std_dataset)
+
+            print("mean_entropy_dataset",mean_entropy_dataset)
+            print("mean_std_dataset",mean_std_dataset)
+            print("min_std_dataset",min_std_dataset)
+            print("max_std_dataset",max_std_dataset)
+
+            for i in range(self.images):
+                image_i = self.images[i]
+                label_i = self.labels[i]
+                prediction_i = self.predictions[i]
+                uncertainty_std_i = self.dataset_std[i]
+                uncertainty_entropy_i = self.dataset_entropy[i]
+                # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
+                p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_entropy_i, mean_entropy_dataset)
+                p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_std_i, mean_std_dataset)
+
+                # binary map output
+                binary_accuracy_map = (prediction_i == label_i).float()
+
+                # min and max Std
+                std_min_proImg = torch.min(uncertainty_std_i)
+                std_max_proImg = torch.max(uncertainty_std_i)
+
+                self.log('pAccCer_entropy', p_accurate_certain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('pInaUnc_entropy', p_inaccurate_uncertain, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('pavpu_entropy', pavpu, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+                # prove if on epoch is average!!!!!
+
+                self.log('pAccCer_std', p_accurate_certain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+                self.log('std_min_proImg', std_min_proImg, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('std_max_proImg', std_max_proImg, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                
+
+                #here didn't consider the situation when batch_size>0!
+                if config.PLOT_TESTIMG.upper().startswith(ua):
+                        mask_data_tensor = prediction_i.squeeze().cpu() # the maximum element
+                        mask_data = mask_data_tensor.numpy()
+                        mask_data_label_tensor =  label_i.squeeze().cpu()
+                        mask_data_label = mask_data_label_tensor.numpy()
+
+                        mask_std = uncertainty_std_i.squeeze().cpu() 
+                        mask_std = mask_std.numpy()
+                        mask_std = (mask_std - min_std_dataset)/(max_std_dataset-min_std_dataset) # min und max werte ein loggen!!
+                        mask_entropy = uncertainty_entropy_i.squeeze().cpu() 
+                        mask_entropy = mask_entropy.numpy()
+
+                        mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
+
+                        class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
+                        mask_img = wandb.Image(
+                                image_i,
+                                masks={
+                                    "predictions": {"mask_data": mask_data, "class_labels": class_labels},
+                                    "ground_truth": {"mask_data": mask_data_label, "class_labels": class_labels},
+                                },
+                            )
+                        entropy_img = wandb.Image(mask_entropy)
+                        std_img = wandb.Image(mask_std)
+                        binary_img = wandb.Image(binary_accuracy_map)
+                        list_outputs = [mask_img, entropy_img, std_img, binary_img]
+                        if wandb.run is not None:
+                            # log images to W&B
+                            wandb.log({"predictions" : list_outputs})
+                            # wandb.log({"predictions" : mask_img,
+                            #            "std_img" : std_img,
+                            #            "entropy_img" : entropy_img})
+                        if config.PLOT_TESTIMG=='True_local':
+
+                            directory = './outputs/'+ config.RUN_NAME +'/'
+                            if not os.path.exists(directory):
+                                os.makedirs(directory)
+                            # plot predicted segmentation mask
+                            fig,ax = plt.subplots()
+                            #print("img_array.shape",img_array.shape)
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_data.shape[1]/100,mask_data.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_data, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
+                            fig.savefig(directory + str(i+1).zfill(4)+'_'+ 'predicted_label.png', dpi=100)
+                            plt.close()
+
+                            # plot target segmentation mask
+                            fig,ax = plt.subplots()
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_data_label.shape[1]/100,mask_data_label.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_data_label, cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1) # so for feste Klasse feste Farbe
+                            fig.savefig(directory + str(i+1).zfill(4)+'_'+ 'target_label.png', dpi=100)
+                            plt.close()
+
+                            # plot std 
+                            fig,ax = plt.subplots()
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_std.shape[1]/100,mask_std.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_std,cmap='gray') # so for feste Klasse feste Farbe
+                            fig.savefig(directory+ str(i+1).zfill(4)+'_'+ 'std.png', dpi=100)
+                            plt.close()
+
+                            # plot entropy 
+                            fig,ax = plt.subplots()
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_entropy.shape[1]/100,mask_entropy.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_entropy,cmap='gray') # so for feste Klasse feste Farbe
+                            fig.savefig(directory + str(i+1).zfill(4)+'_'+ 'entropy.png', dpi=100)
+                            plt.close()
+
+                            # plot binary map 
+                            fig,ax = plt.subplots()
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_binary.shape[1]/100,mask_binary.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_binary,cmap='gray') # so for feste Klasse feste Farbe
+                            fig.savefig(directory + str(i+1).zfill(4)+'_'+ 'binary_map.png', dpi=100)
+                            plt.close()
     
     
     def configure_optimizers(self):
@@ -403,7 +454,7 @@ class SegFormer(L.LightningModule):
         scheduler = PolyLR(self.optimizer, max_iterations=total_iterations, power=1.0)
         return [self.optimizer], [{'scheduler': scheduler, 'interval': 'step'}]
     
-    def compute_uncertainty_metrics(self,images, labels, prediction, uncertainty):
+    def compute_uncertainty_metrics(self, labels, prediction, uncertainty, uc_threshold):
         """
         Computes uncertainty metrics for a given set of images, labels, predictions, and uncertainties. Meant to be used for semantic segmentation.
 
@@ -419,7 +470,7 @@ class SegFormer(L.LightningModule):
             - p_uncertain_inaccurate: The proportion of pixels that are inaccurate and uncertain.
             - pavpu: The proportion of accurate pixels among the uncertain ones.
         """
-        uncertainty_threshold = torch.mean(uncertainty) # Hier kannst du prinizipiell natürlich auch andere Thresholds dir überlegen. Ich habe hier einfach den Durchschnitt genommen. 
+        uncertainty_threshold = uc_threshold # Hier kannst du prinizipiell natürlich auch andere Thresholds dir überlegen. Ich habe hier einfach den Durchschnitt genommen. 
 
         binary_accuracy_map = (prediction == labels).float()
 
