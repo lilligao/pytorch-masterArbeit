@@ -301,7 +301,7 @@ class SegFormer(L.LightningModule):
             std_dataset = []
             mins_std_dataset = []
             maxs_std_dataset = []
-            for i in range(self.images):
+            for i in range(len(self.images)):
                 entropy_i = torch.mean(self.dataset_entropy[i])
                 std_i = torch.mean(self.dataset_std[i])
                 entropy_dataset.append(entropy_i)
@@ -319,7 +319,7 @@ class SegFormer(L.LightningModule):
             print("min_std_dataset",min_std_dataset)
             print("max_std_dataset",max_std_dataset)
 
-            for i in range(self.images):
+            for i in range(len(self.images)):
                 image_i = self.images[i]
                 label_i = self.labels[i]
                 prediction_i = self.predictions[i]
