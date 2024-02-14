@@ -374,7 +374,8 @@ class SegFormer(L.LightningModule):
 
                         mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
 
-                        mask_image= image_i.squeeze().cpu().numpy()
+                        img = image_i.permute(1, 2, 0)
+                        img_array = np.array(img)
 
                         class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                         mask_img = wandb.Image(
@@ -413,9 +414,9 @@ class SegFormer(L.LightningModule):
                             fig.frameon = False
                             ax = plt.Axes(fig, [0., 0., 1., 1.])
                             ax.set_axis_off()
-                            fig.set_size_inches(mask_image.shape[1]/100,mask_image.shape[0]/100)
+                            fig.set_size_inches(img_array.shape[1]/100,img_array.shape[0]/100)
                             fig.add_axes(ax)
-                            ax.imshow(mask_image) # so for feste Klasse feste Farbe
+                            ax.imshow(img_array) # so for feste Klasse feste Farbe
                             fig.savefig(directory + str(i+1).zfill(4)+'_image.png', dpi=100)
                             plt.close()
 
