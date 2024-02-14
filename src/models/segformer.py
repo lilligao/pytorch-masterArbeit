@@ -346,9 +346,13 @@ class SegFormer(L.LightningModule):
                 self.log('pInaUnc_std', p_inaccurate_uncertain_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
                 self.log('pavpu_std', pavpu_std, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
-                self.log('std_min_proImg', std_min_proImg, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-                self.log('std_max_proImg', std_max_proImg, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-                
+                self.log('std_min_proImg', std_min_proImg, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+                self.log('std_max_proImg', std_max_proImg, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+                print("std_min_proImg",std_min_proImg)
+                print("std_max_proImg",std_max_proImg)
+                print("pavpu_entropy",pavpu)
+                print("pavpu_std",pavpu_std)
 
                 #here didn't consider the situation when batch_size>0!
                 if config.PLOT_TESTIMG.upper().startswith(ua):
