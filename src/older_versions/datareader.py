@@ -255,7 +255,7 @@ class TLESSDataset(torch.utils.data.Dataset):
         target["scene_id"] = torch.tensor([int(scene_id)])
         target["image_id"] = torch.tensor([int(im_id)])
         target["label"] = label # masken Bild
-        target["pixel_mask"] = pixel_mask # masken Bild
+        #target["pixel_mask"] = pixel_mask # masken Bild
         
         return img, target  #target["label"]
     
@@ -377,11 +377,18 @@ if __name__ == '__main__':
     
     print('contains classes: ', torch.unique(target['labels_detection']).tolist())
     
-    print('image:', image.shape)
+    #print('image:', image.shape)
 
     unique_values = set()
     for mask in target["masks"]:
         unique_values.update(torch.unique(mask).tolist())
+
+    target_obj = torch.unique(mask).tolist()
+
+    # with open("test" + str(1).zfill(4)+'_info.txt', 'w') as f:
+    #                             f.write('obects in target label: ')
+    #                             f.write(','.join(str(v) for v in target_obj) + '\n')
+
     
     print('labels: ', unique_values)
     

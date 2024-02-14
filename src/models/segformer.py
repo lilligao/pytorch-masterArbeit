@@ -358,6 +358,9 @@ class SegFormer(L.LightningModule):
 
                 #here didn't consider the situation when batch_size>0!
                 if config.PLOT_TESTIMG.upper().startswith(ua):
+                        detected_obj = torch.unique(prediction_i).tolist()
+                        target_obj = torch.unique(label_i).tolist()
+
                         mask_data_tensor = prediction_i.squeeze().cpu() # the maximum element
                         mask_data = mask_data_tensor.numpy()
                         mask_data_label_tensor =  label_i.squeeze().cpu()
@@ -370,6 +373,8 @@ class SegFormer(L.LightningModule):
                         mask_entropy = mask_entropy.numpy()
 
                         mask_binary = binary_accuracy_map.squeeze().cpu().numpy()
+
+                        mask_image= image_i.squeeze().cpu().numpy()
 
                         class_labels = dict(zip(range(config.NUM_CLASSES), [str(p) for p in range(config.NUM_CLASSES)]))
                         mask_img = wandb.Image(
@@ -394,6 +399,26 @@ class SegFormer(L.LightningModule):
                             directory = './outputs/'+ config.RUN_NAME +'/'
                             if not os.path.exists(directory):
                                 os.makedirs(directory)
+                            
+                            # write detected obj ids to txt
+                            with open(directory + str(i+1).zfill(4)+'_info.txt', 'w') as f:
+                                f.write('obects in target label: ')
+                                f.write(','.join(str(v) for v in target_obj) + '\n')
+                                f.write('obects in prediction: ')
+                                f.write(','.join(str(v) for v in detected_obj) + '\n')
+
+                            # plot original image
+                            fig,ax = plt.subplots()
+                            #print("img_array.shape",img_array.shape)
+                            fig.frameon = False
+                            ax = plt.Axes(fig, [0., 0., 1., 1.])
+                            ax.set_axis_off()
+                            fig.set_size_inches(mask_image.shape[1]/100,mask_image.shape[0]/100)
+                            fig.add_axes(ax)
+                            ax.imshow(mask_image) # so for feste Klasse feste Farbe
+                            fig.savefig(directory + str(i+1).zfill(4)+'_image.png', dpi=100)
+                            plt.close()
+
                             # plot predicted segmentation mask
                             fig,ax = plt.subplots()
                             #print("img_array.shape",img_array.shape)

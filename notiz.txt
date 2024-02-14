@@ -169,6 +169,7 @@ Uncertainty in evaluation packen!
 BOP CHallenge in TLESS, und kürzer beschreiben!
 general approach: zuerst training, danach testen. Warum die Experimente?
 Optimizer usw. in implementation details!
+check if results of photoshop richtig ist! -vielleicht in txt schreiben detected obj_id
 
 
 
