@@ -309,10 +309,10 @@ class SegFormer(L.LightningModule):
                 mins_std_dataset.append(torch.min(self.dataset_std[i]))
                 maxs_std_dataset.append(torch.max(self.dataset_std[i]))
 
-            mean_entropy_dataset = np.mean(entropy_dataset)
-            mean_std_dataset = np.mean(std_dataset)
-            min_std_dataset = min(mins_std_dataset)
-            max_std_dataset = max(maxs_std_dataset)
+            mean_entropy_dataset = torch.mean(torch.stack(entropy_dataset))
+            mean_std_dataset = torch.mean(torch.stack(std_dataset))
+            min_std_dataset = torch.min(torch.stack(mins_std_dataset))
+            max_std_dataset = torch.max(torch.stack(maxs_std_dataset))
 
             print("mean_entropy_dataset",mean_entropy_dataset)
             print("mean_std_dataset",mean_std_dataset)
