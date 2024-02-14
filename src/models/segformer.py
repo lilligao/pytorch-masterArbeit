@@ -284,6 +284,7 @@ class SegFormer(L.LightningModule):
         
             
     def on_test_epoch_end(self):
+        ua = str("true").upper()
         if config.TEST_MODE!="MCDropout":
             ua = str("true").upper()
             self.test_iou.reset()
