@@ -305,34 +305,36 @@ if __name__ == '__main__':
     #print(model)
     
     model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-                                    hidden_dropout_prob=0.1, # SegformerSelfOutput & SegformerMixFFN
-                                            attention_probs_dropout_prob=0.2, # SegformerEfficientSelfAttention
-                                            classifier_dropout_prob=0.3, # Dropout layer
-                                            drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
+                                    hidden_dropout_prob=0.0, # SegformerSelfOutput & SegformerMixFFN
+                                            attention_probs_dropout_prob=0.0, # SegformerEfficientSelfAttention
+                                            classifier_dropout_prob=0.0, # Dropout layer
+                                            drop_path_rate=0.0,) #SegformerDropPath in SegformerLayer
     for m in model.modules():
             if m.__class__.__name__.startswith('Dropout'):
                 m.train()
     for m in model.modules():
         print(m)
         class_name = m.__class__.__name__
-        if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
-            print("-----------")
-            print(m.dropout.training)
-            m.dropout.train()
-            print(m.dropout.training)
+        if m.training:
+            print(class_name)
+        # if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
+        #     print("-----------")
+        #     print(m.dropout.training)
+        #     m.dropout.train()
+        #     print(m.dropout.training)
 
-        elif class_name.startswith('SegformerAttention'):
-            print("..........")
-            print(m.training)
-            print(m.self.dropout.training)
-            print(m.output.dropout.training)
-            m.self.dropout.train()
-            m.output.dropout.train()
-            print(m.training)
-            print(m.self.dropout.training)
-            print(m.output.dropout.training)
-            #print(m.dropout.training)
         # elif class_name.startswith('SegformerAttention'):
+        #     print("..........")
+        #     print(m.training)
+        #     print(m.self.dropout.training)
+        #     print(m.output.dropout.training)
+        #     m.self.dropout.train()
+        #     m.output.dropout.train()
+        #     print(m.training)
+        #     print(m.self.dropout.training)
+        #     print(m.output.dropout.training)
+        #     #print(m.dropout.training)
+        # # elif class_name.startswith('SegformerAttention'):
         #     print("..........")
         print("----------------------------------------------------")
 

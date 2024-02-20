@@ -178,6 +178,12 @@ check if results of photoshop richtig ist! -vielleicht in txt schreiben detected
 sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_dropout_100.sh 
 Submitted batch job 23129872
 
+----------------------------------
+2 samples/5 samples mehr mals machen und schauen die std und mean. schauen ob sie signifikant ist
+uncertainty threshold zu 1 bild oder ein datensatz
+mc dropout ausschalten beim testen und schauen ob alle Ergebnisse gleich sind
+zu wenig drop out drin -> so wenige unterschied?
+
 
 
 --------------------------------------------
