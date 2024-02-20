@@ -28,6 +28,7 @@ sys.path.append('/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/')
 import glob
 import json
 import config
+from models.segformer import SegFormer
 
 import lib.AugSeg.augseg.dataset.augs_TIBA as img_trsform
 
@@ -303,20 +304,23 @@ if __name__ == '__main__':
     model = SegformerForSemanticSegmentation(model_config)
     #print(model_config)
     #print(model)
-    
-    model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-                                    hidden_dropout_prob=0.0, # SegformerSelfOutput & SegformerMixFFN
-                                            attention_probs_dropout_prob=0.0, # SegformerEfficientSelfAttention
-                                            classifier_dropout_prob=0.0, # Dropout layer
-                                            drop_path_rate=0.0,) #SegformerDropPath in SegformerLayer
-    for m in model.modules():
-            if m.__class__.__name__.startswith('Dropout'):
-                m.train()
-    for m in model.modules():
-        print(m)
-        class_name = m.__class__.__name__
-        if m.training:
-            print(class_name)
+
+    # model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
+    #                                 hidden_dropout_prob=0.4, # SegformerSelfOutput & SegformerMixFFN
+    #                                         attention_probs_dropout_prob=0.4, # SegformerEfficientSelfAttention
+    #                                         classifier_dropout_prob=0.4, # Dropout layer
+    #                                         drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
+    #model =torch.load('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt',map_location=torch.device('cpu'))
+    model = SegFormer.load_from_checkpoint('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt')
+    print(model)
+    # for m in model.modules():
+    #         if m.__class__.__name__.startswith('Dropout'):
+    #             m.train()
+    # for m in model.modules():
+    #     print(m)
+    #     class_name = m.__class__.__name__
+    #     if m.training:
+    #         print(class_name)
         # if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
         #     print("-----------")
         #     print(m.dropout.training)
@@ -336,7 +340,7 @@ if __name__ == '__main__':
         #     #print(m.dropout.training)
         # # elif class_name.startswith('SegformerAttention'):
         #     print("..........")
-        print("----------------------------------------------------")
+        #print("----------------------------------------------------")
 
                                     
 

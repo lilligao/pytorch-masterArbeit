@@ -106,7 +106,7 @@ python scripts/eval_bop22_coco.py --result_filenames=Segformer28_tless-test.json
 ls -1 | grep -v 'epoch=99' | xargs rm -f
 sbatch -p dev_gpu_4_a100 -N 1 -t 30 --gres=gpu:1 job_test_setups.sh
 
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=1 --project=SegFormer_results --run=dropout_30
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=1 --project=SegFormer_results --run=dropout_30 --dropout_rate=0.3
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_30_2samples
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_30_5samples
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=10 --project=SegFormer_results --run=dropout_30_10samples
@@ -144,3 +144,20 @@ sbatch -p dev_gpu_4_a100 -N 1 -t 30 --gres=gpu:1 job_test_setups.sh
 
 sbatch -p gpu_4_a100 -N 1 -t 48:00:00 --gres=gpu:1 job_test_droput.sh 
 Submitted batch job 23148928
+
+
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_30_2samples
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_30_5samples
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_50_2samples
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_50_5samples
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_30_2samples
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_30_5samples
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_50_2samples
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_50_5samples
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=SegFormer_results --run=dropout_30_2samples
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=SegFormer_results --run=dropout_30_5samples

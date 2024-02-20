@@ -115,9 +115,9 @@ class SegFormer(L.LightningModule):
         if config.TEST_MODE=="MCDropout":
             ## Auskommentierte Sachen sind für MC-Dropout, das sollte man dann aber nicht während dem Training durchlaufen lassen, sondern im Anschluss, wenn man einen finalen Checkpoint hat
             # Activate dropout layers
-            # for m in self.model.modules():
-            #     if m.__class__.__name__.startswith('Dropout'):
-            #         m.train()
+            for m in self.model.modules():
+                if m.__class__.__name__.startswith('Dropout'):
+                    m.train()
 
             # record time
             torch.cuda.synchronize()  # wait for move to complete
