@@ -84,12 +84,14 @@ class TLESSDataModule(L.LightningDataModule):
             
         if self.test_split is not None:
             self.test_dataset = TLESSDataset(root=self.root, split=self.test_split,step="test")  
+            global NUMBER_TEST_IMAGES
+            NUMBER_TEST_IMAGES = len(self.test_dataset)
+            print("number of test images", NUMBER_TEST_IMAGES)
 
-        global NUMBER_TRAIN_IMAGES, NUMBER_TEST_IMAGES
+        global NUMBER_TRAIN_IMAGES
         NUMBER_TRAIN_IMAGES = len(self.train_dataset)
-        NUMBER_TEST_IMAGES = len(self.test_dataset)
         print("number of training images:", NUMBER_TRAIN_IMAGES)
-        print("number of test images", NUMBER_TEST_IMAGES)
+        
     def train_dataloader(self):
         return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers, drop_last=False, collate_fn=self.collate_fn)
     

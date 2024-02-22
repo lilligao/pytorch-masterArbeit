@@ -7,8 +7,8 @@ Oktober bis Mittel November -> in China
 die Anmeldung erst ab November?
 
 
-scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbr_crop_only/epoch=* ./b5_pbr_crop_only
-scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_default ./outputs/dropout_default
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/SegFormer_experiments-dropout_0/epoch=* ./checkpoints/SegFormer_experiments-dropout_0
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_50 ./outputs/dropout_50_neu
 
 scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
 
