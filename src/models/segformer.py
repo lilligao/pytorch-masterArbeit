@@ -327,8 +327,8 @@ class SegFormer(L.LightningModule):
                 uncertainty_std_i = self.dataset_std[i]
                 uncertainty_entropy_i = self.dataset_entropy[i]
                 # Beispiel für die Berechnung der Uncertainty Metrics mit der entropy_map. Analog könnte man es natürlich auch mit der standard_deviation_map machen.
-                p_accurate_certain, p_inaccurate_uncertain, pavpu = self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_entropy_i, mean_entropy_dataset)
-                p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std = self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_std_i, mean_std_dataset)
+                p_accurate_certain, p_inaccurate_uncertain, pavpu, n_ac_entropy, n_au_entropy, n_ic_entropy, n_iu_entropy = self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_entropy_i, mean_entropy_dataset)
+                p_accurate_certain_std, p_inaccurate_uncertain_std, pavpu_std, n_ac_std, n_au_std, n_ic_std, n_iu_std= self.compute_uncertainty_metrics(label_i, prediction_i, uncertainty_std_i, mean_std_dataset)
 
                 # binary map output
                 binary_accuracy_map = (prediction_i == label_i).float()
@@ -353,8 +353,22 @@ class SegFormer(L.LightningModule):
                 self.log('entropy_mean', mean_entropy_dataset, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
 
                 if wandb.run is not None:
+                    wandb.log({'step': i, "pAccCer_entropy_proImg": p_accurate_certain}) 
+                    wandb.log({'step': i, "pInaUnc_entropy_proImg": p_inaccurate_uncertain}) 
+                    wandb.log({'step': i, "pavpu_entropy_proImg": pavpu}) 
+                    wandb.log({'step': i, "pAccCer_std_proImg": p_accurate_certain_std}) 
+                    wandb.log({'step': i, "pInaUnc_std_proImg": p_inaccurate_uncertain_std}) 
+                    wandb.log({'step': i, "pavpu_std_proImg": pavpu_std}) 
                     wandb.log({'step': i, "std_min_proImg": std_min_proImg}) 
                     wandb.log({'step': i, "std_max_proImg": std_max_proImg}) 
+                    wandb.log({'step': i, "n_ac_entropy": n_ac_entropy}) 
+                    wandb.log({'step': i, "n_au_entropy": n_au_entropy}) 
+                    wandb.log({'step': i, "n_ic_entropy": n_ic_entropy}) 
+                    wandb.log({'step': i, "n_iu_entropy": n_iu_entropy}) 
+                    wandb.log({'step': i, "n_ac_std": n_ac_std}) 
+                    wandb.log({'step': i, "n_au_std": n_au_std}) 
+                    wandb.log({'step': i, "n_ic_std": n_ic_std}) 
+                    wandb.log({'step': i, "n_iu_std": n_iu_std}) 
 
                 #here didn't consider the situation when batch_size>0!
                 if config.PLOT_TESTIMG.upper().startswith(ua):
@@ -508,4 +522,4 @@ class SegFormer(L.LightningModule):
         p_uncertain_inaccurate = n_iu / (n_ic + n_iu)
         pavpu = (n_ac + n_iu) / (n_ac + n_au + n_ic + n_iu)
 
-        return p_accurate_certain, p_uncertain_inaccurate, pavpu
+        return p_accurate_certain, p_uncertain_inaccurate, pavpu, n_ac, n_au, n_ic, n_iu

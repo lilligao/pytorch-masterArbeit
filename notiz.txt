@@ -170,7 +170,17 @@ BOP CHallenge in TLESS, und kürzer beschreiben!
 general approach: zuerst training, danach testen. Warum die Experimente?
 Optimizer usw. in implementation details!
 check if results of photoshop richtig ist! -vielleicht in txt schreiben detected obj_id
+-------------------------------------------------------
+27.02.2024
+Frage zu MC Dropout:
+Signifikanz test
+macht es Sinn mit andere Learning Rate noch mal alles zu trainieren?
+macht es Sinn verschiedene Modell zu trainieren mit verschiedene dropout? Wenn sowie so nur Gewicht trainiert sind!
+Kann man ein checkpoint mit Gewicht mit verschiednene Dropout rate machen?
+SigfinikanzÖ sollte auch für std/entropy mehr mals wieder holen?? 
 
+Masterarbeit:
+endlich tune ich hyperparameter mit testing dataset???
 
 
 
@@ -184,7 +194,7 @@ uncertainty threshold zu 1 bild oder ein datensatz
 mc dropout ausschalten beim testen und schauen ob alle Ergebnisse gleich sind
 zu wenig drop out drin -> so wenige unterschied?
 
-
+忘记photoshop那张图了！！！
 
 --------------------------------------------
 [uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_1e-4.sh 

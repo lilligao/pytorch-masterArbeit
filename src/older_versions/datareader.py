@@ -160,34 +160,46 @@ class TLESSDataset(torch.utils.data.Dataset):
         if self.step.startswith('train'):
             print('contains classes before: ', torch.unique(label).tolist())
             # Random Resize
-            if config.K_INTENSITY < 0:
-                print("config k intensity", abs(config.K_INTENSITY))
-                strong_img_aug = img_trsform.strong_img_aug(abs(config.K_INTENSITY))
-                img = strong_img_aug(img)
-                # transforms_list = [v2.RandomAutocontrast(p=1), # normalize or maximize??
-                #                 v2.RandomEqualize(p=1),
-                #                 v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
-                #                 v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
-                #                 v2.RandomPosterize(p=1, bits=2),
-                #                 #v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
-                #                 v2.ColorJitter(hue=.3),
-                #                 v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
-                #                 v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
-                #                 v2.ColorJitter(saturation=.5), # in paper color balance???
-                #                 ]
-                # transforms_list = random.sample(transforms_list,config.K_INTENSITY)
+            if True:
+                # print("config k intensity", abs(config.K_INTENSITY))
+                # strong_img_aug = img_trsform.strong_img_aug(abs(config.K_INTENSITY))
+                # img = strong_img_aug(img)
+                img = TF.to_tensor(img)
+                transforms_list = [v2.RandomAutocontrast(p=1), # normalize or maximize??
+                                # v2.RandomEqualize(p=1),
+                                # v2.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5.)),
+                                # v2.RandomAdjustSharpness(p=1,sharpness_factor=2),
+                                #v2.RandomPosterize(p=1, bits=2),
+                                ##v2.RandomSolarize(p=1,threshold=200.0/255.0), # ??? sieht komisch aus
+                                #v2.ColorJitter(hue=.3),
+                                #v2.ColorJitter(brightness=.5), # in paper by [0.05,0.95]???
+                                #v2.ColorJitter(contrast=.5), # in paper by [0.05,0.95]???
+                                #v2.ColorJitter(saturation=.5), # in paper color balance???
+                                ]
+                # transforms_list = random.sample(transforms_list,1)
                 # random.shuffle(transforms_list)
                 # print(transforms_list)
-                # transform_compose= v2.Compose(transforms_list)
-                # #transform_compose=transforms_list[8]
-                # #print("min", torch.min(img[1,:,:]))
-                # #print("max", torch.max(img[1,:,:]))
-                # if random.random() < 0.67:
-                #     img = transform_compose(img)
+                transform_compose= v2.Compose(transforms_list)
+                #transform_compose=transforms_list[8]
                 #print("min", torch.min(img[1,:,:]))
                 #print("max", torch.max(img[1,:,:]))
+
+                img = transform_compose(img)
+                img = img.permute(1, 2, 0)
+                img_array = np.array(img)
+
+                fig,ax = plt.subplots()
+                #print("img_array.shape",img_array.shape)
+                fig.frameon = False
+                ax = plt.Axes(fig, [0., 0., 1., 1.])
+                ax.set_axis_off()
+                fig.add_axes(ax)
+                #fig.set_size_inches(img_array.size[0]/100,img_array.size[1]/100)
+                ax.imshow(img_array) # so for feste Klasse feste Farbe
+                fig.savefig('data/tless/autocontrast_test.png',dpi=100)
+                plt.close()
             
-            img = TF.to_tensor(img)
+            #img = TF.to_tensor(img)
             pixel_mask = torch.ones_like(img[0],dtype=torch.long)
 
             if True:
@@ -300,19 +312,19 @@ class RandResize(object):
         
  
 if __name__ == '__main__':
-    model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
-    model = SegformerForSemanticSegmentation(model_config)
-    #print(model_config)
-    #print(model)
+    # model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+    # model = SegformerForSemanticSegmentation(model_config)
+    # #print(model_config)
+    # #print(model)
 
-    # model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-    #                                 hidden_dropout_prob=0.4, # SegformerSelfOutput & SegformerMixFFN
-    #                                         attention_probs_dropout_prob=0.4, # SegformerEfficientSelfAttention
-    #                                         classifier_dropout_prob=0.4, # Dropout layer
-    #                                         drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
-    #model =torch.load('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt',map_location=torch.device('cpu'))
-    model = SegFormer.load_from_checkpoint('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt')
-    print(model)
+    # # model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
+    # #                                 hidden_dropout_prob=0.4, # SegformerSelfOutput & SegformerMixFFN
+    # #                                         attention_probs_dropout_prob=0.4, # SegformerEfficientSelfAttention
+    # #                                         classifier_dropout_prob=0.4, # Dropout layer
+    # #                                         drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
+    # #model =torch.load('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt',map_location=torch.device('cpu'))
+    # model = SegFormer.load_from_checkpoint('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt')
+    # #print(model)
     # for m in model.modules():
     #         if m.__class__.__name__.startswith('Dropout'):
     #             m.train()
@@ -353,7 +365,7 @@ if __name__ == '__main__':
     )
     #print("train:",train_index.indices)
     #print("val:",val_index.indices)
-    train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train", ind=train_index.indices) #[0:10]
+    train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train") #[0:10] , ind=train_index.indices
     val_dataset = TLESSDataset(root='./data/tless', split='train_primesense',step="val")  #[0:10]
     test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
 
@@ -363,7 +375,7 @@ if __name__ == '__main__':
     num_imgs_train = len(train_dataset)
     num_imgs = len(val_dataset)
     num_imgs_test = len(test_dataset)
-    img, target = test_dataset[534]
+    img, target = train_dataset[0]
     # for i in range(0,num_imgs_train,200):
     #     img, target = train_dataset[i]
     #     a = torch.unique(target["label"]).tolist()
