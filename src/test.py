@@ -57,7 +57,7 @@ if __name__ == '__main__':
         precision=config.PRECISION,
         check_val_every_n_epoch=1,
         reload_dataloaders_every_n_epochs=1,
-        limit_test_batches=5,
+        #limit_test_batches=5,
         #logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         logger=WandbLogger(entity=config.ENTITY, project=config.PROJECT, name=config.RUN_NAME, save_dir='./logs', log_model=False),
         callbacks=[
