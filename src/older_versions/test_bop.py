@@ -106,7 +106,7 @@ if __name__ == '__main__':
     #     print("scene: " + str(target["scene_id"]) + ", image: " + str(target["image_id"]) + " done")
     
     ################## for specific image output test ############################
-    for i in range(436,437):
+    for i in range(806,807):
         img, target = dataset[i]
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         img = img.to(device)

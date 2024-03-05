@@ -8,7 +8,7 @@ die Anmeldung erst ab November?
 
 
 scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/SegFormer_experiments-dropout_0/epoch=* ./checkpoints/SegFormer_experiments-dropout_0
-scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_50 ./outputs/dropout_50_neu
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_50 ./outputs/dropout_50_0304
 
 scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
 
@@ -195,6 +195,24 @@ mc dropout ausschalten beim testen und schauen ob alle Ergebnisse gleich sind
 zu wenig drop out drin -> so wenige unterschied?
 
 忘记photoshop那张图了！！！
+
+------------------------------------
+allgemein:
+bad: 
+0856: Scene 18 image 43,  0.2028784304857254
+0871:  Scene 18 image 206
+0981: Scene 20, image 298
+0999: Scene 20, image 482
+good:
+0022: Scene 1, image 236
+0035: scene 1, image 364
+0373: Scene 8, image 216
+0393: scene 8. image 441
+
+compare ll dropouts 
+184: scene 4, image 325
+0807: scene 17, image 50
+
 
 --------------------------------------------
 [uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_1e-4.sh 
