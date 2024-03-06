@@ -320,6 +320,16 @@ class SegFormer(L.LightningModule):
             print("min_std_dataset",min_std_dataset)
             print("max_std_dataset",max_std_dataset)
 
+            n_ac_entropy_sum = 0
+            n_au_entropy_sum = 0
+            n_ic_entropy_sum = 0
+            n_iu_entropy_sum = 0
+
+            n_ac_std_sum = 0
+            n_au_std_sum = 0
+            n_ic_std_sum = 0
+            n_iu_std_sum = 0
+
             for i in range(len(self.images)):
                 image_i = self.images[i]
                 label_i = self.labels[i]
@@ -361,14 +371,24 @@ class SegFormer(L.LightningModule):
                     wandb.log({'step': i, "pavpu_std_proImg": pavpu_std}) 
                     wandb.log({'step': i, "std_min_proImg": std_min_proImg}) 
                     wandb.log({'step': i, "std_max_proImg": std_max_proImg}) 
-                    wandb.log({'step': i, "n_ac_entropy": n_ac_entropy}) 
-                    wandb.log({'step': i, "n_au_entropy": n_au_entropy}) 
-                    wandb.log({'step': i, "n_ic_entropy": n_ic_entropy}) 
-                    wandb.log({'step': i, "n_iu_entropy": n_iu_entropy}) 
-                    wandb.log({'step': i, "n_ac_std": n_ac_std}) 
-                    wandb.log({'step': i, "n_au_std": n_au_std}) 
-                    wandb.log({'step': i, "n_ic_std": n_ic_std}) 
-                    wandb.log({'step': i, "n_iu_std": n_iu_std}) 
+
+                    n_ac_entropy_sum += n_ac_entropy
+                    n_au_entropy_sum += n_au_entropy
+                    n_ic_entropy_sum += n_ic_entropy
+                    n_iu_entropy_sum += n_iu_entropy
+
+                    n_ac_std_sum += n_ac_std
+                    n_au_std_sum += n_au_std
+                    n_ic_std_sum += n_ic_std
+                    n_iu_std_sum += n_iu_std
+                    # wandb.log({'step': i, "n_ac_entropy": n_ac_entropy}) 
+                    # wandb.log({'step': i, "n_au_entropy": n_au_entropy}) 
+                    # wandb.log({'step': i, "n_ic_entropy": n_ic_entropy}) 
+                    # wandb.log({'step': i, "n_iu_entropy": n_iu_entropy}) 
+                    # wandb.log({'step': i, "n_ac_std": n_ac_std}) 
+                    # wandb.log({'step': i, "n_au_std": n_au_std}) 
+                    # wandb.log({'step': i, "n_ic_std": n_ic_std}) 
+                    # wandb.log({'step': i, "n_iu_std": n_iu_std}) 
 
                 #here didn't consider the situation when batch_size>0!
                 if config.PLOT_TESTIMG.upper().startswith(ua):
@@ -474,6 +494,18 @@ class SegFormer(L.LightningModule):
                             ax.imshow(mask_binary,cmap='gray') # so for feste Klasse feste Farbe
                             fig.savefig(directory + str(i+1).zfill(4)+'_'+ 'binary_map.png', dpi=100)
                             plt.close()
+
+            
+            self.log('n_ac_entropy_sum', n_ac_entropy_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_au_entropy_sum', n_au_entropy_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_ic_entropy_sum', n_ic_entropy_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_iu_entropy_sum', n_iu_entropy_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
+            self.log('n_ac_std_sum', n_ac_std_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_au_std_sum', n_au_std_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_ic_std_sum', n_ic_std_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+            self.log('n_iu_std_sum', n_iu_std_sum, on_step=False, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+
     
     
     def configure_optimizers(self):
