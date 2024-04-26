@@ -255,10 +255,33 @@ cd $HOME/pytorch-masterArbeit/
 
 #!/bin/sh
 cd $HOME/pytorch-masterArbeit/
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=dropout_repeat --run=dropout_10_100samples --dropout_rate=0.1
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=100 --project=dropout_repeat --run=dropout_20_100samples --dropout_rate=0.2
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=dropout_repeat --run=dropout_30_100samples --dropout_rate=0.3
-/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=dropout_repeat --run=dropout_50_100samples --dropout_rate=0.5
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=counts_nau --run=dropout_10_2samples --dropout_rate=0.1
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=2 --project=counts_nau --run=dropout_20_2samples --dropout_rate=0.2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=counts_nau --run=dropout_30_2samples --dropout_rate=0.3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=2 --project=counts_nau --run=dropout_50_2samples --dropout_rate=0.5
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=counts_nau --run=dropout_10_5samples --dropout_rate=0.1
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=5 --project=counts_nau --run=dropout_20_5samples --dropout_rate=0.2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=counts_nau --run=dropout_30_5samples --dropout_rate=0.3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=counts_nau --run=dropout_50_5samples --dropout_rate=0.5
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=10 --project=counts_nau --run=dropout_10_10samples --dropout_rate=0.1
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=10 --project=counts_nau --run=dropout_20_10samples --dropout_rate=0.2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=10 --project=counts_nau --run=dropout_30_10samples --dropout_rate=0.3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=10 --project=counts_nau --run=dropout_50_10samples --dropout_rate=0.5
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=counts_nau --run=dropout_10_20samples --dropout_rate=0.1
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=20 --project=counts_nau --run=dropout_20_20samples --dropout_rate=0.2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=counts_nau --run=dropout_30_20samples --dropout_rate=0.3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=20 --project=counts_nau --run=dropout_50_20samples --dropout_rate=0.5
+
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_10/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=counts_nau --run=dropout_10_100samples --dropout_rate=0.1
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_20/epoch=98*' --test_mode='MCDropout' --num_samples=100 --project=counts_nau --run=dropout_20_100samples --dropout_rate=0.2
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_30/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=counts_nau --run=dropout_30_100samples --dropout_rate=0.3
+/usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_50/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=counts_nau --run=dropout_50_100samples --dropout_rate=0.5
+
+
+
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-b5_k_intenstiy_3/epoch=99*' --test_mode='MCDropout' --num_samples=100 --project=dropout_repeat --run=dropout_default_100samples
 
 /usr/bin/python3.8 src/test.py --root=$HOME/data/tless/ --plot_testimg=False --load_checkpoints='./checkpoints/SegFormer_experiments-dropout_0/epoch=99*' --test_mode='MCDropout' --num_samples=5 --project=dropout_repeat --run=dropout_0_5samples --dropout_rate=0.0

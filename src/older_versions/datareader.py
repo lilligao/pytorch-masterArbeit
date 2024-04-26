@@ -312,118 +312,119 @@ class RandResize(object):
         
  
 if __name__ == '__main__':
-    # model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
-    # model = SegformerForSemanticSegmentation(model_config)
-    # #print(model_config)
-    # #print(model)
+    model_config = SegformerConfig.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False)
+    model = SegformerForSemanticSegmentation(model_config)
+    #print(model_config)
+    #print(model)
 
-    # # model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
-    # #                                 hidden_dropout_prob=0.4, # SegformerSelfOutput & SegformerMixFFN
-    # #                                         attention_probs_dropout_prob=0.4, # SegformerEfficientSelfAttention
-    # #                                         classifier_dropout_prob=0.4, # Dropout layer
-    # #                                         drop_path_rate=0.4,) #SegformerDropPath in SegformerLayer
-    # #model =torch.load('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt',map_location=torch.device('cpu'))
+    model = model.from_pretrained(f'nvidia/mit-{config.BACKBONE}', num_labels=config.NUM_CLASSES, return_dict=False,
+                                    hidden_dropout_prob=0.234, # SegformerSelfOutput & SegformerMixFFN
+                                            attention_probs_dropout_prob=0.111, # SegformerEfficientSelfAttention
+                                            classifier_dropout_prob=0.432, # Dropout layer
+                                            drop_path_rate=0.999,) #SegformerDropPath in SegformerLayer
+    #model =torch.load('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt',map_location=torch.device('cpu'))
     # model = SegFormer.load_from_checkpoint('./checkpoints/SegFormer_experiments-dropout_20/epoch=94-val_loss=0.05-val_iou=0.55.ckpt')
-    # #print(model)
-    # for m in model.modules():
-    #         if m.__class__.__name__.startswith('Dropout'):
-    #             m.train()
+    #print(model)
+    for m in model.modules():
+            if m.__class__.__name__.startswith('Dropout'):
+                m.train()
+    print(model)
     # for m in model.modules():
     #     print(m)
     #     class_name = m.__class__.__name__
     #     if m.training:
     #         print(class_name)
-        # if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
-        #     print("-----------")
-        #     print(m.dropout.training)
-        #     m.dropout.train()
-        #     print(m.dropout.training)
+    #     if class_name.startswith('SegformerEfficientSelfAttention') or class_name.startswith('SegformerMixFFN') or  class_name.startswith('SegformerSelfOutput'):
+    #         print("-----------")
+    #         print(m.dropout.training)
+    #         m.dropout.train()
+    #         print(m.dropout.training)
 
-        # elif class_name.startswith('SegformerAttention'):
-        #     print("..........")
-        #     print(m.training)
-        #     print(m.self.dropout.training)
-        #     print(m.output.dropout.training)
-        #     m.self.dropout.train()
-        #     m.output.dropout.train()
-        #     print(m.training)
-        #     print(m.self.dropout.training)
-        #     print(m.output.dropout.training)
-        #     #print(m.dropout.training)
-        # # elif class_name.startswith('SegformerAttention'):
-        #     print("..........")
-        #print("----------------------------------------------------")
+    #     elif class_name.startswith('SegformerAttention'):
+    #         print("..........")
+    #         print(m.training)
+    #         print(m.self.dropout.training)
+    #         print(m.output.dropout.training)
+    #         m.self.dropout.train()
+    #         m.output.dropout.train()
+    #         print(m.training)
+    #         print(m.self.dropout.training)
+    #         print(m.output.dropout.training)
+    #         #print(m.dropout.training)
+    #     # elif class_name.startswith('SegformerAttention'):
+    #         print("..........")
+    #     print("----------------------------------------------------")
 
                                     
 
-    n_valid = 200
-    indexes = range(50000)
-    train_index, val_index = random_split(
-        dataset=indexes,
-        lengths=[len(indexes)-n_valid, n_valid],
-        generator=torch.Generator().manual_seed(0)
-    )
-    #print("train:",train_index.indices)
-    #print("val:",val_index.indices)
-    train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train") #[0:10] , ind=train_index.indices
-    val_dataset = TLESSDataset(root='./data/tless', split='train_primesense',step="val")  #[0:10]
-    test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
+    # n_valid = 200
+    # indexes = range(50000)
+    # train_index, val_index = random_split(
+    #     dataset=indexes,
+    #     lengths=[len(indexes)-n_valid, n_valid],
+    #     generator=torch.Generator().manual_seed(0)
+    # )
+    # #print("train:",train_index.indices)
+    # #print("val:",val_index.indices)
+    # train_dataset = TLESSDataset(root='./data/tless', split='train_pbr',step="train") #[0:10] , ind=train_index.indices
+    # val_dataset = TLESSDataset(root='./data/tless', split='train_primesense',step="val")  #[0:10]
+    # test_dataset = TLESSDataset(root='./data/tless', split='test_primesense',step="test") 
 
-    test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8, drop_last=False)
+    # test_dataloader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=8, drop_last=False)
 
-    #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
-    num_imgs_train = len(train_dataset)
-    num_imgs = len(val_dataset)
-    num_imgs_test = len(test_dataset)
-    img, target = train_dataset[0]
-    # for i in range(0,num_imgs_train,200):
-    #     img, target = train_dataset[i]
-    #     a = torch.unique(target["label"]).tolist()
-    #     print('test: ', torch.unique(target["label"]).tolist())
-    #     assert(len(a)<31 and max(a)<31 and min(a)>=0)
+    # #dataset = TLESSDataset(root='./data/tless', transforms=None, split='train_pbr')
+    # num_imgs_train = len(train_dataset)
+    # num_imgs = len(val_dataset)
+    # num_imgs_test = len(test_dataset)
+    # img, target = train_dataset[0]
+    # # for i in range(0,num_imgs_train,200):
+    # #     img, target = train_dataset[i]
+    # #     a = torch.unique(target["label"]).tolist()
+    # #     print('test: ', torch.unique(target["label"]).tolist())
+    # #     assert(len(a)<31 and max(a)<31 and min(a)>=0)
+    # # unique_values = set()
+    
+    # image = img
+    # print("iimage:", type(image))
+    # print("label:", type(target["label"]))
+    # print("mask:", type(target["masks"]))
+    # print("mask_visib:", type(target["masks_visib"]))
+    # print('num_imgs:',num_imgs_train)
+    # print('num_imgs:',num_imgs)
+    # print('num_imgs test dataset:',num_imgs_test)
+    # print('num_imgs test dataloader:',len(test_dataloader))
+    
+    # print('contains classes: ', torch.unique(target['labels_detection']).tolist())
+    
+    # #print('image:', image.shape)
+
     # unique_values = set()
-    
-    image = img
-    print("iimage:", type(image))
-    print("label:", type(target["label"]))
-    print("mask:", type(target["masks"]))
-    print("mask_visib:", type(target["masks_visib"]))
-    print('num_imgs:',num_imgs_train)
-    print('num_imgs:',num_imgs)
-    print('num_imgs test dataset:',num_imgs_test)
-    print('num_imgs test dataloader:',len(test_dataloader))
-    
-    print('contains classes: ', torch.unique(target['labels_detection']).tolist())
-    
-    #print('image:', image.shape)
+    # for mask in target["masks"]:
+    #     unique_values.update(torch.unique(mask).tolist())
 
-    unique_values = set()
-    for mask in target["masks"]:
-        unique_values.update(torch.unique(mask).tolist())
+    # target_obj = torch.unique(mask).tolist()
 
-    target_obj = torch.unique(mask).tolist()
-
-    # with open("test" + str(1).zfill(4)+'_info.txt', 'w') as f:
-    #                             f.write('obects in target label: ')
-    #                             f.write(','.join(str(v) for v in target_obj) + '\n')
+    # # with open("test" + str(1).zfill(4)+'_info.txt', 'w') as f:
+    # #                             f.write('obects in target label: ')
+    # #                             f.write(','.join(str(v) for v in target_obj) + '\n')
 
     
-    print('labels: ', unique_values)
+    # print('labels: ', unique_values)
     
-    label_array = target["label"].squeeze(0).numpy()
-    img = image.permute(1, 2, 0)
-    img_array = np.array(img)
-    #print(label_array)
-    print('label array:', label_array.shape)
-    fig,ax = plt.subplots(1,2)
-    ax[0].imshow(img_array)
-    ax[1].imshow(label_array,cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1)
-    plt.savefig('data/tless/label_img.png')
-    plt.close()
+    # label_array = target["label"].squeeze(0).numpy()
+    # img = image.permute(1, 2, 0)
+    # img_array = np.array(img)
+    # #print(label_array)
+    # print('label array:', label_array.shape)
+    # fig,ax = plt.subplots(1,2)
+    # ax[0].imshow(img_array)
+    # ax[1].imshow(label_array,cmap='gist_ncar', vmin=0, vmax=int(config.NUM_CLASSES)-1)
+    # plt.savefig('data/tless/label_img.png')
+    # plt.close()
 
-    # Define a transform to convert PIL 
-    # image to a Torch tensor
-    transform = transforms.Compose([
-        transforms.PILToTensor()
-    ])
+    # # Define a transform to convert PIL 
+    # # image to a Torch tensor
+    # transform = transforms.Compose([
+    #     transforms.PILToTensor()
+    # ])
     
