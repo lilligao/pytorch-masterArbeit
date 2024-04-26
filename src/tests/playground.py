@@ -1,4 +1,6 @@
 import lightning as L
+import sys
+sys.path.append('./src')
 from datasets.tless import TLESSDataset
 import numpy as np
 import matplotlib.pyplot as plt
