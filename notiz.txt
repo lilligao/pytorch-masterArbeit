@@ -1,0 +1,240 @@
+Ich habe noch eine organisatorische Frage. Derzeit bin ich in einem studentischen Verein, KA-RaceIng, engagiert und wir werden bis August an verschiedenen Wettbewerben teilnehmen.
+
+
+bis mittel August -> Karaceing engangieren
+Ende August -> anfangen
+Oktober bis Mittel November -> in China
+die Anmeldung erst ab November?
+
+
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/SegFormer_experiments-dropout_0/epoch=* ./checkpoints/SegFormer_experiments-dropout_0
+scp -r uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/outputs/dropout_50 ./outputs/dropout_50_0304
+
+scp uenhk@bwunicluster.scc.kit.edu:~/pytorch-masterArbeit/checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt ./
+
+scp -r ./test_ps uenhk@bwunicluster.scc.kit.edu:~/data/tless/test_ps
+
+welche ausgewählte ViT?
+mit Python-> Pytorch
+Hardware?
+kriterien?
+youtube
+wie gut performance
+wie viel speicherplatz
+literatur?
+BOP - Challegenge
+
+
+
+用一个epoche的结果 plot所有test images 用所有test -> 23005694 -> job_test_plot.sh
+用一个epoche的结果 算单个map 用1000张bop test 🈶
+用所有epoche的结果 算iou, ap和map -> 用1000张bop test 23005718 /23007953 / 所有test 23005719 / 23007957
+再训练一次 23005648
+
+
+
+job_val -> Attempt10: pbr und primesense für Training, Test für validiation
+job_val2 -> Attempt11: pbr und primesense für Training und validation, testdaten für testen
+job_val_b.sh -> SegFormer_b5 ->b5_pbrPrimesense_lr_1e-5 +
+job_b5_samelr.sh -> SegFormer_b5 -> b5_pbrPrimesense_lr_6e-5_lr_factor_1 + 意料之外的好
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5 gpu_4_a100 +
+job_b5_crop.sh -> SegFormer Data Augmentation -> b5_pbr_crop_only +
+job_b5_flip.sh -> SegFormer Data Augmentation -> b5_pbr_flip_crop -> flip and crop +
+job_b5_resize_crop.sh -> SegFormer Data Augmentation -> b5_pbr_resize_crop +
+job_b5_resize.sh -> SegFormer Data Augmentation -> b5_pbr_normal_resize +
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5_trImg_256 gpu_8 +
+job_b5_all.sh -> SegFormer Data Augmentation ->  b5_pbr_resize_flip_crop gpu_8 +
+
+job_gradient_accumulate -> LR Gradient Test -> clip_norm_0.5_accum_7 22983869 gpu_4_a100 + 还不错
+job_grad_1.sh -> LR Gradient Test -> clip_norm_1 22983871 gpu_4_a100 +
+job_grad_0.sh -> LR Gradient Test -> clip_norm_0 22983872 gpu_4 +
+job_value.sh -> LR Gradient Test -> clip_value_0.5 22983873 gpu_8 + better
+job_value_1.sh -> LR Gradient Test -> clip_value_1 22983874 gpu_4_a100 + not as good as 0.5
+job_norm.sh -> LR Gradient Test -> clip_norm_0.5  22983875  gpu_4_h100 +
+
+job_b5_primsense.sh -> SegFormer_b5 -> b5_Primesense_lr_6e-5_trImg_256  doppel Test gpu_4 22983880 +
+
+job_b5_samelr_acc.sh 22989349 -> accumulate 7 batches for 0.5 gradient clipping norm +
+job_b5_samelr_pbr.sh -> SegFormer_b5 -> b5_pbr_lr_6e-5_lr_factor_1  22989354 +
+job_b5_samelr_no_clip.sh -> run=b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip 22989546 +
+
+job_b5.sh  -> SegFormer -> 
+
+find out why primesense data!!!! has problem!!!
+
+Frage:
+scene_id
+image_id also as results of model????
+score ???
+bbox ???
+
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.04 python src/test_bop.py --load_checkpoints=./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1/epoch=1-val_loss=0.19-val_iou=0.65.ckpt --run=SegFormer28
+
+epoch=2-val_loss=0.18-val_iou=0.65.ckpt
+epoch=3-val_loss=0.12-val_iou=0.70.ckpt
+epoch=107-val_loss=0.14-val_iou=0.76.ckpt
+epoch=128-val_loss=0.14-val_iou=0.76.ckpt
+epoch=132-val_loss=0.16-val_iou=0.75.ckpt
+
+enroot start --root --rw --mount=$HOME/pytorch-masterArbeit/:/workspace/ --mount=$HOME/data/tless:/workspace/data/tless nvidia_pytorch_23.02 python src/test.py --load_checkpoints='./checkpoints/b5_pbrPrimesense_lr_6e-5_lr_factor_1_no_gd_clip/epoch=28-val_loss=0.09-val_iou=0.77.ckpt*' --project='b5-SameLR' --run=bop_map_no_0_pro_Img_epoche_28 --mAP_proImg=True
+
+11. Januar
+
+intensity based paper schauen und code probieren + aber warum immer kleiner als 1??? und macht es Sinn? (zeige beispiel)
+job_b5_intensity_2 
+
+ander bop challenge ergebnisse mit bop tool probieren und vergleichen + -> exakt das gleiche :)!!!
+see the image with bad map and check what's the problem +
+compare the map using targets: if 1 output for each output then deutlich schlechter ergebnisse + 
+try multiple outputs for same objects detected in same image but different place: problem: how to separate multiple same objects?
+
+---waiting list----
+intensity 1 & 3 -
+job_b4_samelr.sh
+JobName=job_b5_samelr_primesense.sh: primesense training vollständig laufen lassen -
+job_test.sh: map for stabile version nochmal laufen lassen und vergleichen ?算法全错的
+wandb sweep
+----------------------------------
+Try DETR !!! 但是要注意把背景也做一个分类
+不行的话试一试mask2Former
+write the chapter about iou, ap & map
+bop challenge paper schauen, ideen klauen I(verdeckte, und texlos)
+wandb sweep
+-----------------------------------
+  File "/home/lilligao/kit/masterArbeit/pytorch-masterArbeit/src/models/mask2former.py", line 298, in test_step
+    mask_img = wandb.Image(
+    raise TypeError("Mask data must be integers between 0 and 255")
+TypeError: Mask data must be integers between 0 and 255 +
+对test map 进行大改动，因为masks不止一个，而是一个列表 +
+mask2Former test step +
+mask2Former paoptic segmentation
+detr panoptic segmentation
+
+---------------------------------
+mask2former: 
+crop size: 512/640 or 1024???
+learning rate
+swin-b, swin-l, swin-t, swin-s
+what is learning rate multiplier?
+------
+detr: how much classes? 30 or 31 classes!! 
+which post_process funcion? panoptic or object detection or instance segmentation
+which base model?
+learning rate and learning rate backbone!!! & weight_decay
+---------------------------------
+segformer:
+- tatsächlich mit Dropout werden alle Dropoutlayer aktiviert werden
+- ECE Logging problem??? & cupa memory problem
+- Genau, du nimmst dann den finalen Checkpoint von einem Modell, was beispielsweise mit 20% Dropout Rate trainiert wurde, und evaluierst deine ganzen Metriken für unterschiedliche Mengen an Samples. -> eher Test schritt anstatt Validation?
+und welche Dataset? 
+miou und ece for jede sample separat oder alle samples zusammen iou? wie kann ich loggen?
+was heißt  2-20x Samples?
+- for paper: welche dataset für Train, Validation und Test
+Verschiedene Uncertainty Thresholds vergleichen für die Unsicherheitsmetriken
+-Mittelwert eines Bildes???
+-Mittelwert des Datensatzes
+-Verschiedene Schwellwerte
+------------------------------------------------
+/home/kit/stud/uenhk/.local/lib/python3.8/site-packages/transformers/models/mask2former/modeling_mask2former.py
+if torch._six not found: pip install --upgrade timm==0.5.4
+
+distributed learning for mask2former & detr: change libary!!! 
+
+query_states = torch.as_tensor(query_states, dtype=torch.float64)
+key_states = torch.as_tensor(key_states, dtype=torch.float64)
+value_states = torch.as_tensor(value_states, dtype=torch.float64)
+
+/usr/bin/python3.8 src/train_mask2Former.py --root=$HOME/data/tless/ --method=Detr --backbone=panoptic --strategy=single
+/usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/
+/usr/bin/python3.8 ./src/train.py --method=Detr --backbone=instance --lr=1e-4 --lr_backbone=1e-5 --weight_decay=1e-4 --root=$HOME/data/tless/ --project='Detr Train' --run=instance_test
+
+--------------------------------------------------------
+std plotten - normalizieren sonst alles schwarz??? +
+entropy 10 oder 20 samples with every thing again but for 10 samples and 20 samples +
+zusammen plotten wandb +
+draw binay map!!! +
+also dropout 30 epoch 98 check!! +
+matplotlib lokal lib !! +
+color always stay same!!!! +
+irgend ein Bild aus anderen Datensatz holen, wo TLESS drin steht als stoer objekt! dann schauen die Unsicherheiten, wenn nicht dann photoshopen +
+Ergebnisse in tabelle und plots speichern interpretieren (1 nachkomma stelle, wie in paper)
+
+danach
+Untertainty thresholds
+
+----------------------------------------------------
+min max Werte bereich plotten & Threshold aus ganzen datensatz & min max Werte auch aus ganzen datensatz
+oder 2 Bilder nehmen: 1 gute und 1 schlechte, mit einheitliche min und max Std
+Uncertainty in evaluation packen!
+BOP CHallenge in TLESS, und kürzer beschreiben!
+general approach: zuerst training, danach testen. Warum die Experimente?
+Optimizer usw. in implementation details!
+check if results of photoshop richtig ist! -vielleicht in txt schreiben detected obj_id
+-------------------------------------------------------
+27.02.2024
+Frage zu MC Dropout:
+Signifikanz test
+macht es Sinn mit andere Learning Rate noch mal alles zu trainieren?
+macht es Sinn verschiedene Modell zu trainieren mit verschiedene dropout? Wenn sowie so nur Gewicht trainiert sind!
+Kann man ein checkpoint mit Gewicht mit verschiednene Dropout rate machen?
+SigfinikanzÖ sollte auch für std/entropy mehr mals wieder holen?? 
+
+Masterarbeit:
+endlich tune ich hyperparameter mit testing dataset???
+
+
+
+------------------------------
+sbatch -p gpu_4_h100 -N 1 -t 120 --gres=gpu:1 job_test_dropout_100.sh 
+Submitted batch job 23129872
+
+----------------------------------
+2 samples/5 samples mehr mals machen und schauen die std und mean. schauen ob sie signifikant ist
+uncertainty threshold zu 1 bild oder ein datensatz
+mc dropout ausschalten beim testen und schauen ob alle Ergebnisse gleich sind
+zu wenig drop out drin -> so wenige unterschied?
+
+忘记photoshop那张图了！！！
+
+------------------------------------
+allgemein:
+bad: 
+0856: Scene 18 image 43,  0.2028784304857254
+0871:  Scene 18 image 206
+0981: Scene 20, image 298
+0999: Scene 20, image 482
+good:
+0022: Scene 1, image 236
+0035: scene 1, image 364
+0373: Scene 8, image 216
+0393: scene 8. image 441
+
+compare ll dropouts 
+184: scene 4, image 325
+0807: scene 17, image 50
+
+
+--------------------------------------------
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_1e-4.sh 
+Submitted batch job 23122095
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_2e-5.sh 
+Submitted batch job 23122096
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_4e-5.sh 
+Submitted batch job 23122097
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_8e-5.sh 
+Submitted batch job 23122098
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_5e-2.sh 
+Submitted batch job 23122102
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_h100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_5e-3.sh 
+Submitted batch job 23122103
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_a100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_e-1.sh 
+Submitted batch job 23122108
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4_a100 -N 1 -t 48:00:00 --gres=gpu:4 job_wd_e-3.sh 
+Submitted batch job 23122109
+[uenhk@uc2n995 ~]$ sbatch -p gpu_4 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_3.sh 
+Submitted batch job 23122111
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_5.sh 
+Submitted batch job 23122114
+[uenhk@uc2n995 ~]$ sbatch -p gpu_8 -N 1 -t 48:00:00 --gres=gpu:4 job_lr_factor_10.sh 
+Submitted batch job 23122115
+
